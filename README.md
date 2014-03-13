@@ -1,2 +1,2 @@
-ruby-hocon
+ruby-typesafe-config
 ==========
