@@ -1,12 +1,12 @@
 require 'spec_helper'
-require 'typesafe/config/config_factory'
-require 'typesafe/config/config_render_options'
+require 'hocon/config_factory'
+require 'hocon/config_render_options'
 
-describe Typesafe::Config::ConfigFactory do
+describe Hocon::ConfigFactory do
   context "parsing a .conf file" do
-    conf = Typesafe::Config::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/input.conf")
+    conf = Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/input.conf")
     output = File.read("#{FIXTURE_DIR}/parse_render/output.conf")
-    render_options = Typesafe::Config::ConfigRenderOptions.defaults
+    render_options = Hocon::ConfigRenderOptions.defaults
     render_options.origin_comments = false
     render_options.json = false
 
@@ -26,7 +26,7 @@ describe Typesafe::Config::ConfigFactory do
     end
 
     it "should generate the same conf data via re-parsing the rendered output" do
-      conf2 = Typesafe::Config::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/output.conf")
+      conf2 = Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/output.conf")
       expect(conf2.root.render(render_options)).to eq(output)
     end
   end

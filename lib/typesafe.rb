@@ -1,2 +1,0 @@
-module Typesafe
-end
