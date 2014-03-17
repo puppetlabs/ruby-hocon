@@ -12,8 +12,14 @@ The implementation is intended to be as close to a line-for-line port as the two
 Basic Usage
 ===========
 
+```sh
+gem install hocon
+```
+
+
 ```rb
 require 'hocon/config_factory'
 
 conf = Hocon::ConfigFactory.parse_file("myapp.conf")
 conf_map = conf.root.unwrapped
+```
