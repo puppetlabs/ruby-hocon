@@ -579,10 +579,10 @@ class Hocon::Impl::Parser
 
       # special-case the first element
       if t.token == Tokens::CLOSE_SQUARE
-        SimpleConfigList.new(t.append_comments(array_origin), [])
+        return SimpleConfigList.new(t.append_comments(array_origin), [])
       elsif (Tokens.value?(t.token)) ||
           (t.token == Tokens::OPEN_CURLY) ||
-          (to.token == Tokens::OPEN_SQUARE)
+          (t.token == Tokens::OPEN_SQUARE)
         v = parse_value(t)
         v = add_any_comments_after_any_comma(v)
         values.push(v)

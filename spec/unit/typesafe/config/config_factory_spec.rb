@@ -17,7 +17,8 @@ describe Hocon::ConfigFactory do
               :baz => 42,
               :abracadabra => "hi",
               :yahoo => "yippee",
-              :boom => [1, 2, {:derp => "duh"}, 4]
+              :boom => [1, 2, {:derp => "duh"}, 4],
+              :empty => []
           }}})
     end
 
