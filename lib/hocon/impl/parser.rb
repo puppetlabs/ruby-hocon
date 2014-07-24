@@ -360,7 +360,7 @@ class Hocon::Impl::Parser
       while !key.nil?
         # for ruby: convert string keys to symbols
         if key.is_a?(String)
-          key = key.to_sym
+          key = key
         end
         keys.push(key)
         if remaining.nil?
@@ -496,7 +496,7 @@ class Hocon::Impl::Parser
 
           # for ruby: convert string keys to symbols
           if key.is_a?(String)
-            key = key.to_sym
+            key = key
           end
 
           remaining = path.remainder
