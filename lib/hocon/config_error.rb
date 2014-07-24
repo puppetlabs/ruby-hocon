@@ -9,4 +9,7 @@ class Hocon::ConfigError < StandardError
 
   class ConfigParseError < Hocon::ConfigError
   end
+
+  class ConfigWrongTypeError < Hocon::ConfigError
+  end
 end
