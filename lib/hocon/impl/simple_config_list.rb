@@ -67,4 +67,8 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       sb << "]"
     end
   end
+
+  def new_copy(origin)
+    Hocon::Impl::SimpleConfigList.new(origin, @value)
+  end
 end
