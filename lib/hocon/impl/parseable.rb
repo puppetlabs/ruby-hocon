@@ -1,4 +1,6 @@
+require 'stringio'
 require 'hocon/impl'
+require 'hocon/config_error'
 require 'hocon/config_syntax'
 require 'hocon/impl/config_impl'
 require 'hocon/impl/simple_include_context'
@@ -37,8 +39,42 @@ class Hocon::Impl::Parseable
     end
   end
 
+  class ParseableString < Hocon::Impl::Parseable
+    def initialize(string, options)
+      @input = string
+      post_construct(options)
+    end
+
+    def create_origin
+      Hocon::Impl::SimpleConfigOrigin.new_simple("String")
+    end
+
+    def reader
+      self
+    end
+
+    def open
+      if block_given?
+        StringIO.open(@input) do |f|
+          yield f
+        end
+      else
+        StringIO.open(@input)
+      end
+    end
+
+  end
+
   def self.new_file(file_path, options)
     ParseableFile.new(file_path, options)
+  end
+
+  def self.new_string(string, options)
+    ParseableString.new(string, options)
+  end
+
+  def guess_syntax
+    nil
   end
 
   def options
@@ -53,8 +89,9 @@ class Hocon::Impl::Parseable
     if value.is_a? Hocon::Impl::AbstractConfigObject
       value
     else
-      raise ConfigWrongTypeError.new(value.origin, "", "object at file root",
-                                     value.value_type.name)
+      raise Hocon::ConfigError::ConfigWrongTypeError.new(value.origin, "",
+                                                         "object at file root",
+                                                         value.value_type.name)
     end
   end
 
@@ -111,7 +148,7 @@ class Hocon::Impl::Parseable
       syntax = guess_syntax
     end
     if !syntax
-      syntax = Hocon::ConfigSyntax.CONF
+      syntax = Hocon::ConfigSyntax::CONF
     end
 
     modified = base_options.with_syntax(syntax)

@@ -3,13 +3,15 @@ require 'hocon/config_factory'
 require 'hocon/config_render_options'
 
 describe Hocon::ConfigFactory do
-  context "parsing a .conf file" do
-    conf = Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/input.conf")
-    output = File.read("#{FIXTURE_DIR}/parse_render/output.conf")
-    render_options = Hocon::ConfigRenderOptions.defaults
+  let(:output) { File.read("#{FIXTURE_DIR}/parse_render/output.conf") }
+  let(:render_options) { Hocon::ConfigRenderOptions.defaults }
+
+  before do
     render_options.origin_comments = false
     render_options.json = false
+  end
 
+  RSpec.shared_examples "parsing" do
     it "should make the config data available as a map" do
       expect(conf.root.unwrapped).to eq(
         {:foo => {
@@ -29,5 +31,16 @@ describe Hocon::ConfigFactory do
       conf2 = Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/output.conf")
       expect(conf2.root.render(render_options)).to eq(output)
     end
+  end
+
+  context "parsing a HOCON string" do
+    let(:string) { File.open("#{FIXTURE_DIR}/parse_render/input.conf").read }
+    let(:conf) { Hocon::ConfigFactory.parse_string(string) }
+    include_examples "parsing"
+  end
+
+  context "parsing a .conf file" do
+    let(:conf) { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/input.conf") }
+    include_examples "parsing"
   end
 end
