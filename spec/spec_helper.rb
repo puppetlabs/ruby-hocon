@@ -1,1 +1,24 @@
 FIXTURE_DIR = File.join(dir = File.expand_path(File.dirname(__FILE__)), "fixtures")
+
+EXAMPLE1 = { :hash =>
+    {"foo" => {
+      "bar" => {
+          "baz" => 42,
+          "abracadabra" => "hi",
+          "yahoo" => "yippee",
+          "boom" => [1, 2, {:derp => "duh"}, 4],
+          "empty" => []
+      }}},
+    :name => "example1",
+}
+
+EXAMPLE2 = { :hash =>
+    {"jruby-puppet"=> {
+      "jruby-pools" => [{"environment" => "production"}],
+      "load-path" => ["/usr/lib/ruby/site_ruby/1.8", "/usr/lib/ruby/site_ruby/1.8"],
+      "master-conf-dir" => "/etc/puppet",
+      "master-var-dir" => "/var/lib/puppet",
+    }},
+    :name => "example2",
+  }
+
