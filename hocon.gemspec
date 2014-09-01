@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.license       = 'Apache License, v2'
 
   # Testing dependencies
+  s.add_development_dependency 'bundler', '~> 1.5'
+  s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 2.14'
-
 end

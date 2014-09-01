@@ -23,3 +23,11 @@ require 'hocon/config_factory'
 conf = Hocon::ConfigFactory.parse_file("myapp.conf")
 conf_map = conf.root.unwrapped
 ```
+
+Testing
+=======
+
+```sh
+bundle install
+bundle exec rake spec
+```
