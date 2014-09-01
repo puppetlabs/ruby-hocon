@@ -3,6 +3,7 @@ require 'hocon/impl/token'
 require 'hocon/impl/token_type'
 require 'hocon/impl/config_number'
 require 'hocon/impl/config_string'
+require 'hocon/impl/config_boolean'
 
 # FIXME the way the subclasses of Token are private with static isFoo and accessors is kind of ridiculous.
 class Hocon::Impl::Tokens
@@ -10,6 +11,7 @@ class Hocon::Impl::Tokens
   TokenType = Hocon::Impl::TokenType
   ConfigNumber = Hocon::Impl::ConfigNumber
   ConfigString = Hocon::Impl::ConfigString
+  ConfigBoolean = Hocon::Impl::ConfigBoolean
 
   START = Token.new_without_origin(TokenType::START, "start of file")
   EOF = Token.new_without_origin(TokenType::EOF, "end of file")
@@ -101,6 +103,10 @@ class Hocon::Impl::Tokens
 
   def self.new_long(origin, value, original_text)
     new_value(ConfigNumber.new_number(origin, value, original_text))
+  end
+
+  def self.new_boolean(origin, value)
+    new_value(ConfigBoolean.new(origin, value))
   end
 
   def self.comment?(t)

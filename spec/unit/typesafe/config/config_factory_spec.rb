@@ -10,7 +10,13 @@ describe Hocon::ConfigFactory do
     render_options.json = false
   end
 
-  RSpec.shared_examples "config_factory_parsing" do
+  shared_examples_for "config_factory_parsing" do
+    let(:input_file)  { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
+    let(:output_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf" }
+    let(:expected)    { example[:hash] }
+    let(:reparsed)    { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf") }
+    let(:output)      { File.read("#{output_file}") }
+
     it "should make the config data available as a map" do
       expect(conf.root.unwrapped).to eq(expected)
     end
@@ -22,15 +28,25 @@ describe Hocon::ConfigFactory do
     it "should generate the same conf data via re-parsing the rendered output" do
       expect(reparsed.root.render(render_options)).to eq(output)
     end
-
   end
 
-  [EXAMPLE1, EXAMPLE2].each do |example|
-    let(:input_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
-    let(:output_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf" }
-    let(:expected) { example[:hash] }
-    let(:reparsed) { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf") }
-    let(:output) { File.read("#{output_file}") }
+  context "example1" do
+    let(:example) { EXAMPLE1 }
+
+    context "parsing a HOCON string" do
+      let(:string) { File.open(input_file).read }
+      let(:conf) { Hocon::ConfigFactory.parse_string(string) }
+      include_examples "config_factory_parsing"
+    end
+
+    context "parsing a .conf file" do
+      let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
+      include_examples "config_factory_parsing"
+    end
+  end
+
+  context "example2" do
+    let(:example) { EXAMPLE2 }
 
     context "parsing a HOCON string" do
       let(:string) { File.open(input_file).read }
@@ -44,4 +60,3 @@ describe Hocon::ConfigFactory do
     end
   end
 end
-

@@ -6,8 +6,10 @@ EXAMPLE1 = { :hash =>
           "baz" => 42,
           "abracadabra" => "hi",
           "yahoo" => "yippee",
-          "boom" => [1, 2, {:derp => "duh"}, 4],
-          "empty" => []
+          "boom" => [1, 2, {"derp" => "duh"}, 4],
+          "empty" => [],
+          "truthy" => true,
+          "falsy" => false
       }}},
     :name => "example1",
 }
