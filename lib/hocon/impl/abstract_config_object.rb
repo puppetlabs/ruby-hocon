@@ -5,9 +5,14 @@ require 'hocon/config_object'
 require 'hocon/config_value_type'
 require 'hocon/impl/resolve_status'
 require 'hocon/impl/simple_config_origin'
+require 'hocon/config_error'
+require 'hocon/impl/config_impl'
 
 class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   include Hocon::ConfigObject
+
+  ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
+  ConfigImpl = Hocon::Impl::ConfigImpl
 
   def initialize(origin)
     super(origin)
@@ -60,5 +65,13 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     end
 
     Hocon::Impl::SimpleConfigOrigin.merge_origins(origins)
+  end
+
+  def peek_assuming_resolved(key, original_path)
+    begin
+      attempt_peek_with_partial_resolve(key)
+    rescue ConfigNotResolvedError => e
+      raise ConfigImpl.improve_not_resolved(original_path, e)
+    end
   end
 end
