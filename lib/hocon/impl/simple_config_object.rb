@@ -175,4 +175,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     @value.empty?
   end
 
+  def attempt_peek_with_partial_resolve(key)
+    @value[key]
+  end
 end

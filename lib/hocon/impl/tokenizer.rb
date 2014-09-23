@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/impl/config_impl_util'
 require 'hocon/impl/tokens'
 require 'stringio'
+require 'forwardable'
 
 class Hocon::Impl::Tokenizer
   Tokens = Hocon::Impl::Tokens
@@ -10,6 +11,7 @@ class Hocon::Impl::Tokenizer
   end
 
   class TokenIterator
+    extend Forwardable
     class WhitespaceSaver
       def initialize
         @whitespace = StringIO.new
@@ -78,6 +80,8 @@ class Hocon::Impl::Tokenizer
     def self.whitespace_not_newline?(c)
       (c != "\n") and (Hocon::Impl::ConfigImplUtil.whitespace?(c))
     end
+
+    def_delegator :@tokens, :each
 
     def initialize(origin, input, allow_comments)
       @origin = origin
@@ -360,6 +364,10 @@ class Hocon::Impl::Tokenizer
         end
       end
       t
+    end
+
+    def empty?
+      @tokens.empty?
     end
   end
 
