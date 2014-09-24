@@ -2,10 +2,13 @@ require 'hocon/impl'
 require 'hocon/config_value_type'
 require 'hocon/impl/path'
 require 'hocon/impl/default_transformer'
+require 'hocon/impl/config_impl'
 
 class Hocon::Impl::SimpleConfig
 
+  ConfigImpl = Hocon::Impl::ConfigImpl
   ConfigMissingError = Hocon::ConfigError::ConfigMissingError
+  ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
   ConfigNullError = Hocon::ConfigError::ConfigNullError
   ConfigWrongTypeError = Hocon::ConfigError::ConfigWrongTypeError
   ConfigValueType = Hocon::ConfigValueType
@@ -61,5 +64,15 @@ class Hocon::Impl::SimpleConfig
   def get_value(path)
     parsed_path = Path.new_path(path)
     find(@object, parsed_path, nil, parsed_path)
+  end
+
+  def has_path(path_expression)
+    path = Path.new_path(path_expression)
+    begin
+      peeked = @object.peek_path(path)
+    rescue ConfigNotResolvedError => e
+      raise ConfigImpl.improve_not_resolved(path, e)
+    end
+    (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
   end
 end

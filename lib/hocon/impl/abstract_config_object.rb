@@ -11,6 +11,7 @@ require 'hocon/impl/config_impl'
 class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   include Hocon::ConfigObject
 
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
   ConfigImpl = Hocon::Impl::ConfigImpl
 
@@ -72,6 +73,42 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
       attempt_peek_with_partial_resolve(key)
     rescue ConfigNotResolvedError => e
       raise ConfigImpl.improve_not_resolved(original_path, e)
+    end
+  end
+
+  def peek_path(path)
+    begin
+      return peek_path_impl(self, path, nil)
+    rescue ConfigNotResolvedError => e
+      raise ConfigBugOrBrokenError.new("NotPossibleToResolve happened though we had no ResolveContext in peek_path", nil)
+    end
+  end
+
+  def peek_path_impl(me, path, context)
+    begin
+      if not context.nil?
+        partially_resolved = context.restrict(path).resolve(me)
+        if partially_resolved.is_a?(self.class)
+          return peek_path_impl(partially_resolved, path, nil)
+        else
+          raise ConfigBugOrBrokenError.new(
+              "resolved object to non-object #{me} to #{partially_resolved}", nil)
+        end
+      else
+        remainder = path.remainder
+        v = me.attempt_peek_with_partial_resolve(path.first)
+        if remainder.nil?
+          return v
+        else
+          if v.is_a?(self.class)
+            return peek_path_impl(v, remainder, nil)
+          else
+            return nil
+          end
+        end
+      end
+    rescue ConfigNotResolvedError => e
+      raise ConfigImpl.improve_not_resolved(path, e)
     end
   end
 end
