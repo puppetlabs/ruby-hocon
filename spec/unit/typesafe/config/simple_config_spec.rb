@@ -34,33 +34,47 @@ describe Hocon::ConfigFactory do
     end
 
     it "should return false if a path does not exist" do
-      expect(conf.has_path(false_setting)).to eql(false)
+      expect(conf.has_path(false_setting)).to eq(false)
+    end
+  end
+
+  shared_examples_for "add_value_to_config" do
+    let(:input_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
+    it "should add desired setting with desired value" do
+      modified_conf = conf.with_value(setting_to_add, value_to_add)
+      expect(modified_conf.get_value(setting_to_add)).to eq(value_to_add)
     end
   end
 
   context "example1" do
     let(:example) { EXAMPLE1 }
     let(:setting) { "foo.bar.yahoo" }
-    let (:expected_setting) { "yippee" }
-    let (:false_setting) { "non-existent" }
+    let(:expected_setting) { "yippee" }
+    let(:false_setting) { "non-existent" }
+    let(:setting_to_add) { "foo.bar.test" }
+    let(:value_to_add) { Hocon::Impl::ConfigString.new(nil, "This is a test string") }
 
     context "parsing a .conf file" do
       let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
       include_examples "config_value_retrieval_single_value"
       include_examples "has_path_check"
+      include_examples "add_value_to_config"
     end
   end
 
   context "example2" do
     let(:example) { EXAMPLE2 }
     let(:setting) { "jruby-puppet.jruby-pools" }
-    let (:expected_setting) { "[{environment=production}]" }
-    let (:false_setting) { "jruby-puppet-false" }
+    let(:expected_setting) { "[{environment=production}]" }
+    let(:false_setting) { "jruby-puppet-false" }
+    let(:setting_to_add) { "top" }
+    let(:value_to_add) { Hocon::Impl::ConfigInt.new(nil, 12345, "12345") }
 
     context "parsing a .conf file" do
       let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
       include_examples "config_value_retrieval_config_list"
       include_examples "has_path_check"
+      include_examples "add_value_to_config"
     end
   end
 end
