@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'hocon/config_factory'
 require 'hocon/config_render_options'
 
-describe Hocon::ConfigFactory do
+describe Hocon::Impl::SimpleConfig do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
 
   before do

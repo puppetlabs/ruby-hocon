@@ -6,14 +6,12 @@ require 'hocon/config_value_type'
 require 'hocon/impl/resolve_status'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/config_error'
-require 'hocon/impl/config_impl'
 
 class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   include Hocon::ConfigObject
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
-  ConfigImpl = Hocon::Impl::ConfigImpl
 
   def initialize(origin)
     super(origin)
@@ -72,7 +70,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     begin
       attempt_peek_with_partial_resolve(key)
     rescue ConfigNotResolvedError => e
-      raise ConfigImpl.improve_not_resolved(original_path, e)
+      raise Hocon::Impl::ConfigImpl.improve_not_resolved(original_path, e)
     end
   end
 
@@ -108,7 +106,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
         end
       end
     rescue ConfigNotResolvedError => e
-      raise ConfigImpl.improve_not_resolved(path, e)
+      raise Hocon::Impl::ConfigImpl.improve_not_resolved(path, e)
     end
   end
 end

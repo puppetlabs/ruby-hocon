@@ -1,6 +1,7 @@
 require 'hocon/impl'
 require 'hocon/impl/resolve_status'
 require 'hocon/config_value_type'
+require 'hocon/impl/abstract_config_object'
 
 class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   ResolveStatus = Hocon::Impl::ResolveStatus
