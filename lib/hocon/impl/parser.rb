@@ -56,6 +56,17 @@ class Hocon::Impl::Parser
       end
     end
 
+    def add(after)
+      if @comments.empty?
+        TokenWithComments.new(@token, [after])
+      else
+        merged = Array.new
+        merged += @comments
+        merged.push(after)
+        TokenWithComments.new(@token, merged)
+      end
+    end
+
     def prepend_comments(origin)
       if @comments.empty?
         origin
