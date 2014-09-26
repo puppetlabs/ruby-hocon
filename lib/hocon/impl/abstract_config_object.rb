@@ -6,6 +6,7 @@ require 'hocon/config_value_type'
 require 'hocon/impl/resolve_status'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/config_error'
+require 'hocon/impl/config_impl'
 
 class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   include Hocon::ConfigObject

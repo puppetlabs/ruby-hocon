@@ -1,4 +1,6 @@
 require 'hocon/impl'
+require 'hocon/config_error'
+require 'hocon/impl/config_impl'
 
 class Hocon::Impl::PropertiesParser
   def from_path_map(origin, path_map, converted_from_properties)
@@ -48,7 +50,7 @@ class Hocon::Impl::PropertiesParser
           value = nil
         end
       else
-        value = Hocon::Impl::ConfigImpl.from_any_ref(path_map[path], origin, Hocon::Impl::FromMapMode::KEYS_ARE_PATHS)
+        value = Hocon::Impl::ConfigImpl.from_any_ref_impl(path_map[path], origin, Hocon::Impl::FromMapMode::KEYS_ARE_PATHS)
       end
       if not value.nil?
         parent[last, value]

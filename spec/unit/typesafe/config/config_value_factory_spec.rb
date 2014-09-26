@@ -1,7 +1,6 @@
 require 'spec_helper'
-require 'hocon/config_factory'
-require 'hocon/config_render_options'
 require 'hocon/config_value_factory'
+require 'hocon/config_render_options'
 
 describe Hocon::ConfigValueFactory do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }

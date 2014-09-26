@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/config_value_type'
 require 'hocon/impl/path'
 require 'hocon/impl/default_transformer'
+require 'hocon/impl/config_impl'
 
 class Hocon::Impl::SimpleConfig
 
