@@ -1,5 +1,5 @@
 require 'hocon/impl'
-#require 'hocon/impl/path_builder'
+require 'hocon/impl/path_builder'
 require 'hocon/config_error'
 require 'stringio'
 
@@ -45,6 +45,28 @@ class Hocon::Impl::Path
 
   def remainder
     @remainder
+  end
+
+  def parent
+    if remainder.nil?
+      return nil
+    end
+
+    pb = Hocon::Impl::PathBuilder.new
+    p = self
+    while not p.remainder.nil?
+      pb.append_key(p.first)
+      p = p.remainder
+    end
+    pb.result
+  end
+
+  def last
+    p = self
+    while not p.remainder.nil?
+      p = p.remainder
+    end
+    p.first
   end
 
   def length
