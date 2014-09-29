@@ -46,6 +46,14 @@ describe Hocon::Impl::SimpleConfig do
     end
   end
 
+  shared_examples_for "remove_value_from_config" do
+    let(:input_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
+    it "should remove desired setting" do
+      modified_conf = conf.without_path(setting_to_remove)
+      expect(modified_conf.has_path(setting_to_remove)).to be false
+    end
+  end
+
   context "example1" do
     let(:example) { EXAMPLE1 }
     let(:setting) { "foo.bar.yahoo" }
@@ -53,12 +61,14 @@ describe Hocon::Impl::SimpleConfig do
     let(:false_setting) { "non-existent" }
     let(:setting_to_add) { "foo.bar.test" }
     let(:value_to_add) { Hocon::Impl::ConfigString.new(nil, "This is a test string") }
+    let(:setting_to_remove) { "foo.bar" }
 
     context "parsing a .conf file" do
       let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
       include_examples "config_value_retrieval_single_value"
       include_examples "has_path_check"
       include_examples "add_value_to_config"
+      include_examples "remove_value_from_config"
     end
   end
 
@@ -69,12 +79,14 @@ describe Hocon::Impl::SimpleConfig do
     let(:false_setting) { "jruby-puppet-false" }
     let(:setting_to_add) { "top" }
     let(:value_to_add) { Hocon::Impl::ConfigInt.new(nil, 12345, "12345") }
+    let(:setting_to_remove) { "jruby-puppet.master-conf-dir" }
 
     context "parsing a .conf file" do
       let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
       include_examples "config_value_retrieval_config_list"
       include_examples "has_path_check"
       include_examples "add_value_to_config"
+      include_examples "remove_value_from_config"
     end
   end
 end

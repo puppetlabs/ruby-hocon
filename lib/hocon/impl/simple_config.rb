@@ -75,6 +75,11 @@ class Hocon::Impl::SimpleConfig
     (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
   end
 
+  def without_path(path_expression)
+    path = Path.new_path(path_expression)
+    self.class.new(root.without_path(path))
+  end
+
   def with_value(path_expression, v)
     path = Path.new_path(path_expression)
     self.class.new(root.with_value(path, v))

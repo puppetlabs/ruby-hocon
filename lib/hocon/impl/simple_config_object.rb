@@ -185,6 +185,31 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     @value[key]
   end
 
+  def without_path(path)
+    key = path.first
+    remainder = path.remainder
+    v = @value[key]
+
+    if (not v.nil?) && (not remainder.nil?) && v.is_a?(Hocon::Impl::AbstractConfigObject)
+      v = v.without_path(remainder)
+      updated = @value.clone
+      updated[key] = v
+      return Hocon::Impl::SimpleConfigObject.new(origin, updated,
+                                                 ResolveStatus.from_values(updated.values), @ignores_fallbacks)
+    elsif (not remainder.nil?) || v.nil?
+      return self
+    else
+      smaller = Hash.new
+      @value.each do |old_key, old_value|
+        if not old_key == key
+          smaller[old_key] = old_value
+        end
+      end
+      return Hocon::Impl::SimpleConfigObject.new(origin, smaller,
+                                                 ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
+    end
+  end
+
   def with_value(path, v)
     key = path.first
     remainder = path.remainder
