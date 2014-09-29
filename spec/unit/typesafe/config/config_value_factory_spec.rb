@@ -11,10 +11,16 @@ describe Hocon::ConfigValueFactory do
   end
 
   context "converting objects to ConfigValue using ConfigValueFactory" do
-    it "should convert a boolean into a ConfigBoolean" do
+    it "should convert true into a ConfigBoolean" do
       value = Hocon::ConfigValueFactory.from_any_ref(true, nil)
       expect(value).to be_instance_of(Hocon::Impl::ConfigBoolean)
       expect(value.unwrapped).to eql(true)
+    end
+
+    it "should convert false into a ConfigBoolean" do
+      value = Hocon::ConfigValueFactory.from_any_ref(false, nil)
+      expect(value).to be_instance_of(Hocon::Impl::ConfigBoolean)
+      expect(value.unwrapped).to eql(false)
     end
 
     it "should convert nil into a ConfigNull object" do

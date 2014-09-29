@@ -11,7 +11,7 @@ class Hocon::Impl::ConfigImpl
   @default_includer = Hocon::Impl::SimpleIncluder.new
   @default_value_origin = Hocon::Impl::SimpleConfigOrigin.new_simple("hardcoded value")
   @default_true_value = Hocon::Impl::ConfigBoolean.new(@default_value_origin, true)
-  @default_false_value = Hocon::Impl::ConfigBoolean.new(@default_value_origin, true)
+  @default_false_value = Hocon::Impl::ConfigBoolean.new(@default_value_origin, false)
   @default_null_value = Hocon::Impl::ConfigNull.new(@default_value_origin)
   @default_empty_list = Hocon::Impl::SimpleConfigList.new(@default_value_origin, Array.new)
 

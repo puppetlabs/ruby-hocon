@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'hocon/config_factory'
 require 'hocon/config_render_options'
+require 'hocon/config_value_factory'
 
 describe Hocon::Impl::SimpleConfig do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -46,6 +47,21 @@ describe Hocon::Impl::SimpleConfig do
     end
   end
 
+  shared_examples_for "add_data_structures_to_config" do
+    let(:input_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
+    it "should add a nested map to a config" do
+      map = Hocon::ConfigValueFactory.from_any_ref({"a" => "b", "c" => {"d" => "e"}}, nil)
+      modified_conf = conf.with_value(setting_to_add, map)
+      expect(modified_conf.get_value(setting_to_add)).to eq(map)
+    end
+
+    it "should add an array to a config" do
+      array = Hocon::ConfigValueFactory.from_any_ref([1,2,3,4,5], nil)
+      modified_conf = conf.with_value(setting_to_add, array)
+      expect(modified_conf.get_value(setting_to_add)).to eq(array)
+    end
+  end
+
   shared_examples_for "remove_value_from_config" do
     let(:input_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
     it "should remove desired setting" do
@@ -68,6 +84,7 @@ describe Hocon::Impl::SimpleConfig do
       include_examples "config_value_retrieval_single_value"
       include_examples "has_path_check"
       include_examples "add_value_to_config"
+      include_examples "add_data_structures_to_config"
       include_examples "remove_value_from_config"
     end
   end
@@ -86,6 +103,7 @@ describe Hocon::Impl::SimpleConfig do
       include_examples "config_value_retrieval_config_list"
       include_examples "has_path_check"
       include_examples "add_value_to_config"
+      include_examples "add_data_structures_to_config"
       include_examples "remove_value_from_config"
     end
   end
