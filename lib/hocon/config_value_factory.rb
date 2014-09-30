@@ -1,4 +1,3 @@
-require 'hocon/config_factory'
 require 'hocon'
 require 'hocon/impl/config_impl'
 
