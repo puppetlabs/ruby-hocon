@@ -1,5 +1,6 @@
 require 'hocon'
 require 'hocon/impl/parseable'
+require 'hocon/config_parse_options'
 
 class Hocon::ConfigFactory
   def self.parse_file(file_path, options = Hocon::ConfigParseOptions.defaults)
