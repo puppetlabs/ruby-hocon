@@ -6,7 +6,7 @@ require 'stringio'
 class Hocon::Impl::Path
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
-  #PathBuilder = Hocon::Impl::PathBuilder
+
   # this doesn't have a very precise meaning, just to reduce
   # noise from quotes in the rendered path for average cases
   def self.has_funky_chars?(s)
