@@ -6,4 +6,8 @@ class Hocon::Impl::ConfigFloat < Hocon::Impl::ConfigNumber
     super(origin, original_text)
     @value = value
   end
+
+  def unwrapped
+    @value
+  end
 end

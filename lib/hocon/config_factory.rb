@@ -1,5 +1,4 @@
 require 'hocon'
-require 'hocon/config_parse_options'
 require 'hocon/impl/parseable'
 
 class Hocon::ConfigFactory

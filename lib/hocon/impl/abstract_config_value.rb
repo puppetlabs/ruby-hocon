@@ -127,4 +127,20 @@ class Hocon::Impl::AbstractConfigValue
     sb.string[0, sb.pos]
   end
 
+  def at_key(origin, key)
+    m = {key=>self}
+    Hocon::Impl::SimpleConfigObject.new(origin, m).to_config
+  end
+
+  def at_path(origin, path)
+    parent = path.parent
+    result = at_key(origin, path.last)
+    while not parent.nil? do
+      key = parent.last
+      result = result.at_key(origin, key)
+      parent = parent.parent
+    end
+    result
+  end
+
 end

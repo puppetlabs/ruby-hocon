@@ -2,7 +2,6 @@ require 'hocon/impl'
 require 'hocon/impl/path'
 
 class Hocon::Impl::PathBuilder
-  Path = Hocon::Impl::Path
 
   def initialize
     @keys = []
@@ -27,7 +26,7 @@ class Hocon::Impl::PathBuilder
       remainder = nil
       while !@keys.empty?
         key = @keys.pop
-        remainder = Path.new(key, remainder)
+        remainder = Hocon::Impl::Path.new(key, remainder)
       end
       @result = remainder
     end

@@ -75,4 +75,12 @@ class Hocon::Impl::ConfigImplUtil
     # file).
     c =~ /[[:space:]]/
   end
+
+  def self.unicode_trim(s)
+    # this implementation is *not* a port of the java code. Ruby can strip
+    # unicode whitespace much easier than Java can, and relies on a lot of
+    # Java functions that don't really have straight equivalents in Ruby.
+    s.gsub(/[[:space]]/, ' ')
+    s.strip
+  end
 end
