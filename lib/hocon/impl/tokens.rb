@@ -4,6 +4,7 @@ require 'hocon/impl/token_type'
 require 'hocon/impl/config_number'
 require 'hocon/impl/config_string'
 require 'hocon/impl/config_boolean'
+require 'hocon/config_error'
 
 # FIXME the way the subclasses of Token are private with static isFoo and accessors is kind of ridiculous.
 class Hocon::Impl::Tokens
@@ -79,10 +80,54 @@ class Hocon::Impl::Tokens
       @suggest_quotes = suggest_quotes
       @cause = cause
     end
+
+    def what
+      @what
+    end
+
+    def message
+      @message
+    end
+
+    def suggest_quotes
+      @suggest_quotes
+    end
+
+    def cause
+      @cause
+    end
+  end
+
+  def self.get_problem_message(token)
+    if token.is_a?(Problem)
+      token.message
+    else
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem message from #{token}", nil)
+    end
+  end
+
+  def self.get_problem_suggest_quotes(token)
+    if token.is_a?(Problem)
+      token.suggest_quotes
+    else
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}", nil)
+    end
+  end
+
+  def self.get_problem_cause(token)
+    if token.is_a?(Problem)
+      token.cause
+    else
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem cause from #{token}", nil)
+    end
   end
 
   def self.new_line(origin)
     Line.new(origin)
+  end
+
+  def self.new_problem(origin, what, message, suggest_quotes, cause)
+    Problem.new(origin, what, message, suggest_quotes, cause)
   end
 
   def self.new_comment(origin, text)

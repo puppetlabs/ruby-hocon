@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'hocon/config_factory'
 require 'hocon/config_render_options'
+require 'hocon/config_error'
 
 describe Hocon::ConfigFactory do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -57,6 +58,12 @@ describe Hocon::ConfigFactory do
     context "parsing a .conf file" do
       let(:conf) { Hocon::ConfigFactory.parse_file(input_file) }
       include_examples "config_factory_parsing"
+    end
+  end
+
+  context "example3" do
+    it "should raise a ConfigParseError when given an invalid .conf file" do
+      expect{Hocon::ConfigFactory.parse_string("abcdefg")}.to raise_error(Hocon::ConfigError::ConfigParseError)
     end
   end
 end
