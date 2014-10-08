@@ -1,6 +1,7 @@
 require 'hocon/impl'
 require 'hocon/impl/config_impl_util'
 require 'hocon/impl/tokens'
+require 'hocon/config_error'
 require 'stringio'
 require 'forwardable'
 
@@ -8,6 +9,13 @@ class Hocon::Impl::Tokenizer
   Tokens = Hocon::Impl::Tokens
 
   class TokenizerProblemError < StandardError
+    def initialize(problem)
+      @problem = problem
+    end
+
+    def problem
+      @problem
+    end
   end
 
   class TokenIterator
@@ -66,6 +74,13 @@ class Hocon::Impl::Tokenizer
     NUMBER_CHARS = "0123456789eE+-."
     # chars that stop an unquoted string
     NOT_IN_UNQUOTED_TEXT = "$\"{}[]:=,+#`^?!@*&\\"
+
+    def self.problem(origin, what, message, suggest_quotes, cause)
+      if what.nil? || message.nil?
+        throw Hocon::ConfigError::ConfigBugOrBrokenError.new("internal error, creating bad TokenizerProblemError", nil)
+      end
+      TokenizerProblemError.new(Tokens.new_problem(origin, what, message, suggest_quotes, cause))
+    end
 
     def self.simple_value?(t)
       Tokens.substitution?(t) ||
@@ -245,8 +260,8 @@ class Hocon::Impl::Tokenizer
           # not a number after all, see if it's an unquoted string.
           s.each do |u|
             if NOT_IN_UNQUOTED_TEXT.index
-              raise problem(u, "Reserved character '#{u}'" +
-                "is not allowed outside quotes", true)
+              raise self.problem(@line_origin, u, "Reserved character '#{u}'" +
+                "is not allowed outside quotes", true, nil)
             end
           end
           # no evil chars so we just decide this was a string and
@@ -265,7 +280,7 @@ class Hocon::Impl::Tokenizer
       while c != '"'
         c = next_char_raw
         if c == -1
-          raise problem("End of input but string quote was still open")
+          raise self.problem(@line_origin, c, "End of input but string quote was still open", false, nil)
         end
 
         if c == "\\"
@@ -273,8 +288,8 @@ class Hocon::Impl::Tokenizer
         elsif c == '"'
           # done!
         elsif c =~ /[[:cntrl:]]/
-          raise problem(c, "JSON does not allow unescaped #{c}" +
-                            " in quoted strings, use a backslash escape")
+          raise self.problem(@line_origin, c, "JSON does not allow unescaped #{c}" +
+                            " in quoted strings, use a backslash escape", false, nil)
         else
           sb << c
         end
@@ -326,7 +341,7 @@ class Hocon::Impl::Tokenizer
             if FIRST_NUMBER_CHARS.index(c)
               t = pull_number(c)
             elsif NOT_IN_UNQUOTED_TEXT.index(c)
-              raise problem(c, "Reserved character '#{c}' is not allowed outside quotes", true)
+              raise Hocon::Impl::Tokenizer::TokenIterator.problem(@line_origin, c, "Reserved character '#{c}' is not allowed outside quotes", true, nil)
             else
               put_back(c)
               t = pull_unquoted_text
