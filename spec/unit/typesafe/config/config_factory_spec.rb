@@ -27,7 +27,7 @@ describe Hocon::ConfigFactory do
     end
 
     it "should generate the same conf data via re-parsing the rendered output" do
-      expect(reparsed.root.render(render_options)).to eq(output)
+      expect(reparsed.root.unwrapped).to eq(expected)
     end
   end
 
