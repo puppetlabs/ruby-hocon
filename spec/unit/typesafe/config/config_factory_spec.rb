@@ -15,7 +15,7 @@ describe Hocon::ConfigFactory do
     let(:input_file)  { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
     let(:output_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf" }
     let(:expected)    { example[:hash] }
-    let(:reparsed)    { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf") }
+    let(:reparsed)    { Hocon::ConfigFactory.parse_file("#{output_file}") }
     let(:output)      { File.read("#{output_file}") }
 
     it "should make the config data available as a map" do
