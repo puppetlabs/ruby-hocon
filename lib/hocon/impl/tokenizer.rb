@@ -143,7 +143,7 @@ class Hocon::Impl::Tokenizer
     def next_char_raw
       if @buffer.empty?
         begin
-          @input.readchar
+          @input.readchar.chr
         rescue EOFError
           -1
         end

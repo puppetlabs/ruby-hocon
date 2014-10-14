@@ -6,6 +6,7 @@ require 'stringio'
 class Hocon::Impl::Path
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+  ConfigImplUtil = Hocon::Impl::ConfigImplUtil
 
   # this doesn't have a very precise meaning, just to reduce
   # noise from quotes in the rendered path for average cases
