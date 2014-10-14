@@ -3,6 +3,29 @@ require 'hocon/config_factory'
 require 'hocon/config_render_options'
 require 'hocon/config_error'
 
+def get_comment_config_hash(config_string)
+  split_config_string = config_string.split("\n")
+  r = Regexp.new('^\s*#')
+
+  previous_string_comment = false
+  hash = {}
+  comment_list = []
+
+  split_config_string.each do |s|
+    if r.match(s)
+      comment_list << s
+      previous_string_comment = true
+    else
+      if previous_string_comment
+        hash[s] = comment_list
+        comment_list = []
+      end
+      previous_string_comment = false
+    end
+  end
+  return hash
+end
+
 describe Hocon::ConfigFactory do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
 
@@ -23,7 +46,11 @@ describe Hocon::ConfigFactory do
     end
 
     it "should render the config data to a string with comments intact" do
-      expect(conf.root.render(render_options)).to eq(output)
+      rendered_conf = conf.root.render(render_options)
+      rendered_conf_comment_hash = get_comment_config_hash(rendered_conf)
+      output_comment_hash = get_comment_config_hash(output)
+
+      expect(rendered_conf_comment_hash).to eq(output_comment_hash)
     end
 
     it "should generate the same conf data via re-parsing the rendered output" do
