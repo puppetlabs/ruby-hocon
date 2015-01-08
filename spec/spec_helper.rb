@@ -24,3 +24,11 @@ EXAMPLE2 = { :hash =>
     :name => "example2",
   }
 
+EXAMPLE3 = { :hash =>
+                 {"kermit" => "frog",
+                  "miss" => "piggy",
+                  "bert" => "ernie",
+                  "janice" => "guitar"},
+             :name => "example3",
+}
+

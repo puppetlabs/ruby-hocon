@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hocon (0.0.5)
+    hocon (0.0.6)
 
 GEM
   remote: https://rubygems.org/

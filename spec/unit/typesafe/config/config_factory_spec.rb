@@ -35,7 +35,7 @@ describe Hocon::ConfigFactory do
   end
 
   shared_examples_for "config_factory_parsing" do
-    let(:input_file)  { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input.conf" }
+    let(:input_file)  { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/input#{extension}" }
     let(:output_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf" }
     let(:expected)    { example[:hash] }
     let(:reparsed)    { Hocon::ConfigFactory.parse_file("#{output_file}") }
@@ -60,6 +60,7 @@ describe Hocon::ConfigFactory do
 
   context "example1" do
     let(:example) { EXAMPLE1 }
+    let (:extension) { ".conf" }
 
     context "parsing a HOCON string" do
       let(:string) { File.open(input_file).read }
@@ -75,6 +76,7 @@ describe Hocon::ConfigFactory do
 
   context "example2" do
     let(:example) { EXAMPLE2 }
+    let (:extension) { ".conf" }
 
     context "parsing a HOCON string" do
       let(:string) { File.open(input_file).read }
@@ -89,6 +91,16 @@ describe Hocon::ConfigFactory do
   end
 
   context "example3" do
+    let(:example) { EXAMPLE3 }
+    let (:extension) { ".json" }
+
+    context "parsing a .json file" do
+      let (:conf) { Hocon::ConfigFactory.parse_file(input_file) }
+      include_examples "config_factory_parsing"
+    end
+  end
+
+  context "example4" do
     it "should raise a ConfigParseError when given an invalid .conf file" do
       expect{Hocon::ConfigFactory.parse_string("abcdefg")}.to raise_error(Hocon::ConfigError::ConfigParseError)
     end

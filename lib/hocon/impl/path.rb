@@ -131,6 +131,10 @@ class Hocon::Impl::Path
     pb.result
   end
 
+  def self.new_key(key)
+    return self.new(key, nil)
+  end
+
   def self.new_path(path)
     Hocon::Impl::Parser.parse_path(path)
   end
