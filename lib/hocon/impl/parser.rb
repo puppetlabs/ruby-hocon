@@ -479,7 +479,7 @@ class Hocon::Impl::Parser
                       add_quote_suggestion(t, "Expecting close brace } or a comma, got #{t}",
                                            last_path, last_inside_equals))
           else
-            if t.token == Tokens::END
+            if t.token == Tokens::EOF
               put_back(t)
               break
             else
@@ -568,7 +568,7 @@ class Hocon::Impl::Parser
         result = parse_value(t)
       else
         if @syntax == ConfigSyntax::JSON
-          if t.token == Tokens::END
+          if t.token == Tokens::EOF
             raise parse_error("Empty document")
           else
             raise parse_error("Document must have an object or array at root, unexpected token: #{t}")
