@@ -12,6 +12,7 @@ require 'hocon/impl/simple_config_object'
 require 'hocon/impl/config_impl_util'
 require 'hocon/impl/tokenizer'
 require 'hocon/impl/simple_config_origin'
+require 'hocon/impl/path'
 
 class Hocon::Impl::Parser
   
@@ -26,6 +27,7 @@ class Hocon::Impl::Parser
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
   PathBuilder = Hocon::Impl::PathBuilder
   Tokenizer = Hocon::Impl::Tokenizer
+  Path = Hocon::Impl::Path
   
   class TokenWithComments
     def initialize(token, comments = [])
