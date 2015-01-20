@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name        = 'hocon'
-  s.version     = '0.0.6'
-  s.date        = '2014-10-14'
+  s.version     = '0.0.7'
+  s.date        = '2015-01-20'
   s.summary     = "HOCON Config Library"
   s.description = "== A port of the Java {Typesafe Config}[https://github.com/typesafehub/config] library to Ruby"
-  s.authors     = ["Chris Price", "Wayne Warren", "Dai Akatsuka", "Preben Ingvaldsen"]
+  s.authors     = ["Chris Price", "Wayne Warren", "Preben Ingvaldsen"]
   s.email       = 'chris@puppetlabs.com'
   s.files       = Dir["{lib}/**/*.rb", "bin/*", "LICENSE", "*.md"]
   s.require_paths = ["lib"]
