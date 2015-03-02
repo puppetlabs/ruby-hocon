@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/impl/token_type'
 
 class Hocon::Impl::Token
+  attr_reader :token_type
   def self.new_without_origin(token_type, debug_string)
     Hocon::Impl::Token.new(token_type, nil, debug_string)
   end
@@ -28,5 +29,10 @@ class Hocon::Impl::Token
     else
       Hocon::Impl::TokenType.name(@token_type)
     end
+  end
+
+  def ==(other)
+    # @origin deliberately left out
+    other.is_a?(Hocon::Impl::Token) && @token_type == other.token_type
   end
 end

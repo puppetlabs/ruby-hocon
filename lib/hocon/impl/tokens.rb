@@ -3,6 +3,7 @@ require 'hocon/impl/token'
 require 'hocon/impl/token_type'
 require 'hocon/impl/config_number'
 require 'hocon/impl/config_string'
+require 'hocon/impl/config_null'
 require 'hocon/impl/config_boolean'
 require 'hocon/config_error'
 
@@ -11,7 +12,10 @@ class Hocon::Impl::Tokens
   Token = Hocon::Impl::Token
   TokenType = Hocon::Impl::TokenType
   ConfigNumber = Hocon::Impl::ConfigNumber
+  ConfigInt = Hocon::Impl::ConfigInt
+  ConfigFloat = Hocon::Impl::ConfigFloat
   ConfigString = Hocon::Impl::ConfigString
+  ConfigNull = Hocon::Impl::ConfigNull
   ConfigBoolean = Hocon::Impl::ConfigBoolean
 
   START = Token.new_without_origin(TokenType::START, "start of file")
@@ -146,12 +150,28 @@ class Hocon::Impl::Tokens
     new_value(ConfigString.new(origin, value))
   end
 
+  def self.new_int(origin, value, original_text)
+    new_value(ConfigInt.new(origin, value, original_text))
+  end
+
+  def self.new_float(origin, value, original_text)
+    new_value(ConfigFloat.new(origin, value, original_text))
+  end
+
   def self.new_long(origin, value, original_text)
     new_value(ConfigNumber.new_number(origin, value, original_text))
   end
 
+  def self.new_null(origin)
+    new_value(ConfigNull.new(origin))
+  end
+
   def self.new_boolean(origin, value)
     new_value(ConfigBoolean.new(origin, value))
+  end
+
+  def self.new_substitution(origin, optional, expression)
+    Substitution.new(origin, optional, expression)
   end
 
   def self.comment?(t)

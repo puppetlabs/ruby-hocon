@@ -33,12 +33,16 @@ class Hocon::Impl::Tokenizer
       end
 
       def check(t, base_origin, line_number)
-        if Hocon::Impl::Tokenizer::TokenIterator.simple_value?(t)
+        if TokenIterator.simple_value?(t)
           next_is_a_simple_value(base_origin, line_number)
         else
           next_is_not_a_simple_value
           nil
         end
+      end
+
+      def line_origin(base_origin, line_number)
+        base_origin.set_line_number(line_number)
       end
 
       private
@@ -58,11 +62,22 @@ class Hocon::Impl::Tokenizer
           # need to save whitespace between the two so
           # the parser has the option to concatenate it.
           if @whitespace.length > 0
-            Tokens.new_unquoted_text(
+            token = Tokens.new_unquoted_text(
                 line_origin(base_origin, line_number),
-                @whitespace.string = ""
+                String.new(@whitespace.string)
             )
+
+            @whitespace.string = ""
+
+            return token
+          else
+            # @last_token_was_simple_value = true still
+            return nil
           end
+        else
+          @last_token_was_simple_value = true
+          @whitespace.string = ""
+          return nil
         end
       end
 
@@ -251,7 +266,7 @@ class Hocon::Impl::Tokenizer
       begin
         if contained_decimal_or_e
           # force floating point representation
-          Tokens.new_double(@line_origin, s.to_f, s)
+          Tokens.new_float(@line_origin, s.to_f, s)
         else
           Tokens.new_long(@line_origin, s.to_i, s)
         end
@@ -260,7 +275,7 @@ class Hocon::Impl::Tokenizer
           # not a number after all, see if it's an unquoted string.
           s.each do |u|
             if NOT_IN_UNQUOTED_TEXT.index
-              raise self.problem(@line_origin, u, "Reserved character '#{u}'" +
+              raise TokenIterator.problem(@line_origin, u, "Reserved character '#{u}'" +
                 "is not allowed outside quotes", true, nil)
             end
           end
@@ -273,6 +288,85 @@ class Hocon::Impl::Tokenizer
       end
     end
 
+    def pull_escape_sequence(sb)
+      escaped = next_char_raw
+
+      if escaped == -1
+        error_msg = "End of input but backslash in string had nothing after it"
+        raise TokenIterator.problem(@line_origin, "", error_msg, false, nil)
+      end
+
+      case escaped
+        when '"'
+          sb << '"'
+        when '\\'
+          sb << '\\'
+        when '/'
+          sb << '/'
+        when 'b'
+          sb << '\b'
+        when 'f'
+          sb << '\f'
+        when 'n'
+          sb << '\n'
+        when 'r'
+          sb << '\r'
+        when 't'
+          sb << '\t'
+        when 'u'
+          codepoint = ""
+
+          # Grab the 4 hex chars for the unicode character
+          4.times do
+            c = next_char_raw
+
+            if c == -1
+              error_msg = "End of input but expecting 4 hex digits for \\uXXXX escape"
+              raise TokenIterator.problem(@line_origin, c, error_msg, false, nil)
+            end
+
+            codepoint << c
+          end
+          # Convert codepoint to a unicode character
+          sb << [codepoint.hex].pack("U")
+
+        else
+          error_msg = "backslash followed by '#{escaped.dump}', this is not a valid escape sequence (quoted strings use JSON escaping, so use double-backslash \\ for literal backslash)"
+          raise TokenIterator.problem(escaped.dump, "", error_msg, false, nil)
+      end
+    end
+
+    def append_triple_quoted_string(sb)
+      # we are after the opening triple quote and need to consume the
+      # close triple
+      consecutive_quotes = 0
+
+      while true
+        c = next_char_raw
+
+        if c == '"'
+          consecutive_quotes += 1
+        elsif consecutive_quotes >= 3
+          # the last three quotes end the string and the other kept.
+          sb.string = sb.string[0...-3]
+          put_back c
+          break
+        else
+          consecutive_quotes = 0
+          if c == -1
+            error_msg = "End of input but triple-quoted string was still open"
+            raise TokenIterator.problem(@line_origin, c, error_msg, false, nil)
+          elsif c == "\n"
+            # keep the line number accurate
+            @line_number += 1
+            @line_origin = @origin.set_line_number(@line_number)
+          end
+        end
+
+        sb << c
+      end
+    end
+
     def pull_quoted_string
       # the open quote has already been consumed
       sb = StringIO.new
@@ -280,7 +374,7 @@ class Hocon::Impl::Tokenizer
       while c != '"'
         c = next_char_raw
         if c == -1
-          raise self.problem(@line_origin, c, "End of input but string quote was still open", false, nil)
+          raise TokenIterator.problem(@line_origin, c, "End of input but string quote was still open", false, nil)
         end
 
         if c == "\\"
@@ -288,7 +382,7 @@ class Hocon::Impl::Tokenizer
         elsif c == '"'
           # done!
         elsif c =~ /[[:cntrl:]]/
-          raise self.problem(@line_origin, c, "JSON does not allow unescaped #{c}" +
+          raise TokenIterator.problem(@line_origin, c, "JSON does not allow unescaped #{c}" +
                             " in quoted strings, use a backslash escape", false, nil)
         else
           sb << c
@@ -306,6 +400,61 @@ class Hocon::Impl::Tokenizer
       end
 
       Tokens.new_string(@line_origin, sb.string)
+    end
+
+    def pull_plus_equals
+      # the initial '+' has already been consumed
+      c = next_char_raw
+
+      unless c == '='
+        error_msg = "'+' not followed by =, '#{c}' not allowed after '+'"
+        raise TokenIterator.problem(@line_origin, c, error_msg, true, nil) # true = suggest quotes
+      end
+
+      Tokens::PLUS_EQUALS
+    end
+
+    def pull_substitution
+      # the initial '$' has already been consumed
+      c = next_char_raw
+      if c != '{'
+        error_msg = "'$' not followed by {, '#{c}' not allowed after '$'"
+        raise TokenIterator.problem(@line_origin, c, error_msg, true, nil) # true = suggest quotes
+      end
+
+      optional = false
+      c = next_char_raw
+
+      if c == '?'
+          optional = true
+      elsif
+          put_back(c)
+      end
+
+      saver = WhitespaceSaver.new
+      expression = []
+
+      while true
+        t = pull_next_token(saver)
+        # note that we avoid validating the allowed tokens inside
+        # the substitution here; we even allow nested substitutions
+        # in the tokenizer. The parser sorts it out.
+
+        if t == Tokens::CLOSE_CURLY
+          # end the loop, done!
+          break
+        elsif t == Tokens::EOF
+          raise TokenIterator.problem(@line_origin, t, "Substitution ${ was not closed with a }", false, nil)
+        else
+          whitespace = saver.check(t, @line_origin, @line_number)
+          unless whitespace.nil?
+            expression << whitespace
+          end
+          expression << t
+        end
+      end
+
+      Tokens.new_substitution(@line_origin, optional, expression)
     end
 
     def pull_next_token(saver)
@@ -341,7 +490,7 @@ class Hocon::Impl::Tokenizer
             if FIRST_NUMBER_CHARS.index(c)
               t = pull_number(c)
             elsif NOT_IN_UNQUOTED_TEXT.index(c)
-              raise Hocon::Impl::Tokenizer::TokenIterator.problem(@line_origin, c, "Reserved character '#{c}' is not allowed outside quotes", true, nil)
+              raise TokenIterator.problem(@line_origin, c, "Reserved character '#{c}' is not allowed outside quotes", true, nil)
             else
               put_back(c)
               t = pull_unquoted_text
