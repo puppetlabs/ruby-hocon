@@ -9,12 +9,16 @@ module TestUtils
     [Tokens::START] + token_list + [Tokens::EOF]
   end
 
-  def TestUtils.tokenize_as_list(input_string)
+  def TestUtils.tokenize(input_string)
     origin = Hocon::Impl::SimpleConfigOrigin.new_simple("test")
     options = Hocon::ConfigParseOptions.defaults
     io = StringIO.open(input_string)
 
-    token_iterator =  Hocon::Impl::Tokenizer.tokenize(origin, io, options)
+    Hocon::Impl::Tokenizer.tokenize(origin, io, options)
+  end
+
+  def TestUtils.tokenize_as_list(input_string)
+    token_iterator = tokenize(input_string)
 
     token_list = []
 
@@ -74,11 +78,11 @@ module TestUtils
     Tokens.new_substitution(fake_origin(), optional, token_list)
   end
 
-  def TestUtils.token_substitution(token_list)
+  def TestUtils.token_substitution(*token_list)
     token_maybe_optional_substitution(false, token_list)
   end
 
-  def TestUtils.token_optional_substitution(token_list)
+  def TestUtils.token_optional_substitution(*token_list)
     token_maybe_optional_substitution(true, token_list)
   end
 

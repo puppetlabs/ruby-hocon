@@ -7,6 +7,10 @@ class Hocon::Impl::ConfigFloat < Hocon::Impl::ConfigNumber
     @value = value
   end
 
+  def value_type
+    Hocon::ConfigValueType::NUMBER
+  end
+
   def unwrapped
     @value
   end

@@ -181,11 +181,11 @@ class Hocon::Impl::Tokens
   end
 
   def self.new_int(origin, value, original_text)
-    new_value(ConfigInt.new(origin, value, original_text))
+    new_value(ConfigNumber.new_number(origin, value, original_text))
   end
 
   def self.new_float(origin, value, original_text)
-    new_value(ConfigFloat.new(origin, value, original_text))
+    new_value(ConfigNumber.new_number(origin, value, original_text))
   end
 
   def self.new_long(origin, value, original_text)
