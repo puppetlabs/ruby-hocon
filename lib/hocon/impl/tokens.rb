@@ -35,6 +35,10 @@ class Hocon::Impl::Tokens
       @text = text
     end
     attr_reader :text
+
+    def ==(other)
+      super(other) && other.text == @text
+    end
   end
 
   # This is not a Value, because it requires special processing
@@ -43,6 +47,12 @@ class Hocon::Impl::Tokens
       super(TokenType::SUBSTITUTION, origin)
       @optional = optional
       @value = expression
+    end
+
+    attr_reader :value
+
+    def ==(other)
+      super(other) && other.value == @value
     end
   end
 
@@ -56,6 +66,10 @@ class Hocon::Impl::Tokens
     def to_s
       "'#{value}'"
     end
+
+    def ==(other)
+      super(other) && other.value == @value
+    end
   end
 
   class Value < Token
@@ -63,16 +77,25 @@ class Hocon::Impl::Tokens
       super(TokenType::VALUE, value.origin)
       @value = value
     end
+
     attr_reader :value
 
     def to_s
       "'#{value.unwrapped}' (#{Hocon::ConfigValueType.name(value.value_type)})"
+    end
+
+    def ==(other)
+      super(other) && other.value == @value
     end
   end
 
   class Line < Token
     def initialize(origin)
       super(TokenType::NEWLINE, origin)
+    end
+
+    def ==(other)
+      super(other) && other.line_number == line_number
     end
   end
 
@@ -99,6 +122,13 @@ class Hocon::Impl::Tokens
 
     def cause
       @cause
+    end
+
+    def ==(other)
+      super(other) && other.what == @what &&
+          other.message == @message &&
+          other.suggest_quotes == @suggest_quotes &&
+          Hocon::Impl::ConfigImplUtil.equals_handling_nil?(other.cause, @cause)
     end
   end
 
