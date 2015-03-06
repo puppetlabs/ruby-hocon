@@ -65,6 +65,21 @@ class Hocon::Impl::AbstractConfigValue
     end
   end
 
+  def can_equal(other)
+    other.is_a?(Hocon::Impl::AbstractConfigValue)
+  end
+
+  def ==(other)
+    # note that "origin" is deliberately NOT part of equality
+    if other.is_a?(Hocon::Impl::AbstractConfigValue)
+      can_equal(other) &&
+          value_type == other.value_type &&
+          ConfigImplUtil.equals_handling_nil?(unwrapped, other.unwrapped)
+    else
+      false
+    end
+  end
+
   def to_s
     sb = StringIO.new
     render_to_sb(sb, 0, true, nil, Hocon::ConfigRenderOptions.concise)

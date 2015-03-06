@@ -3,7 +3,7 @@ require 'hocon/config_value_type'
 
 class Hocon::Impl::ConfigNull < Hocon::Impl::AbstractConfigValue
   def value_type
-    Hocon::Impl::ConfigValueType::NULL
+    Hocon::ConfigValueType::NULL
   end
 
   def unwrapped
