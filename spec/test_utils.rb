@@ -3,6 +3,7 @@ require 'spec_helper'
 
 module TestUtils
   Tokens = Hocon::Impl::Tokens
+  Path = Hocon::Impl::Path
   EOF = Hocon::Impl::TokenType::EOF
 
 
@@ -25,18 +26,7 @@ module TestUtils
   def TestUtils.tokenize_as_list(input_string)
     token_iterator = tokenize(input_string)
 
-    token_list = []
-
-    while true
-      token = token_iterator.next
-      token_list.push token
-
-      if token.token_type == EOF
-        break
-      end
-    end
-
-    token_list
+    token_iterator.map { |token| token }
   end
 
   def TestUtils.fake_origin
@@ -108,6 +98,16 @@ module TestUtils
       971
     end
   end
+
+  ##################
+  # Path Functions
+  ##################
+  def TestUtils.path(*elements)
+    # this is importantly NOT using Path.newPath, which relies on
+    # the parser; in the test suite we are often testing the parser,
+    # so we don't want to use the parser to build the expected result.
+    Path.from_string_list(elements)
+  end
 end
 
 
@@ -170,4 +170,19 @@ shared_examples_for "object_inequality" do
   end
 
   include_examples "not_equal_to_other_random_thing"
+end
+
+
+shared_examples_for "path_render_test" do
+  it "should find the expected rendered text equal to the rendered path" do
+    expect(path.render).to eq(expected)
+  end
+
+  it "should find the path equal to the parsed expected text" do
+    expect(Hocon::Impl::Parser.parse_path(expected)).to eq(path)
+  end
+
+  it "should find the path equal to the parsed text that came from the rendered path" do
+    expect(Hocon::Impl::Parser.parse_path(path.render)).to eq(path)
+  end
 end

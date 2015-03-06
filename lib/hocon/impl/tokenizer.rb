@@ -533,6 +533,28 @@ class Hocon::Impl::Tokenizer
     def empty?
       @tokens.empty?
     end
+
+    def has_next?
+      !empty?
+    end
+
+    def each
+      while has_next?
+        # Have to use self.next instead of next because next is a reserved word
+        yield self.next
+      end
+    end
+
+    def map
+      token_list = []
+      each do |token|
+        # yield token to calling method, append whatever is returned from the
+        # map block to token_list
+        token_list << yield(token)
+      end
+
+      token_list
+    end
   end
 
 

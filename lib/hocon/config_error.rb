@@ -34,4 +34,11 @@ class Hocon::ConfigError < StandardError
 
   class ConfigNotResolvedError < Hocon::ConfigError::ConfigBugOrBrokenError
   end
+
+  class ConfigBadPathError < Hocon::ConfigError
+    def initialize(origin, path, message, cause = nil)
+      error_message = !path.nil? ? "Invalid path '#{path}': #{message}" : message
+      super(origin, error_message, cause)
+    end
+  end
 end

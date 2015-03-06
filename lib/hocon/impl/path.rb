@@ -16,15 +16,6 @@ class Hocon::Impl::Path
       return false
     end
 
-    # if the path starts with something that could be a number,
-    # we need to quote it because the number could be invalid,
-    # for example it could be a hyphen with no digit afterward
-    # or the exponent "e" notation could be mangled.
-    first = s[0]
-    unless first =~ /[[:alpha:]]/
-      return true
-    end
-
     s.chars.each do |c|
       unless (c =~ /[[:alnum:]]/) || (c == '-') || (c == '_')
         return true
@@ -35,10 +26,79 @@ class Hocon::Impl::Path
   end
 
   def initialize(first, remainder)
+    # first: String, remainder: Path
+
     @first = first
     @remainder = remainder
   end
   attr_reader :first, :remainder
+
+  def self.from_string_list(elements)
+    # This method was translated from the Path constructor in the
+    # Java hocon library that has this signature:
+    #   Path(String... elements)
+    #
+    # It figures out what @first and @remainder should be, then
+    # pass those to the ruby constructor
+    if elements.length == 0
+      raise Hocon::ConfigError::ConfigBugOrBrokenError("empty path")
+    end
+
+    new_first = elements.first
+
+    if elements.length > 1
+      pb = Hocon::Impl::PathBuilder.new
+
+      # Skip first element
+      elements.drop(1).each do |element|
+        pb.append_key(element)
+      end
+
+      new_remainder = pb.result
+    else
+      new_remainder = nil
+    end
+
+    self.new(new_first, new_remainder)
+  end
+
+  def self.from_path_list(path_list)
+    # This method was translated from the Path constructors in the
+    # Java hocon library that take in a list of Paths
+    #
+    # It just passes an iterator to self.from_path_iterator, which
+    # will return a new Path object
+    from_path_iterator(path_list.each)
+  end
+
+  def self.from_path_iterator(path_iterator)
+    # This method was translated from the Path constructors in the
+    # Java hocon library that takes in an iterator of Paths
+    #
+    # It figures out what @first and @remainder should be, then
+    # pass those to the ruby constructor
+    if path_iterator.size <= 0
+      raise Hocon::ConfigError::ConfigBugOrBrokenError("empty path")
+    end
+
+    first_path = path_iterator.first
+    new_first = first_path.first
+
+    pb = Hocon::Impl::PathBuilder.new
+
+    unless first_path.remainder.nil?
+      pb.append_path(first_path.remainder)
+    end
+
+    # Skip first path
+    path_iterator.drop(1).each do |path|
+      pb.append_path(path)
+    end
+
+    new_remainder = pb.result
+
+    self.new(new_first, new_remainder)
+  end
 
   def first
     @first
@@ -70,6 +130,15 @@ class Hocon::Impl::Path
     p.first
   end
 
+  def prepend(to_prepend)
+    pb = Hocon::Impl::PathBuilder.new
+
+    pb.append_path(to_prepend)
+    pb.append_path(self)
+
+    pb.result
+  end
+
   def length
     count = 1
     p = remainder
@@ -78,6 +147,15 @@ class Hocon::Impl::Path
       p = p.remainder
     end
     return count
+  end
+
+  def to_s
+    sb = StringIO.new
+    sb << "Path("
+    append_to_string_builder(sb)
+    sb << ")"
+
+    sb.string
   end
 
   #
@@ -137,5 +215,20 @@ class Hocon::Impl::Path
 
   def self.new_path(path)
     Hocon::Impl::Parser.parse_path(path)
+  end
+
+  def ==(other)
+    if other.is_a? Hocon::Impl::Path
+      that = other
+      first == that.first && ConfigImplUtil.equals_handling_nil?(remainder, that.remainder)
+    else
+      false
+    end
+  end
+
+  def hash
+    remainder_hash = remainder.nil? ? 0 : remainder.hash
+
+    41 * (41 + first.hash) + remainder_hash
   end
 end
