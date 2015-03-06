@@ -80,6 +80,16 @@ class Hocon::Impl::AbstractConfigValue
     end
   end
 
+  def hash
+    # note that "origin" is deliberately NOT part of equality
+    unwrapped_value = unwrapped
+    if unwrapped_value.nil?
+      0
+    else
+      unwrapped_value.hash
+    end
+  end
+
   def to_s
     sb = StringIO.new
     render_to_sb(sb, 0, true, nil, Hocon::ConfigRenderOptions.concise)

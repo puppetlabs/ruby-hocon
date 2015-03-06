@@ -4,6 +4,10 @@ module TestUtils
   Tokens = Hocon::Impl::Tokens
   EOF = Hocon::Impl::TokenType::EOF
 
+
+  ##################
+  # Tokenizer Functions
+  ##################
   def TestUtils.wrap_tokens(token_list)
     # Wraps token_list in START and EOF tokens
     [Tokens::START] + token_list + [Tokens::EOF]
@@ -88,5 +92,25 @@ module TestUtils
 
   def TestUtils.token_key_substitution(value)
     token_substitution(token_string(value))
+  end
+
+
+  ##################
+  # Token Functions
+  ##################
+  class NotEqualToAnythingElse
+    def ==(other)
+      other.is_a? NotEqualToAnythingElse
+    end
+
+    def hash
+      971
+    end
+  end
+
+  def TestUtils.check_not_equal_to_random_other_thing(token)
+    not_equal_to_anything_else = NotEqualToAnythingElse.new
+
+    token != not_equal_to_anything_else && not_equal_to_anything_else != token
   end
 end

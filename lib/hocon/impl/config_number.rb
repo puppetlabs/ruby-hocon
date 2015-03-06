@@ -24,4 +24,29 @@ class Hocon::Impl::ConfigNumber < Hocon::Impl::AbstractConfigValue
   def transform_to_string
     @original_text
   end
+
+  def can_equal(other)
+    other.is_a?(Hocon::Impl::ConfigNumber)
+  end
+
+  def ==(other)
+    if other.is_a?(Hocon::Impl::ConfigNumber) && can_equal(other)
+      @value == other.value
+    else
+      false
+    end
+  end
+
+  def hash
+    # This hash function makes it so that a ConfigNumber with a 3.0
+    # and one with a 3 will return the hash code
+    to_int = @value.round
+
+    # If the value is an integer or a floating point equal to an integer
+    if to_int == @value
+      return to_int.hash
+    else
+      return @value.hash
+    end
+  end
 end

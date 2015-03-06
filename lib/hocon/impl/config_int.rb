@@ -8,6 +8,8 @@ class Hocon::Impl::ConfigInt < Hocon::Impl::ConfigNumber
     @value = value
   end
 
+  attr_reader :value
+
   def value_type
     Hocon::ConfigValueType::NUMBER
   end

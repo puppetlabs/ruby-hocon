@@ -35,4 +35,8 @@ class Hocon::Impl::Token
     # @origin deliberately left out
     other.is_a?(Hocon::Impl::Token) && @token_type == other.token_type
   end
+
+  def hash
+    @token_type.hash
+  end
 end
