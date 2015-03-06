@@ -1,3 +1,5 @@
+require "support/shared_examples_for_object_equality"
+
 FIXTURE_DIR = File.join(dir = File.expand_path(File.dirname(__FILE__)), "fixtures")
 
 EXAMPLE1 = { :hash =>
