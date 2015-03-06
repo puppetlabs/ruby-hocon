@@ -107,10 +107,4 @@ module TestUtils
       971
     end
   end
-
-  def TestUtils.check_not_equal_to_random_other_thing(token)
-    not_equal_to_anything_else = NotEqualToAnythingElse.new
-
-    token != not_equal_to_anything_else && not_equal_to_anything_else != token
-  end
 end
