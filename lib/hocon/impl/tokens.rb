@@ -39,6 +39,13 @@ class Hocon::Impl::Tokens
     def ==(other)
       super(other) && other.text == @text
     end
+
+    def hash
+      hashcode = 41 * (41 + super)
+      hashcode = 41 * (hashcode + @text.hash)
+
+      hashcode
+    end
   end
 
   # This is not a Value, because it requires special processing
@@ -53,6 +60,10 @@ class Hocon::Impl::Tokens
 
     def ==(other)
       super(other) && other.value == @value
+    end
+
+    def hash
+      41 * (41 + super + @value.hash)
     end
   end
 
@@ -69,6 +80,10 @@ class Hocon::Impl::Tokens
 
     def ==(other)
       super(other) && other.value == @value
+    end
+
+    def hash
+      41 * (41 + super) + value.hash
     end
   end
 
@@ -87,6 +102,10 @@ class Hocon::Impl::Tokens
     def ==(other)
       super(other) && other.value == @value
     end
+
+    def hash
+      41 * (41 + super) + value.hash
+    end
   end
 
   class Line < Token
@@ -96,6 +115,10 @@ class Hocon::Impl::Tokens
 
     def ==(other)
       super(other) && other.line_number == line_number
+    end
+
+    def hash
+      41 * (41 + super) + line_number
     end
   end
 
@@ -129,6 +152,18 @@ class Hocon::Impl::Tokens
           other.message == @message &&
           other.suggest_quotes == @suggest_quotes &&
           Hocon::Impl::ConfigImplUtil.equals_handling_nil?(other.cause, @cause)
+    end
+
+    def hash
+      hashcode = 41 * (41 + super)
+      hashcode = 41 * (hashcode + @what.hash)
+      hashcode = 41 * (hashcode + @message.hash)
+      hashcode = 41 * (hashcode + @suggest_quotes.hash)
+      unless @cause.nil?
+        hashcode = 41 * (hashcode + @cause.hash)
+      end
+
+      hashcode
     end
   end
 
