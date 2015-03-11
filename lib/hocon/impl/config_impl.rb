@@ -27,7 +27,7 @@ class Hocon::Impl::ConfigImpl
 
   def self.improve_not_resolved(what, original)
     new_message = "#{what.render} has not been resolved, you need to call Config#resolve, see API docs for Config#resolve"
-    if new_message == original.get_message
+    if new_message == original.message
       return original
     else
       return ConfigNotResolvedError.new(new_message, original)

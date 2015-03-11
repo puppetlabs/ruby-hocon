@@ -6,9 +6,10 @@ require 'hocon/impl/abstract_config_value'
 require 'hocon/impl/resolve_source'
 
 class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
+  include Hocon::Impl::Unmergeable
   NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve
 
-  attr_reader :expr
+  attr_reader :expr, :prefix_length
 
   def initialize(origin, expr, prefix_length = 0)
     super(origin)
@@ -72,4 +73,56 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
     end
 
   end
+
+  def self.not_resolved
+    error_message = "need to Config#resolve, see the API docs for Config#resolve; substitution not resolved: #{self}"
+    Hocon::ConfigError::ConfigNotResolvedError.new(error_message, nil)
+  end
+
+  def value_type
+    raise self.class.not_resolved
+  end
+
+  def unwrapped
+    raise self.class.not_resolved
+  end
+
+  def new_copy(new_origin)
+    Hocon::Impl::ConfigReference.new(new_origin, @expr, @prefix_length)
+  end
+
+  def ignores_fallbacks
+    false
+  end
+
+  def resolve_status
+    Hocon::Impl::ResolveStatus::UNRESOLVED
+  end
+
+  def relativized(prefix)
+    new_expr = @expr.change_path(@expr.path,prepend(prefix))
+
+    Hocon::Impl::ConfigReference.new(origin, new_expr, @prefix_length + prefix.length)
+  end
+
+  def can_equal(other)
+    other.is_a? Hocon::Impl::ConfigReference
+  end
+
+  def ==(other)
+    # note that "origin" is deliberately NOT part of equality
+    if other.is_a? Hocon::Impl::ConfigReference
+      can_equal(other) && @expr == other.expr
+    end
+  end
+
+  def hash
+    # note that "origin" is deliberately NOT part of equality
+    @expr.hash
+  end
+
+  def render_value_to_sb(sb, indent, at_root, options)
+    sb << @expr.to_s
+  end
+
 end

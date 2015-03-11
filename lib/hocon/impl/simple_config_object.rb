@@ -7,8 +7,11 @@ require 'hocon/impl/resolve_status'
 require 'hocon/impl/resolve_result'
 require 'hocon/config_error'
 require 'set'
+require 'forwardable'
+
 
 class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
+  extend Forwardable
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ResolveStatus = Hocon::Impl::ResolveStatus
@@ -39,6 +42,9 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
   end
 
   attr_reader :value
+  # To support accessing ConfigObjects like a hash
+  def_delegators :@value, :[], :has_key?, :has_value?, :empty?, :size, :keys, :values, :each, :map
+
 
   def new_copy_with_status(new_status, new_origin, new_ignores_fallbacks = nil)
     Hocon::Impl::SimpleConfigObject.new(new_origin,
@@ -181,6 +187,62 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     Set.new(@value.keys)
   end
 
+  def self.map_hash(m)
+    # the keys have to be sorted, otherwise we could be equal
+    # to another map but have a different hashcode.
+    keys = m.keys.sort
+
+    value_hash = 0
+
+    keys.each do |key|
+      value_hash += m[key].hash
+    end
+
+    41 * (41 + keys.hash) + value_hash
+  end
+
+  def self.map_equals(a, b)
+    # This array comparison works if there are no duplicates, which
+    # the hash keys won't have
+    sets_equal = lambda { |x, y| (x.size == y.size) && (x & y == x) }
+
+    if a == b
+      return true
+    end
+
+    if not sets_equal.call(a.keys, b.keys)
+      return false
+    end
+
+    a.keys.each do |key|
+      if a[key] != b[key]
+        return false
+      end
+    end
+
+    true
+  end
+
+  def can_equal(other)
+    other.is_a? Hocon::Impl::AbstractConfigObject
+  end
+
+  def ==(other)
+    # note that "origin" is deliberately NOT part of equality.
+    # neither are other "extras" like ignoresFallbacks or resolve status.
+    if other.is_a? Hocon::Impl::AbstractConfigObject
+      # optimization to avoid unwrapped() for two ConfigObject,
+      # which is what AbstractConfigValue does.
+      can_equal(other) && self.class.map_equals(@value, other.value)
+    else
+      false
+    end
+  end
+
+  def hash
+    self.class.map_hash(@value)
+  end
+
   def empty?
     @value.empty?
   end
@@ -268,6 +330,14 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       raise e
     rescue Exception => e
       raise ConfigBugOrBrokenError.new("unexpected exception", e)
+    end
+  end
+
+  def self.empty(origin = nil)
+    if origin.nil?
+      empty(SimpleConfigOrigin.new_simple("empty config"))
+    else
+      SimpleConfigObject.new(origin, {})
     end
   end
 end

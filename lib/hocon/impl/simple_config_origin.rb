@@ -173,4 +173,29 @@ class Hocon::Impl::SimpleConfigOrigin
     @comments_or_nil || []
   end
 
+  def ==(other)
+    if other.is_a? Hocon::Impl::SimpleConfigOrigin
+      @description == other.description &&
+          @line_number == other.line_number &&
+          @end_line_number == other.end_line_number &&
+          @origin_type == other.origin_type &&
+          Hocon::Impl::ConfigImplUtil.equals_handling_nil?(@url_or_nil, other.url_or_nil)
+    else
+      false
+    end
+  end
+
+  def hash
+    h = 41 * (41 + @description.hash)
+    h = 41 * (h + @line_number)
+    h = 41 * (h + @end_line_number)
+    h = 41 * (h + @origin_type.hash)
+
+    unless @url_or_nil.nil?
+      h = 41 * (h + @url_or_nil.hash)
+    end
+
+    h
+  end
+
 end
