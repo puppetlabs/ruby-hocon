@@ -24,6 +24,7 @@ describe Hocon do
     let(:output_nocomments_file) { "#{FIXTURE_DIR}/parse_render/#{example[:name]}/output_nocomments.conf" }
     let(:output_nocomments) { File.read("#{output_nocomments_file}") }
     let(:expected) { example[:hash] }
+    # TODO 'reparsed' appears to be unused
     let(:reparsed) { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf") }
 
     context "parsing a HOCON file" do

@@ -564,9 +564,7 @@ class Hocon::Impl::Parser
       end
 
       t = next_token_ignoring_newline
-      result = nil
-      if (t.token == Tokens::OPEN_CURLY) or
-          (t.token == Tokens::OPEN_SQUARE)
+      if (t.token == Tokens::OPEN_CURLY) or (t.token == Tokens::OPEN_SQUARE)
         result = parse_value(t)
       else
         if @syntax == ConfigSyntax::JSON

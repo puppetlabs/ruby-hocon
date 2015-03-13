@@ -16,11 +16,12 @@ EXAMPLE1 = { :hash =>
 
 EXAMPLE2 = { :hash =>
     {"jruby-puppet"=> {
-      "jruby-pools" => [{"environment" => "production"}],
-      "load-path" => ["/usr/lib/ruby/site_ruby/1.8", "/usr/lib/ruby/site_ruby/1.8"],
-      "master-conf-dir" => "/etc/puppet",
-      "master-var-dir" => "/var/lib/puppet",
-    }},
+        "jruby-pools" => [{"environment" => "production"}],
+        "load-path" => ["/usr/lib/ruby/site_ruby/1.8", "/usr/lib/ruby/site_ruby/1.8"],
+        "master-conf-dir" => "/etc/puppet",
+        "master-var-dir" => "/var/lib/puppet",
+    },
+    "webserver" => {"host" => "1.2.3.4"}},
     :name => "example2",
   }
 
