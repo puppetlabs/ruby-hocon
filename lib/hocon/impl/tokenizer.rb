@@ -555,6 +555,11 @@ class Hocon::Impl::Tokenizer
 
       token_list
     end
+
+    def to_list
+      # Return array of tokens from the iterator
+      self.map { |token| token }
+    end
   end
 
 

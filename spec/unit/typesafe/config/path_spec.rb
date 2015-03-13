@@ -197,12 +197,12 @@ describe Hocon::Impl::Path do
   end
 
   context "path length" do
-    it "should length of single part path to be 1" do
+    it "should find length of single part path to be 1" do
       path = TestUtils.path("food")
       expect(path.length).to eq(1)
     end
 
-    it "should length of two part path to be 2" do
+    it "should find length of two part path to be 2" do
       path = TestUtils.path("foo", "bar")
       expect(path.length).to eq(2)
 

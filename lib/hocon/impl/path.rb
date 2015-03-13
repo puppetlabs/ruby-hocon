@@ -77,11 +77,16 @@ class Hocon::Impl::Path
     #
     # It figures out what @first and @remainder should be, then
     # pass those to the ruby constructor
-    if path_iterator.size <= 0
+
+    # Try to get first path from iterator
+    # Ruby iterators have no .hasNext() method like java
+    # So we try to catch the StopIteration exception
+    begin
+      first_path = path_iterator.next
+    rescue StopIteration
       raise Hocon::ConfigError::ConfigBugOrBrokenError("empty path")
     end
 
-    first_path = path_iterator.first
     new_first = first_path.first
 
     pb = Hocon::Impl::PathBuilder.new

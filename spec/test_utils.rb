@@ -26,7 +26,7 @@ module TestUtils
   def TestUtils.tokenize_as_list(input_string)
     token_iterator = tokenize(input_string)
 
-    token_iterator.map { |token| token }
+    token_iterator.to_list
   end
 
   def TestUtils.fake_origin
