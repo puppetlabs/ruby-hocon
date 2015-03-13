@@ -1,8 +1,8 @@
 language: ruby
 sudo: false
-bundler_args: --without development
+cache: bundler
 script:
-  - "rspec spec"
+  - "bundle exec rspec spec"
 notifications:
   email: false
 rvm:
