@@ -2,7 +2,7 @@ language: ruby
 sudo: false
 cache: bundler
 script:
-  - "bundle exec rspec spec"
+  - "bundle exec rake spec"
 notifications:
   email: false
 rvm:
