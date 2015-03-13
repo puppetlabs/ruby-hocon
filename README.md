@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/puppetlabs/ruby-hocon.png?branch=master)](https://travis-ci.org/puppetlabs/ruby-hocon)
+
 ruby-hocon
 ==========
 

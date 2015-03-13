@@ -1,0 +1,10 @@
+language: ruby
+sudo: false
+bundler_args: --without development
+script:
+  - "bundle exec rspec spec"
+notifications:
+  email: false
+rvm:
+  - 2.0.0
+  - 1.9.3
