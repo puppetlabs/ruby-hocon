@@ -266,15 +266,15 @@ class Hocon::Impl::Tokenizer
       begin
         if contained_decimal_or_e
           # force floating point representation
-          Tokens.new_float(@line_origin, s.to_f, s)
+          Tokens.new_float(@line_origin, Float(s), s)
         else
-          Tokens.new_long(@line_origin, s.to_i, s)
+          Tokens.new_long(@line_origin, Integer(s), s)
         end
       rescue ArgumentError => e
         if e.message =~ /^invalid value for (Float|Integer)\(\)/
           # not a number after all, see if it's an unquoted string.
-          s.each do |u|
-            if NOT_IN_UNQUOTED_TEXT.index
+          s.each_char do |u|
+            if NOT_IN_UNQUOTED_TEXT.index(u)
               raise self.class.problem(@line_origin, u, "Reserved character '#{u}'" +
                 "is not allowed outside quotes", true, nil)
             end
