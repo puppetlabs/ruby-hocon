@@ -19,8 +19,26 @@ class Hocon::Impl::PathBuilder
     @keys.push(key)
   end
 
+  def append_path(path)
+    check_can_append
+
+    first = path.first
+    remainder = path.remainder
+
+    loop do
+      @keys << first
+
+      if !remainder.nil?
+        first = remainder.first
+        remainder = remainder.remainder
+      else
+        break
+      end
+    end
+  end
+
   def result
-    # note: if keys is empty, we want to return null, which is a valid
+    # note: if keys is empty, we want to return nil, which is a valid
     # empty path
     if @result.nil?
       remainder = nil

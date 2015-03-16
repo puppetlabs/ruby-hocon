@@ -805,6 +805,8 @@ class Hocon::Impl::Parser
       @sb = StringIO.new(initial)
     end
 
+    attr_accessor :can_be_empty
+
     def to_string
       "Element(#{@sb.string},#{@can_be_empty})"
     end
@@ -952,8 +954,8 @@ class Hocon::Impl::Parser
 
     pb = Hocon::Impl::PathBuilder.new
     buf.each do |e|
-      if (e.sb.length == 0) && !e.can_be_empty?
-        raise ConfigBadPathError.new(
+      if (e.sb.length == 0) && !e.can_be_empty
+        raise Hocon::ConfigError::ConfigBadPathError.new(
                   origin,
                   original_text,
                   "path has a leading, trailing, or two adjacent period '.' (use quoted \"\" empty string if you want an empty element)")
