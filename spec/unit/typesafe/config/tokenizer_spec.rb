@@ -10,12 +10,14 @@ describe Hocon::Impl::Tokenizer do
   shared_examples_for "token_matching" do
     it "should match the tokenized string to the list of expected tokens" do
       tokenized_from_string = TestUtils.tokenize_as_list(test_string)
+      tokenized_as_string = TestUtils.tokenize_as_string(test_string)
 
       # Add START and EOF tokens
       wrapped_tokens = TestUtils.wrap_tokens(expected_tokens)
 
       # Compare the two lists of tokens
       expect(tokenized_from_string).to eq(wrapped_tokens)
+      expect(tokenized_as_string).to eq(test_string)
     end
   end
 
@@ -45,20 +47,25 @@ describe Hocon::Impl::Tokenizer do
       include_examples "token_matching"
     end
 
-    context "tokenize unquoted text should trim spaces" do
+    context "tokenize unquoted text should keep spaces" do
       let(:test_string) { "    foo     \n" }
-      let(:expected_tokens) { [TestUtils.token_unquoted("foo"), TestUtils.token_line(1)] }
+      let(:expected_tokens) { [TestUtils.token_whitespace("    "),
+                               TestUtils.token_unquoted("foo"),
+                               TestUtils.token_whitespace("     "),
+                               TestUtils.token_line(1)] }
 
       include_examples "token_matching"
     end
 
     context "tokenize unquoted text should trim spaces, keep internal spaces" do
       let(:test_string) { "    foo bar baz   \n" }
-      let(:expected_tokens) { [TestUtils.token_unquoted("foo"),
+      let(:expected_tokens) { [TestUtils.token_whitespace("    "),
+                               TestUtils.token_unquoted("foo"),
                                TestUtils.token_unquoted(" "),
                                TestUtils.token_unquoted("bar"),
                                TestUtils.token_unquoted(" "),
                                TestUtils.token_unquoted("baz"),
+                               TestUtils.token_whitespace("    "),
                                TestUtils.token_line(1)] }
 
       include_examples "token_matching"
@@ -151,9 +158,11 @@ describe Hocon::Impl::Tokenizer do
     ####################
     context "tokenize mixed unquoted and quoted" do
       let(:test_string) { "    foo\"bar\"baz   \n" }
-      let(:expected_tokens) { [TestUtils.token_unquoted("foo"),
+      let(:expected_tokens) { [TestUtils.token_whitespace("    "),
+                               TestUtils.token_unquoted("foo"),
                                TestUtils.token_string("bar"),
                                TestUtils.token_unquoted("baz"),
+                               TestUtils.token_whitespace("   "),
                                TestUtils.token_line(1)] }
 
       include_examples "token_matching"
@@ -302,7 +311,7 @@ describe Hocon::Impl::Tokenizer do
   context "tokenizing comments" do
     context "tokenize two slashes as comment" do
       let(:test_string) { "//" }
-      let(:expected_tokens) { [TestUtils.token_comment("")] }
+      let(:expected_tokens) { [TestUtils.token_comment_double_slash("")] }
 
       include_examples "token_matching"
     end
@@ -324,7 +333,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize slash comment after unquoted text" do
       let(:test_string) { "bar//comment" }
       let(:expected_tokens) { [TestUtils.token_unquoted("bar"),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_double_slash("comment")] }
 
       include_examples "token_matching"
     end
@@ -332,7 +341,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize hash comment after unquoted text" do
       let(:test_string) { "bar#comment" }
       let(:expected_tokens) { [TestUtils.token_unquoted("bar"),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_hash("comment")] }
 
       include_examples "token_matching"
     end
@@ -340,7 +349,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize slash comment after int" do
       let(:test_string) { "10//comment" }
       let(:expected_tokens) { [TestUtils.token_int(10),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_double_slash("comment")] }
 
       include_examples "token_matching"
     end
@@ -348,7 +357,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize hash comment after int" do
       let(:test_string) { "10#comment" }
       let(:expected_tokens) { [TestUtils.token_int(10),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_hash("comment")] }
 
       include_examples "token_matching"
     end
@@ -356,7 +365,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize hash comment after int" do
       let(:test_string) { "10#comment" }
       let(:expected_tokens) { [TestUtils.token_int(10),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_hash("comment")] }
 
       include_examples "token_matching"
     end
@@ -364,7 +373,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize slash comment after float" do
       let(:test_string) { "3.14//comment" }
       let(:expected_tokens) { [TestUtils.token_float(3.14),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_double_slash("comment")] }
 
       include_examples "token_matching"
     end
@@ -372,7 +381,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize hash comment after float" do
       let(:test_string) { "3.14#comment" }
       let(:expected_tokens) { [TestUtils.token_float(3.14),
-                               TestUtils.token_comment("comment")] }
+                               TestUtils.token_comment_hash("comment")] }
 
       include_examples "token_matching"
     end
@@ -380,7 +389,7 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize slash comment with newline" do
       let(:test_string) { "10//comment\n12" }
       let(:expected_tokens) { [TestUtils.token_int(10),
-                               TestUtils.token_comment("comment"),
+                               TestUtils.token_comment_double_slash("comment"),
                                TestUtils.token_line(1),
                                TestUtils.token_int(12)] }
 
@@ -390,9 +399,58 @@ describe Hocon::Impl::Tokenizer do
     context "tokenize hash comment with newline" do
       let(:test_string) { "10#comment\n12" }
       let(:expected_tokens) { [TestUtils.token_int(10),
-                               TestUtils.token_comment("comment"),
+                               TestUtils.token_comment_hash("comment"),
                                TestUtils.token_line(1),
                                TestUtils.token_int(12)] }
+
+      include_examples "token_matching"
+    end
+
+    context "tokenize slash comments on two consecutive lines" do
+      let(:test_string) { "//comment\n//comment2" }
+      let(:expected_tokens) { [TestUtils.token_comment_double_slash("comment"),
+                               TestUtils.token_line(1),
+                               TestUtils.token_comment_double_slash("comment2")] }
+
+      include_examples "token_matching"
+    end
+
+    context "tokenize hash comments on two consecutive lines" do
+      let(:test_string) { "#comment\n#comment2" }
+      let(:expected_tokens) { [TestUtils.token_comment_hash("comment"),
+                               TestUtils.token_line(1),
+                               TestUtils.token_comment_hash("comment2")] }
+      include_examples "token_matching"
+    end
+
+    context "tokenize slash comments on multiple lines with whitespace" do
+      let(:test_string) { "        //comment\r\n        //comment2        \n//comment3        \n\n//comment4" }
+      let(:expected_tokens) { [TestUtils.token_whitespace("        "),
+                               TestUtils.token_comment_double_slash("comment\r"),
+                               TestUtils.token_line(1),
+                               TestUtils.token_whitespace("        "),
+                               TestUtils.token_comment_double_slash("comment2        "),
+                               TestUtils.token_line(2),
+                               TestUtils.token_comment_double_slash("comment3        "),
+                               TestUtils.token_line(3),
+                               TestUtils.token_line(4),
+                               TestUtils.token_comment_double_slash("comment4")] }
+
+      include_examples "token_matching"
+    end
+
+    context "tokenize hash comments on multiple lines with whitespace" do
+      let(:test_string) { "        #comment\r\n        #comment2        \n#comment3        \n\n#comment4" }
+      let(:expected_tokens) { [TestUtils.token_whitespace("        "),
+                               TestUtils.token_comment_hash("comment\r"),
+                               TestUtils.token_line(1),
+                               TestUtils.token_whitespace("        "),
+                               TestUtils.token_comment_hash("comment2        "),
+                               TestUtils.token_line(2),
+                               TestUtils.token_comment_hash("comment3        "),
+                               TestUtils.token_line(3),
+                               TestUtils.token_line(4),
+                               TestUtils.token_comment_hash("comment4")] }
 
       include_examples "token_matching"
     end
@@ -534,28 +592,36 @@ describe Hocon::Impl::Tokenizer do
 
     context "tokenize null byte" do
       let(:test_string) { ' "\u0000" ' }
-      let(:expected_tokens) { [TestUtils.token_string("\u0000")] }
+      let(:expected_tokens) { [TestUtils.token_whitespace(" "),
+                               TestUtils.token_string("\u0000"),
+                               TestUtils.token_whitespace(" ")] }
 
       include_examples "token_matching"
     end
 
     context "tokenize various espace codes" do
       let(:test_string) { ' "\"\\\/\b\f\n\r\t" ' }
-      let(:expected_tokens) { [TestUtils.token_string("\"\\/\b\f\n\r\t")] }
+      let(:expected_tokens) { [TestUtils.token_whitespace(" "),
+                              TestUtils.token_string("\"\\/\b\f\n\r\t"),
+                              TestUtils.token_whitespace(" ")] }
 
       include_examples "token_matching"
     end
 
     context "tokenize unicode F" do
-      let(:test_string) { '"\u0046"' }
-      let(:expected_tokens) { [TestUtils.token_string("F")] }
+      let(:test_string) { ' "\u0046" ' }
+      let(:expected_tokens) { [TestUtils.token_whitespace(" "),
+                               TestUtils.token_string("F"),
+                               TestUtils.token_whitespace(" ")] }
 
       include_examples "token_matching"
     end
 
     context "tokenize two unicode Fs" do
-      let(:test_string) { '"\u0046\u0046"' }
-      let(:expected_tokens) { [TestUtils.token_string("FF")] }
+      let(:test_string) { ' "\u0046\u0046" ' }
+      let(:expected_tokens) { [TestUtils.token_whitespace(" "),
+                               TestUtils.token_string("FF"),
+                               TestUtils.token_whitespace(" ")] }
 
       include_examples "token_matching"
     end
@@ -642,14 +708,23 @@ describe Hocon::Impl::Tokenizer do
 
     context "tokenize all types single spaces" do
       let(:test_string) { ' , : = } { ] [ += "foo" """bar""" 42 true 3.14 false null ${a.b} ${?x.y} ${"c.d"} ' + "\n " }
-      let(:expected_tokens) { [Tokens::COMMA,
+      let(:expected_tokens) { [TestUtils.token_whitespace(" "),
+                               Tokens::COMMA,
+                               TestUtils.token_whitespace(" "),
                                Tokens::COLON,
+                               TestUtils.token_whitespace(" "),
                                Tokens::EQUALS,
+                               TestUtils.token_whitespace(" "),
                                Tokens::CLOSE_CURLY,
+                               TestUtils.token_whitespace(" "),
                                Tokens::OPEN_CURLY,
+                               TestUtils.token_whitespace(" "),
                                Tokens::CLOSE_SQUARE,
+                               TestUtils.token_whitespace(" "),
                                Tokens::OPEN_SQUARE,
+                               TestUtils.token_whitespace(" "),
                                Tokens::PLUS_EQUALS,
+                               TestUtils.token_whitespace(" "),
                                TestUtils.token_string("foo"),
                                TestUtils.token_unquoted(" "),
                                TestUtils.token_string("bar"),
@@ -669,21 +744,32 @@ describe Hocon::Impl::Tokenizer do
                                TestUtils.token_optional_substitution(TestUtils.token_unquoted("x.y")),
                                TestUtils.token_unquoted(" "),
                                TestUtils.token_key_substitution("c.d"),
-                               TestUtils.token_line(1)] }
+                               TestUtils.token_whitespace(" "),
+                               TestUtils.token_line(1),
+                               TestUtils.token_whitespace(" ")] }
 
       include_examples "token_matching"
     end
 
     context "tokenize all types multiple spaces" do
       let(:test_string) { '   ,   :   =   }   {   ]   [   +=   "foo"   """bar"""   42   true   3.14   false   null   ${a.b}   ${?x.y}   ${"c.d"}   ' + "\n   " }
-      let(:expected_tokens) { [Tokens::COMMA,
+      let(:expected_tokens) { [TestUtils.token_whitespace("   "),
+                               Tokens::COMMA,
+                               TestUtils.token_whitespace("   "),
                                Tokens::COLON,
+                               TestUtils.token_whitespace("   "),
                                Tokens::EQUALS,
+                               TestUtils.token_whitespace("   "),
                                Tokens::CLOSE_CURLY,
+                               TestUtils.token_whitespace("   "),
                                Tokens::OPEN_CURLY,
+                               TestUtils.token_whitespace("   "),
                                Tokens::CLOSE_SQUARE,
+                               TestUtils.token_whitespace("   "),
                                Tokens::OPEN_SQUARE,
+                               TestUtils.token_whitespace("   "),
                                Tokens::PLUS_EQUALS,
+                               TestUtils.token_whitespace("   "),
                                TestUtils.token_string("foo"),
                                TestUtils.token_unquoted("   "),
                                TestUtils.token_string("bar"),
@@ -703,7 +789,9 @@ describe Hocon::Impl::Tokenizer do
                                TestUtils.token_optional_substitution(TestUtils.token_unquoted("x.y")),
                                TestUtils.token_unquoted("   "),
                                TestUtils.token_key_substitution("c.d"),
-                               TestUtils.token_line(1)] }
+                               TestUtils.token_whitespace("   "),
+                               TestUtils.token_line(1),
+                               TestUtils.token_whitespace("   ")] }
 
       include_examples "token_matching"
     end

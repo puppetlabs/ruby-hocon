@@ -2,14 +2,15 @@ require 'hocon/impl'
 require 'hocon/impl/token_type'
 
 class Hocon::Impl::Token
-  attr_reader :token_type
-  def self.new_without_origin(token_type, debug_string)
-    Hocon::Impl::Token.new(token_type, nil, debug_string)
+  attr_reader :token_type, :token_text
+  def self.new_without_origin(token_type, debug_string, token_text)
+    Hocon::Impl::Token.new(token_type, nil, token_text, debug_string)
   end
 
-  def initialize(token_type, origin, debug_string = nil)
+  def initialize(token_type, origin, token_text = nil, debug_string = nil)
     @token_type = token_type
     @origin = origin
+    @token_text = token_text
     @debug_string = debug_string
   end
 

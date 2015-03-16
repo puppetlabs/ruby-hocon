@@ -18,16 +18,16 @@ class Hocon::Impl::Tokens
   ConfigNull = Hocon::Impl::ConfigNull
   ConfigBoolean = Hocon::Impl::ConfigBoolean
 
-  START = Token.new_without_origin(TokenType::START, "start of file")
-  EOF = Token.new_without_origin(TokenType::EOF, "end of file")
-  COMMA = Token.new_without_origin(TokenType::COMMA, "','")
-  EQUALS = Token.new_without_origin(TokenType::EQUALS, "'='")
-  COLON = Token.new_without_origin(TokenType::COLON, "':'")
-  OPEN_CURLY = Token.new_without_origin(TokenType::OPEN_CURLY, "'{'")
-  CLOSE_CURLY = Token.new_without_origin(TokenType::CLOSE_CURLY, "'}'")
-  OPEN_SQUARE = Token.new_without_origin(TokenType::OPEN_SQUARE, "'['")
-  CLOSE_SQUARE = Token.new_without_origin(TokenType::CLOSE_SQUARE, "']'")
-  PLUS_EQUALS = Token.new_without_origin(TokenType::PLUS_EQUALS, "'+='")
+  START = Token.new_without_origin(TokenType::START, "start of file", "")
+  EOF = Token.new_without_origin(TokenType::EOF, "end of file", "")
+  COMMA = Token.new_without_origin(TokenType::COMMA, "','", ",")
+  EQUALS = Token.new_without_origin(TokenType::EQUALS, "'='", "=")
+  COLON = Token.new_without_origin(TokenType::COLON, "':'", ":")
+  OPEN_CURLY = Token.new_without_origin(TokenType::OPEN_CURLY, "'{'", "{")
+  CLOSE_CURLY = Token.new_without_origin(TokenType::CLOSE_CURLY, "'}'", "}")
+  OPEN_SQUARE = Token.new_without_origin(TokenType::OPEN_SQUARE, "'['", "[")
+  CLOSE_SQUARE = Token.new_without_origin(TokenType::CLOSE_SQUARE, "']'", "]")
+  PLUS_EQUALS = Token.new_without_origin(TokenType::PLUS_EQUALS, "'+='", "+=")
 
   class Comment < Token
     def initialize(origin, text)
@@ -35,6 +35,26 @@ class Hocon::Impl::Tokens
       @text = text
     end
     attr_reader :text
+
+    class DoubleSlashComment < Comment
+      def initialize(origin, text)
+        super(origin, text)
+      end
+
+      def token_text
+        "//" + @text
+      end
+    end
+
+    class HashComment < Comment
+      def initialize(origin, text)
+        super(origin, text)
+      end
+
+      def token_text
+        "#" + @text
+      end
+    end
 
     def ==(other)
       super(other) && other.text == @text
@@ -65,6 +85,12 @@ class Hocon::Impl::Tokens
     def hash
       41 * (41 + super + @value.hash)
     end
+
+    def token_text
+      sub_text = ""
+      @value.each { |t| sub_text << t.token_text }
+      "${" + (@optional ? "?" : "") + sub_text + "}"
+    end
   end
 
   class UnquotedText < Token
@@ -85,11 +111,31 @@ class Hocon::Impl::Tokens
     def hash
       41 * (41 + super) + value.hash
     end
+
+    def token_text
+      @value
+    end
+  end
+
+  class IgnoredWhitespace < Token
+    def initialize(origin, s)
+      super(TokenType::IGNORED_WHITESPACE, origin)
+      @value = s
+    end
+    attr_reader :value
+
+    def to_s
+      "'#{value}' (WHITESPACE)"
+    end
+
+    def token_text
+      @value
+    end
   end
 
   class Value < Token
-    def initialize(value)
-      super(TokenType::VALUE, value.origin)
+    def initialize(value, orig_text = nil)
+      super(TokenType::VALUE, value.origin, orig_text)
       @value = value
     end
 
@@ -119,6 +165,10 @@ class Hocon::Impl::Tokens
 
     def hash
       41 * (41 + super) + line_number
+    end
+
+    def token_text
+      "\n"
     end
   end
 
@@ -199,40 +249,48 @@ class Hocon::Impl::Tokens
     Problem.new(origin, what, message, suggest_quotes, cause)
   end
 
-  def self.new_comment(origin, text)
-    Comment.new(origin, text)
+  def self.new_comment_double_slash(origin, text)
+    Comment::DoubleSlashComment.new(origin, text)
+  end
+
+  def self.new_comment_hash(origin, text)
+    Comment::HashComment.new(origin, text)
   end
 
   def self.new_unquoted_text(origin, s)
     UnquotedText.new(origin, s)
   end
 
-  def self.new_value(value)
-    Value.new(value)
+  def self.new_ignored_whitespace(origin, s)
+    IgnoredWhitespace.new(origin, s)
   end
 
-  def self.new_string(origin, value)
-    new_value(ConfigString.new(origin, value))
+  def self.new_value(value, orig_text = nil)
+    Value.new(value, orig_text)
   end
 
-  def self.new_int(origin, value, original_text)
-    new_value(ConfigNumber.new_number(origin, value, original_text))
+  def self.new_string(origin, value, orig_text)
+    new_value(ConfigString.new(origin, value), orig_text)
   end
 
-  def self.new_float(origin, value, original_text)
-    new_value(ConfigNumber.new_number(origin, value, original_text))
+  def self.new_int(origin, value, orig_text)
+    new_value(ConfigNumber.new_number(origin, value, orig_text), orig_text)
   end
 
-  def self.new_long(origin, value, original_text)
-    new_value(ConfigNumber.new_number(origin, value, original_text))
+  def self.new_float(origin, value, orig_text)
+    new_value(ConfigNumber.new_number(origin, value, orig_text), orig_text)
+  end
+
+  def self.new_long(origin, value, orig_text)
+    new_value(ConfigNumber.new_number(origin, value, orig_text), orig_text)
   end
 
   def self.new_null(origin)
-    new_value(ConfigNull.new(origin))
+    new_value(ConfigNull.new(origin), "null")
   end
 
   def self.new_boolean(origin, value)
-    new_value(ConfigBoolean.new(origin, value))
+    new_value(ConfigBoolean.new(origin, value), value.to_s)
   end
 
   def self.new_substitution(origin, optional, expression)
@@ -251,8 +309,12 @@ class Hocon::Impl::Tokens
     end
   end
 
-  def self.substitution?(t)
-    t.is_a?(Substitution)
+  def self.ignore_whitespace?(token)
+    token.is_a?(IgnoredWhitespace)
+  end
+
+  def self.substitution?(token)
+    token.is_a?(Substitution)
   end
 
   def self.unquoted_text?(token)

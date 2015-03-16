@@ -193,7 +193,7 @@ class Hocon::Impl::Parser
         end
 
         previous_token = next_token
-        next_token = @tokens.next
+        next_token = next_token_ignoring_whitespace
       end
 
       # put our concluding token in the queue with all the comments
@@ -612,12 +612,22 @@ class Hocon::Impl::Parser
         t = next_token
       end
 
-      # update line number again, iff we have one
+      # update line number again, if we have one
       new_number = t.token.line_number
       if new_number >= 0
         @line_number = new_number
       end
 
+      t
+    end
+
+    # Grabs the next Token off of the TokenIterator, ignoring
+    # IgnoredWhitespace tokens
+    def next_token_ignoring_whitespace
+      t = @tokens.next
+      while Tokens.ignore_whitespace?(t)
+        t = @tokens.next
+      end
       t
     end
 
@@ -766,7 +776,7 @@ class Hocon::Impl::Parser
       if !self.class.attracts_trailing_comments?(with_preceding_comments.token)
         with_preceding_comments
       elsif @buffer.empty?
-        after = @tokens.next
+        after = next_token_ignoring_whitespace
         if Tokens.comment?(after)
           with_preceding_comments.add(after)
         else
@@ -785,7 +795,7 @@ class Hocon::Impl::Parser
 
     def pop_token_without_trailing_comment
       if @buffer.empty?
-        t = @tokens.next
+        t = next_token_ignoring_whitespace
         if Tokens.comment?(t)
           consolidate_comment_block(t)
           @buffer.pop
@@ -913,6 +923,9 @@ class Hocon::Impl::Parser
     end
 
     expression.each do |t|
+      # Ignore all IgnoredWhitespace tokens
+      next if Tokens.ignore_whitespace?(t)
+
       if Tokens.value_with_type?(t, ConfigValueType::STRING)
         v = Tokens.value(t)
         # this is a quoted string; so any periods

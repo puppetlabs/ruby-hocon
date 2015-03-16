@@ -27,17 +27,14 @@ class Hocon::Impl::Tokenizer
       end
 
       def add(c)
-        if @last_token_was_simple_value
-          @whitespace << c
-        end
+        @whitespace << c
       end
 
       def check(t, base_origin, line_number)
         if TokenIterator.simple_value?(t)
           next_is_a_simple_value(base_origin, line_number)
         else
-          next_is_not_a_simple_value
-          nil
+          next_is_not_a_simple_value(base_origin, line_number)
         end
       end
 
@@ -49,38 +46,36 @@ class Hocon::Impl::Tokenizer
       # called if the next token is not a simple value;
       # discards any whitespace we were saving between
       # simple values.
-      def next_is_not_a_simple_value
+      def next_is_not_a_simple_value(base_origin, line_number)
         @last_token_was_simple_value = false
-        @whitespace.reopen("")
+        create_whitespace_token_from_saver(base_origin, line_number)
       end
 
       # called if the next token IS a simple value,
       # so creates a whitespace token if the previous
       # token also was.
       def next_is_a_simple_value(base_origin, line_number)
-        if @last_token_was_simple_value
-          # need to save whitespace between the two so
-          # the parser has the option to concatenate it.
-          if @whitespace.length > 0
-            token = Tokens.new_unquoted_text(
-                line_origin(base_origin, line_number),
-                String.new(@whitespace.string)
-            )
-
-            @whitespace.string = ""
-
-            return token
-          else
-            # @last_token_was_simple_value = true still
-            return nil
-          end
-        else
-          @last_token_was_simple_value = true
-          @whitespace.string = ""
-          return nil
-        end
+        t = create_whitespace_token_from_saver(base_origin, line_number)
+        @last_token_was_simple_value = true unless @last_token_was_simple_value
+        t
       end
 
+      def create_whitespace_token_from_saver(base_origin, line_number)
+        return nil unless @whitespace.length > 0
+        if (@last_token_was_simple_value)
+          t = Tokens.new_unquoted_text(
+              line_origin(base_origin, line_number),
+              String.new(@whitespace.string)
+          )
+        else
+          t = Tokens.new_ignored_whitespace(
+              line_origin(base_origin, line_number),
+              String.new(@whitespace.string)
+          )
+        end
+        @whitespace.string = ""
+        t
+      end
     end
 
     # chars JSON allows a number to start with
@@ -226,11 +221,13 @@ class Hocon::Impl::Tokenizer
 
 
     def pull_comment(first_char)
+      double_slash = false
       if first_char == '/'
         discard = next_char_raw
         if discard != '/'
           raise ConfigBugError, "called pullComment but // not seen"
         end
+        double_slash = true
       end
 
       io = StringIO.new
@@ -238,7 +235,11 @@ class Hocon::Impl::Tokenizer
         c = next_char_raw
         if (c == -1) || (c == "\n")
           put_back(c)
-          return Tokens.new_comment(@line_origin, io.string)
+          if (double_slash)
+            return Tokens.new_comment_double_slash(@line_origin, io.string)
+          else
+            return Tokens.new_comment_hash(@line_origin, io.string)
+          end
         else
           io << c
         end
@@ -288,13 +289,17 @@ class Hocon::Impl::Tokenizer
       end
     end
 
-    def pull_escape_sequence(sb)
+    def pull_escape_sequence(sb, sb_orig)
       escaped = next_char_raw
 
       if escaped == -1
         error_msg = "End of input but backslash in string had nothing after it"
         raise self.class.problem(@line_origin, "", error_msg, false, nil)
       end
+
+      # This is needed so we return the unescaped escape characters back out when rendering
+      # the token
+      sb_orig << "\\" << escaped
 
       case escaped
         when "\""
@@ -327,6 +332,7 @@ class Hocon::Impl::Tokenizer
 
             codepoint << c
           end
+          sb_orig << codepoint
           # Convert codepoint to a unicode character
           sb << [codepoint.hex].pack("U")
 
@@ -336,7 +342,7 @@ class Hocon::Impl::Tokenizer
       end
     end
 
-    def append_triple_quoted_string(sb)
+    def append_triple_quoted_string(sb, sb_orig)
       # we are after the opening triple quote and need to consume the
       # close triple
       consecutive_quotes = 0
@@ -364,12 +370,21 @@ class Hocon::Impl::Tokenizer
         end
 
         sb << c
+        sb_orig << c
       end
     end
 
     def pull_quoted_string
       # the open quote has already been consumed
       sb = StringIO.new
+
+      # We need a second StringIO to keep track of escape characters.
+      # We want to return them exactly as they appeared in the original text,
+      # which means we will need a new StringIO to escape escape characters
+      # so we can also keep the actual value of the string. This is gross.
+      sb_orig = StringIO.new
+      sb_orig << '"'
+
       c = ""
       while c != '"'
         c = next_char_raw
@@ -378,14 +393,16 @@ class Hocon::Impl::Tokenizer
         end
 
         if c == "\\"
-          pull_escape_sequence(sb)
+          pull_escape_sequence(sb, sb_orig)
         elsif c == '"'
+          sb_orig << c
           # done!
         elsif c =~ /[[:cntrl:]]/
           raise self.class.problem(@line_origin, c, "JSON does not allow unescaped #{c}" +
                             " in quoted strings, use a backslash escape", false, nil)
         else
           sb << c
+          sb_orig << c
         end
       end
 
@@ -393,13 +410,14 @@ class Hocon::Impl::Tokenizer
       if sb.length == 0
         third = next_char_raw
         if third == '"'
-          append_triple_quoted_string(sb)
+          sb_orig << third
+          append_triple_quoted_string(sb, sb_orig)
         else
           put_back(third)
         end
       end
 
-      Tokens.new_string(@line_origin, sb.string)
+      Tokens.new_string(@line_origin, sb.string, sb_orig.string)
     end
 
     def pull_plus_equals
@@ -565,5 +583,13 @@ class Hocon::Impl::Tokenizer
 
   def self.tokenize(origin, input, syntax)
     TokenIterator.new(origin, input, syntax != Hocon::ConfigSyntax::JSON)
+  end
+
+  def self.render(tokens)
+    rendered_text = ""
+    while (t = tokens.next)
+      rendered_text << t.token_text
+    end
+    rendered_text
   end
 end
