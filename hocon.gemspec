@@ -14,6 +14,5 @@ Gem::Specification.new do |s|
 
   # Testing dependencies
   s.add_development_dependency 'bundler', '~> 1.5'
-  s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 2.14'
 end
