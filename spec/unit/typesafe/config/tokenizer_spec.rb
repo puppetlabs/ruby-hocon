@@ -57,7 +57,7 @@ describe Hocon::Impl::Tokenizer do
       include_examples "token_matching"
     end
 
-    context "tokenize unquoted text should trim spaces, keep internal spaces" do
+    context "tokenize unquoted text with internal spaces should keep spaces" do
       let(:test_string) { "    foo bar baz   \n" }
       let(:expected_tokens) { [TestUtils.token_whitespace("    "),
                                TestUtils.token_unquoted("foo"),
