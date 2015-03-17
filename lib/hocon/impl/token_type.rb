@@ -17,6 +17,7 @@ class Hocon::Impl::TokenType
   PROBLEM = 13
   COMMENT = 14
   PLUS_EQUALS = 15
+  IGNORED_WHITESPACE = 16
 
   def self.name(token_type)
     case token_type
@@ -36,6 +37,7 @@ class Hocon::Impl::TokenType
       when PROBLEM then "PROBLEM"
       when COMMENT then "COMMENT"
       when PLUS_EQUALS then "PLUS_EQUALS"
+      when IGNORED_WHITESPACE then "IGNORED_WHITESPACE"
       else raise ConfigBugError, "Unrecognized token type #{token_type}"
     end
   end

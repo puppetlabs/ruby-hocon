@@ -29,6 +29,10 @@ module TestUtils
     token_iterator.to_list
   end
 
+  def TestUtils.tokenize_as_string(input_string)
+    Hocon::Impl::Tokenizer.render(tokenize(input_string))
+  end
+
   def TestUtils.fake_origin
     Hocon::Impl::SimpleConfigOrigin.new_simple("fake origin")
   end
@@ -53,12 +57,20 @@ module TestUtils
     Tokens.new_unquoted_text(fake_origin, value)
   end
 
-  def TestUtils.token_comment(value)
-    Tokens.new_comment(fake_origin, value)
+  def TestUtils.token_comment_double_slash(value)
+    Tokens.new_comment_double_slash(fake_origin, value)
+  end
+
+  def TestUtils.token_comment_hash(value)
+    Tokens.new_comment_hash(fake_origin, value)
+  end
+
+  def TestUtils.token_whitespace(value)
+    Tokens.new_ignored_whitespace(fake_origin, value)
   end
 
   def TestUtils.token_string(value)
-    Tokens.new_string(fake_origin, value)
+    Tokens.new_string(fake_origin, value, value)
   end
 
   def TestUtils.token_float(value)
@@ -70,7 +82,7 @@ module TestUtils
   end
 
   def TestUtils.token_maybe_optional_substitution(optional, token_list)
-    Tokens.new_substitution(fake_origin(), optional, token_list)
+    Tokens.new_substitution(fake_origin, optional, token_list)
   end
 
   def TestUtils.token_substitution(*token_list)
