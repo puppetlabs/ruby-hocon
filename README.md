@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/puppetlabs/ruby-hocon.png?branch=master)](https://travis-ci.org/puppetlabs/ruby-hocon)
+
 ruby-hocon
 ==========
 
@@ -31,5 +33,5 @@ Testing
 
 ```sh
 bundle install
-bundle exec rake spec
+bundle exec rspec spec
 ```
