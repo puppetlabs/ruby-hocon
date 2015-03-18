@@ -97,6 +97,13 @@ module TestUtils
     token_substitution(token_string(value))
   end
 
+  def TestUtils.parse_config(s)
+    options = Hocon::ConfigParseOptions.defaults
+                  .with_origin_description("test string")
+                  .with_syntax(Hocon::ConfigSyntax::CONF)
+    Hocon::ConfigFactory.parse_string(s, options)
+  end
+
 
   ##################
   # Token Functions

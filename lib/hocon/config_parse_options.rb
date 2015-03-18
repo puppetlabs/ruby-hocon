@@ -29,6 +29,17 @@ class Hocon::ConfigParseOptions
     end
   end
 
+  def with_origin_description(origin_description)
+    if @origin_description == origin_description
+      self
+    else
+      Hocon::ConfigParseOptions.new(@syntax,
+                                    origin_description,
+                                    @allow_missing,
+                                    @includer)
+    end
+  end
+
   def with_includer(includer)
     if @includer == includer
       self
