@@ -198,7 +198,7 @@ class Hocon::Impl::Path
 
   def sub_path(first_index, last_index)
     if last_index < first_index
-      raise ConfigBugOrBrokenError.new("bad call to sub_path", nil)
+      raise ConfigBugOrBrokenError.new("bad call to sub_path")
     end
     from = sub_path_to_end(first_index)
     pb = Hocon::Impl::PathBuilder.new
@@ -208,7 +208,7 @@ class Hocon::Impl::Path
       pb.append_key(from.first)
       from = from.remainder
       if from.nil?
-        raise ConfigBugOrBrokenError.new("sub_path last_index out of range #{last_index}", nil)
+        raise ConfigBugOrBrokenError.new("sub_path last_index out of range #{last_index}")
       end
     end
     pb.result

@@ -6,6 +6,8 @@ require 'hocon/impl/config_impl_util'
 class Hocon::Impl::ConfigString < Hocon::Impl::AbstractConfigValue
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
 
+  attr_accessor :value
+
   def initialize(origin, value)
     super(origin)
     @value = value

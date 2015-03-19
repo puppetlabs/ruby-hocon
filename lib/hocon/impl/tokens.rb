@@ -221,7 +221,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.message
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem message from #{token}", nil)
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem message from #{token}")
     end
   end
 
@@ -229,7 +229,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.suggest_quotes
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}", nil)
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}")
     end
   end
 
@@ -237,7 +237,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.cause
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem cause from #{token}", nil)
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem cause from #{token}")
     end
   end
 

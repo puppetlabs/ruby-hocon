@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/abstract_config_object'
 require 'hocon/impl/resolve_status'
+require 'hocon/impl/resolve_result'
 require 'hocon/config_error'
 require 'set'
 
@@ -9,6 +10,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ResolveStatus = Hocon::Impl::ResolveStatus
+  ResolveResult = Hocon::Impl::ResolveResult
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
 
   def self.empty_missing(base_origin)
@@ -194,19 +196,21 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       v = v.without_path(remainder)
       updated = @value.clone
       updated[key] = v
-      return Hocon::Impl::SimpleConfigObject.new(origin, updated,
-                                                 ResolveStatus.from_values(updated.values), @ignores_fallbacks)
+      Hocon::Impl::SimpleConfigObject.new(origin,
+                                          updated,
+                                          ResolveStatus.from_values(updated.values), @ignores_fallbacks)
     elsif (not remainder.nil?) || v.nil?
       return self
     else
       smaller = Hash.new
       @value.each do |old_key, old_value|
-        if not old_key == key
+        unless old_key == key
           smaller[old_key] = old_value
         end
       end
-      return Hocon::Impl::SimpleConfigObject.new(origin, smaller,
-                                                 ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
+      Hocon::Impl::SimpleConfigObject.new(origin,
+                                          smaller,
+                                          ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
     end
   end
 
@@ -215,7 +219,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     remainder = path.remainder
 
     if remainder.nil?
-      return with_value_impl(key, v)
+      with_value_impl(key, v)
     else
       child = @value[key]
       if (not child.nil?) && child.is_a?(Hocon::Impl::AbstractConfigObject)
@@ -230,7 +234,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
   def with_value_impl(key, v)
     if v.nil?
-      raise ConfigBugOrBrokenError.new("Trying to store null ConfigValue in a ConfigObject", nil)
+      raise ConfigBugOrBrokenError.new("Trying to store null ConfigValue in a ConfigObject")
     end
 
     new_map = Hash.new
@@ -241,5 +245,27 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       new_map[key] = v
     end
     self.class.new(origin, new_map, ResolveStatus.from_values(new_map.values), @ignores_fallbacks)
+  end
+
+  def resolve_substitutions(context, source)
+    if resolve_status == ResolveStatus::RESOLVED
+      return ResolveResult.make(context, self)
+    end
+
+    source_with_parent = source.push_parent(self)
+
+    begin
+      modifier = ResolveModifier.new(context, source_with_parent)
+
+      value = modify_may_throw(modifier)
+      ResolveResult.make(modifier.context, value)
+
+    rescue NotPossibleToResolve => e
+      raise e
+    rescue RuntimeError => e
+      raise e
+    rescue Exception => e
+      raise ConfigBugOrBrokenError.new("unexpected exception", e)
+    end
   end
 end

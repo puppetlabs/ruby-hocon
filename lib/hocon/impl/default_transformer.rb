@@ -45,16 +45,16 @@ class Hocon::Impl::DefaultTransformer
       # as a string.
       case value.value_type
         # NUMBER case removed since you can't fallthrough in a ruby case statement
-        when BOOLEAN
+        when Hocon::ConfigValueType::BOOLEAN
           return ConfigString.new(value.origin, value.transform_to_string)
-        when NULL
+        when Hocon::ConfigValueType::NULL
           # want to be sure this throws instead of returning "null" as a
           # string
-        when OBJECT
+        when Hocon::ConfigValueType::OBJECT
           # no OBJECT to STRING automatically
-        when LIST
+        when Hocon::ConfigValueType::LIST
           # no LIST to STRING automatically
-        when STRING
+        when Hocon::ConfigValueType::STRING
           # no-op STRING to STRING
       end
     elsif requested == ConfigValueType::LIST && value.value_type == ConfigValueType::OBJECT

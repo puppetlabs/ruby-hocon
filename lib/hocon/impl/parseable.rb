@@ -136,7 +136,7 @@ class Hocon::Impl::Parseable
     @initial_options = fixup_options(base_options)
     @include_context = Hocon::Impl::SimpleIncludeContext.new(self)
     if @initial_options.origin_description
-      @initial_origin = SimpleConfigOrigin.new_simple(@initial_options.origin_description)
+      @initial_origin = Hocon::Impl::SimpleConfigOrigin.new_simple(@initial_options.origin_description)
     else
       @initial_origin = create_origin
     end

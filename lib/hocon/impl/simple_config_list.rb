@@ -1,10 +1,12 @@
 require 'hocon/impl'
 require 'hocon/impl/resolve_status'
 require 'hocon/config_value_type'
+require 'hocon/config_error'
 require 'hocon/impl/abstract_config_object'
 
 class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   ResolveStatus = Hocon::Impl::ResolveStatus
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
   def initialize(origin, value, status = ResolveStatus.from_values(value))
     super(origin)
@@ -24,6 +26,77 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   def unwrapped
     @value.map { |v| v.unwrapped }
   end
+
+  def modify_may_throw(modifier, new_resolve_status)
+    # lazy-create for optimization
+    changed = nil
+    i = 0
+    @value.each { |v|
+      modified = modifier.modify_child_may_throw(nil, v)
+
+      # lazy-create the new list if required
+      if changed == nil && !modified.equal?(v)
+        changed = []
+        j = 0
+        while j < i
+          changed << @value[j]
+          j += 1
+        end
+      end
+
+      # once the new list is created, all elements
+      # have to go in it.if modifyChild returned
+      # null, we drop that element.
+      if changed != nil && modified != nil
+        changed << modified
+      end
+
+      i += 1
+    }
+
+    if changed != nil
+      if new_resolve_status != nil
+        SimpleConfigList.new(origin, changed, new_resolve_status)
+      else
+        SimpleConfigList.new(origin, changed)
+      end
+    else
+      self
+    end
+  end
+
+  class ResolveModifier
+    attr_reader :context, :source
+    def initialize(context, source)
+      @context = context
+      @source = source
+    end
+  end
+
+  def resolve_substitutions(context, source)
+    if @resolved
+      return ResolveResult.make(context, self)
+    end
+
+    if context.is_restricted_to_child
+      # if a list restricts to a child path, then it has no child paths,
+      # so nothing to do.
+      ResolveResult.make(context, self)
+    else
+      begin
+        modifier = ResolveModifier.new(context, source.push_parent(self))
+        value = modify_may_throw(modifier, context.options.allow_unresolved ? nil : ResolveStatus::RESOLVED)
+        ResolveResult.make(modifier.context, value)
+      rescue NotPossibleToResolve => e
+        raise e
+      rescue RuntimeError => e
+        raise e
+      rescue Exception => e
+        raise ConfigBugOrBrokenError("unexpected exception", e)
+      end
+    end
+  end
+
 
   def render_value_to_sb(sb, indent_size, at_root, options)
     if @value.empty?

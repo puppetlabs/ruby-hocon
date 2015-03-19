@@ -27,7 +27,7 @@ class Hocon::ConfigError < StandardError
   end
 
   class ConfigBugOrBrokenError < Hocon::ConfigError
-    def initialize(message, cause)
+    def initialize(message, cause = nil)
       super(nil, message, cause)
     end
   end
