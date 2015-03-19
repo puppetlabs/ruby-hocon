@@ -87,7 +87,7 @@ class Hocon::Impl::Tokenizer
 
     def self.problem(origin, what, message, suggest_quotes, cause)
       if what.nil? || message.nil?
-        throw Hocon::ConfigError::ConfigBugOrBrokenError.new("internal error, creating bad TokenizerProblemError", nil)
+        throw Hocon::ConfigError::ConfigBugOrBrokenError.new("internal error, creating bad TokenizerProblemError")
       end
       TokenizerProblemError.new(Tokens.new_problem(origin, what, message, suggest_quotes, cause))
     end

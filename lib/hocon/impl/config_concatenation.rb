@@ -14,6 +14,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
   ConfigObject = Hocon::ConfigObject
   Unmergeable = Hocon::Impl::Unmergeable
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
   #
   # Add left and right, or their merger, to builder
@@ -103,6 +104,60 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     end
   end
 
+  def resolve_substitutions(context, source)
+    if Hocon::Impl::ConfigImpl.trace_substitution_enabled
+      indent = context.depth + 2
+      Hocon::Impl::ConfigImpl.trace("concatenation has #{@pieces.size} pieces",
+                                    indent - 1)
+      count = 0
+      @pieces.each { |v|
+        Hocon::Impl::ConfigImpl.trace("#{count}: #{v}", count)
+        count += 1
+      }
+    end
+
+    # Right now there's no reason to pushParent here because the
+    # content of ConfigConcatenation should not need to replaceChild,
+    # but if it did we'd have to do this.
+    source_with_parent = source
+    new_context = context
+
+    resolved = []
+    @pieces.each { |p|
+      # to concat into a string we have to do a full resolve,
+      # so unrestrict the context, then put restriction back afterward
+      restriction = new_context.restrict_to_child
+      result = new_context.unrestricted
+                   .resolve(p, source_with_parent)
+      r = result.value
+      new_context = result.context.restrict(restriction)
+      if Hocon::Impl::ConfigImpl.trace_substitution_enabled
+        Hocon::Impl::ConfigImpl.trace("resolved concat piece to #{r}",
+                                      context.depth)
+      end
+
+      if r
+        resolved << r
+      end
+      # otherwise, it was optional ... omit
+    }
+
+    # now need to concat everything
+    joined = self.consolidate(resolved)
+    # if unresolved is allowed we can just become another
+    # ConfigConcatenation
+    if joined.size > 1 and context.options.allow_unresolved
+      Hocon::Impl::ResolveResult.make(new_context, Hocon::Impl::ConfigConcatenation.new(origin, joined))
+    elsif joined.empty?
+      # we had just a list of optional references using ${?}
+      Hocon::Impl::ResolveResult.make(new_context, nil)
+    elsif joined.size == 1
+      Hocon::Impl::ResolveResult.make(new_context, joined[0])
+    else
+      raise ConfigBugOrBrokenError.new(
+                "Bug in the library; resolved list was joined to too many values: #{joined}")
+    end
+  end
 
   def initialize(origin, pieces)
     super(origin)

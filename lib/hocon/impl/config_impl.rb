@@ -65,7 +65,7 @@ class Hocon::Impl::ConfigImpl
 
   def self.from_any_ref_mode(object, origin, map_mode)
     if origin.nil?
-      raise ConfigBugOrBrokenError.new("origin not supposed to be nil", nil)
+      raise ConfigBugOrBrokenError.new("origin not supposed to be nil")
     end
     if object.nil?
       if origin != @default_value_origin
@@ -106,8 +106,7 @@ class Hocon::Impl::ConfigImpl
         object.each do |key, entry|
           if not key.is_a?(String)
             raise ConfigBugOrBrokenError.new(
-                      "bug in method caller: not valid to create ConfigObject from map with non-String key: #{key}",
-                      nil)
+                      "bug in method caller: not valid to create ConfigObject from map with non-String key: #{key}")
           end
           value = self.from_any_ref_mode(entry, origin, map_mode)
           values[key] = value
@@ -129,7 +128,56 @@ class Hocon::Impl::ConfigImpl
 
       return Hocon::Impl::SimpleConfigList.new(origin, values)
     else
-      raise ConfigBugOrBrokenError.new("bug in method caller: not valid to create ConfigValue from: #{object}", nil)
+      raise ConfigBugOrBrokenError.new("bug in method caller: not valid to create ConfigValue from: #{object}")
     end
+  end
+
+  # This class is a lot simpler than the Java version ...
+  # The Java version uses system properties to toggle these settings.
+  # We don't have system properties in MRI so it's not clear what to do here.
+  # Initially, I ported this as more of a direct translation from the Java code,
+  # but I ran into issues around how to translate stupid Java static
+  # initialization crap to Ruby, so what we have here is a much simpler version
+  # that is # equivalent.
+  #
+  # There's no way to toggle this logging without changing code, but it's
+  # actually proved to be useful for debugging purposes while porting code
+  # down from Java.
+  class DebugHolder
+    class << self
+
+      def trace_loads_enabled
+        TRACE_LOADS_ENABLED
+      end
+
+      def trace_substitutions_enabled
+        TRACE_SUBSTITUTIONS_ENABLED
+      end
+
+      private
+
+      TRACE_LOADS_ENABLED = false
+      TRACE_SUBSTITUTIONS_ENABLED = false
+    end
+  end
+
+  def self.trace_loads_enabled
+    # Ignoring 'catch ExceptionInInitializerError' from that java version,
+    # that is just terrible java code anyway.
+    DebugHolder.trace_loads_enabled
+  end
+
+  def self.trace_substitution_enabled
+    # Ignoring 'catch ExceptionInInitializerError' from that java version,
+    # that is just terrible java code anyway.
+    DebugHolder.trace_substitutions_enabled
+  end
+
+  def self.trace(message, indent_level = 0)
+    while indent_level > 0
+      $stderr.putc(" ")
+      indent_level -= 1
+    end
+    $stderr.puts(message)
   end
 end

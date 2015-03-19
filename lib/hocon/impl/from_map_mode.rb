@@ -10,7 +10,7 @@ module Hocon::Impl::FromMapMode
     case from_map_mode
       when KEYS_ARE_PATHS then "KEYS_ARE_PATHS"
       when KEYS_ARE_KEYS then "KEYS_ARE_KEYS"
-      else raise ConfigBugOrBrokenError.new("Unrecognized FromMapMode #{from_map_mode}", nil)
+      else raise ConfigBugOrBrokenError.new("Unrecognized FromMapMode #{from_map_mode}")
     end
   end
 end

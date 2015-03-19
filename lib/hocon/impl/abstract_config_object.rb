@@ -83,6 +83,10 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     end
   end
 
+  def resolve_substitutions(context, source)
+    raise "'resolve_substitutions' needs to be overridden by sub-class, this is abstract in the Java version"
+  end
+
   def peek_path_impl(me, path, context)
     begin
       if not context.nil?

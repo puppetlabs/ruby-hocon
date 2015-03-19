@@ -3,6 +3,7 @@ require 'stringio'
 require 'hocon/config_render_options'
 require 'hocon/config_object'
 require 'hocon/impl/resolve_status'
+require 'hocon/impl/resolve_result'
 require 'hocon/impl/unmergeable'
 require 'hocon/impl/abstract_config_object'
 require 'hocon/impl/config_impl_util'
@@ -15,11 +16,24 @@ require 'hocon/impl/config_impl_util'
 class Hocon::Impl::AbstractConfigValue
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
 
+  attr_reader :origin
+
   def initialize(origin)
     @origin = origin
   end
 
-  attr_reader :origin
+  class NotPossibleToResolve < Exception
+    attr_reader :trace_string
+    def initialize(context)
+      super("was not possible to resolve")
+      @trace_string = context.trace_string
+    end
+  end
+
+  def resolve_substitutions(context, source)
+    Hocon::Impl::ResolveResult.make(context, self)
+  end
+
 
   def resolve_status
     Hocon::Impl::ResolveStatus::RESOLVED
@@ -43,7 +57,7 @@ class Hocon::Impl::AbstractConfigValue
   end
 
   def with_origin(origin)
-    if @origin == origin
+    if @origin.equal?(origin)
       self
     else
       new_copy(origin)

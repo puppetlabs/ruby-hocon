@@ -1,8 +1,10 @@
 require 'hocon/impl'
 require 'hocon/config_value_type'
+require 'hocon/config_resolve_options'
 require 'hocon/impl/path'
 require 'hocon/impl/default_transformer'
 require 'hocon/impl/config_impl'
+require 'hocon/impl/resolve_context'
 
 class Hocon::Impl::SimpleConfig
 
@@ -14,12 +16,27 @@ class Hocon::Impl::SimpleConfig
   Path = Hocon::Impl::Path
   DefaultTransformer = Hocon::Impl::DefaultTransformer
 
+  attr_reader :object
+
   def initialize(object)
     @object = object
   end
 
   def root
     @object
+  end
+
+  def resolve(options = Hocon::ConfigResolveOptions.defaults)
+    resolve_with(self, options)
+  end
+
+  def resolve_with(source, options)
+    resolved = Hocon::Impl::ResolveContext.resolve(@object, source.object, options)
+    if resolved.eql?(@object)
+      self
+    else
+      Hocon::SimpleConfig.new(resolved)
+    end
   end
 
   def find_key(me, key, expected, original_path)
@@ -60,9 +77,23 @@ class Hocon::Impl::SimpleConfig
     end
   end
 
+  def find3(path_expression, expected, original_path)
+    find(@object, path_expression, expected, original_path)
+  end
+
+  def find2(path_expression, expected)
+    path = Path.new_path(path_expression)
+    find3(path, expected, path)
+  end
+
   def get_value(path)
     parsed_path = Path.new_path(path)
     find(@object, parsed_path, nil, parsed_path)
+  end
+
+  def get_string(path)
+    v = find2(path, ConfigValueType::STRING)
+    v.unwrapped
   end
 
   def has_path(path_expression)
