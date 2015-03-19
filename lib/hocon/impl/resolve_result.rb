@@ -15,6 +15,6 @@ class Hocon::Impl::ResolveResult
   end
 
   def pop_trace
-    Hocon::Impl::ResolveResult.make(@context.pop_trace, value)
+    self.class.make(@context.pop_trace, value)
   end
 end

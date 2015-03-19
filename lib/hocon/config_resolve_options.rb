@@ -12,8 +12,8 @@ class Hocon::ConfigResolveOptions
     self.new(value, @allow_unresolved)
   end
 
-  def set_allow_resolved(value)
-    self.new(value, @allow_unresolved)
+  def set_allow_unresolved(value)
+    self.new(@use_system_environment, value)
   end
 
   class << self

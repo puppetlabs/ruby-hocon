@@ -1,7 +1,11 @@
+require 'hocon'
 require 'hocon/impl'
 require 'hocon/impl/abstract_config_value'
+require 'hocon/impl/resolve_source'
 
 class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
+  NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve
+
   attr_reader :expr
 
   def initialize(origin, expr, prefix_length = 0)
@@ -27,11 +31,11 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
               depth)
         end
 
-        recursive_resolve_source =
-            result_with_path.path_from_root.last, result_with_path.path_from_root
+        recursive_resolve_source = Hocon::Impl::ResolveSource.new(
+            result_with_path.path_from_root.last, result_with_path.path_from_root)
 
         if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-          Hocon::Impl::ConfigImpl.trace("will recursively resolve against #{recursiveResolveSource}", depth)
+          Hocon::Impl::ConfigImpl.trace("will recursively resolve against #{recursive_resolve_source}", depth)
         end
 
         result = new_context.resolve(result_with_path.result.value,
@@ -41,7 +45,7 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
       else
         v = nil
       end
-    rescue NotPossibleToResove => e
+    rescue NotPossibleToResolve => e
       if Hocon::Impl::ConfigImpl.trace_substitution_enabled
         Hocon::Impl::ConfigImpl.trace(
             "not possible to resolve #{expr}, cycle involved: #{e.trace_string}", new_context.depth)

@@ -27,7 +27,7 @@ class Hocon::Impl::ResolveContext
 
   def memoize(key, value)
     changed = @memos.put(key, value)
-    Hocon::Impl::ResolveContext.new(changed, @memos, @restrict_to_child, @resolve_stack, @cycle_markers)
+    self.class.new(changed, @options, @restrict_to_child, @resolve_stack, @cycle_markers)
   end
 
   def is_restricted_to_child

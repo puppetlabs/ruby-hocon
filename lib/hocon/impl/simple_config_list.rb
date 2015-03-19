@@ -85,7 +85,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
     else
       begin
         modifier = ResolveModifier.new(context, source.push_parent(self))
-        value = modify_may_throw(modifier, context.options.allow_unresolved ? nil : ResolveStatus::UNRESOLVED)
+        value = modify_may_throw(modifier, context.options.allow_unresolved ? nil : ResolveStatus::RESOLVED)
         ResolveResult.make(modifier.context, value)
       rescue NotPossibleToResolve => e
         raise e

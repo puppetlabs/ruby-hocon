@@ -84,8 +84,7 @@ class Hocon::Impl::ResolveSource
       if @next_node == nil
         self
       else
-        reversed = Nod
-        e.new(@value)
+        reversed = Node.new(@value)
         i = @next_node
         while i != nil
           reversed = reversed.prepend(i.value)

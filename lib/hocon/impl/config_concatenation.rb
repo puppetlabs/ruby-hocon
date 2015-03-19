@@ -143,7 +143,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     }
 
     # now need to concat everything
-    joined = self.consolidate(resolved)
+    joined = self.class.consolidate(resolved)
     # if unresolved is allowed we can just become another
     # ConfigConcatenation
     if joined.size > 1 and context.options.allow_unresolved
