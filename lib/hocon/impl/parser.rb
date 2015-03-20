@@ -359,6 +359,10 @@ class Hocon::Impl::Parser
           if (@flavor == ConfigSyntax::JSON) && after_comma
             raise parse_error(
                       add_quote_suggestion(t,
+                        "expecting a field name after a comma, got a close brace } instead"))
+          elsif !had_open_curly
+            raise parse_error(
+                      add_quote_suggestion(t,
                         "unbalanced close brace '}' with no open brace"))
           end
 
@@ -472,8 +476,8 @@ class Hocon::Impl::Parser
           if t.token == Tokens::CLOSE_CURLY
             if !had_open_curly
               raise parse_error(
-                        add_quote_suggestion(last_path, last_inside_equals,
-                                             t, "unbalanced close brace '}' with no open brace"))
+                        add_quote_suggestion(t, "unbalanced close brace '}' with no open brace",
+                                             last_path, last_inside_equals))
             end
 
             object_origin = t.append_comments(object_origin)
