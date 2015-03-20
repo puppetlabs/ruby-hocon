@@ -71,10 +71,10 @@ describe "ConfigInt equality" do
 end
 
 describe "ConfigFloat equality" do
-  context "different ConfigInts with the same value should be equal" do
-    a = TestUtils.float_value(42)
-    same_as_a = TestUtils.float_value(42)
-    b = TestUtils.float_value(43)
+  context "different ConfigFloats with the same value should be equal" do
+    a = TestUtils.float_value(3.14)
+    same_as_a = TestUtils.float_value(3.14)
+    b = TestUtils.float_value(4.14)
 
     context "a equals a" do
       let(:first_object) { a }
@@ -440,6 +440,8 @@ describe "ConfigList" do
     expect(values[2]).to eq(l[2])
 
     expect(l.include? TestUtils.string_value("a")).to be_truthy
+    expect(l.include_all?([TestUtils.string_value("a")])).to be_truthy
+    expect(l.include_all?([TestUtils.string_value("b")])).to be_truthy
 
     expect(l.index(values[1])).to eq(1)
 
@@ -453,9 +455,9 @@ describe "ConfigList" do
 
     expect { l.push(TestUtils.int_value(3)) }.to raise_error(NoMethodError)
     expect { l << TestUtils.int_value(3) }.to raise_error(NoMethodError)
+    expect { l.clear }.to raise_error(NoMethodError)
     expect { l.delete(TestUtils.int_value(2)) }.to raise_error(NoMethodError)
     expect { l.delete(1) }.to raise_error(NoMethodError)
-    expect { l.push(TestUtils.int_value(3)) }.to raise_error(NoMethodError)
     expect { l[0] = TestUtils.int_value(42) }.to raise_error(NoMethodError)
   end
 end

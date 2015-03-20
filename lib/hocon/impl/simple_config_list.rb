@@ -152,4 +152,8 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   def new_copy(origin)
     Hocon::Impl::SimpleConfigList.new(origin, @value)
   end
+
+  def include_all?(value_list)
+    value_list.all? { |v| @value.include?(v)}
+  end
 end

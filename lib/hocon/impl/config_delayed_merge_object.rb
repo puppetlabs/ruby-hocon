@@ -35,8 +35,7 @@ class Hocon::Impl::ConfigDelayedMergeObject < Hocon::Impl::AbstractConfigObject
   end
 
   def unwrapped
-    error_message = "called unwrapped() on value with unresolved substitutions, need to Config#resolve() first, see API docs"
-    raise Hocon::ConfigError::ConfigNotResolvedError.new(error_message, nil)
+    raise self.class.not_resolved
   end
 
   def [](key)

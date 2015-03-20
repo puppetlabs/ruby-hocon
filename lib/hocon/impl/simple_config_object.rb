@@ -187,42 +187,6 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     Set.new(@value.keys)
   end
 
-  def self.map_hash(m)
-    # the keys have to be sorted, otherwise we could be equal
-    # to another map but have a different hashcode.
-    keys = m.keys.sort
-
-    value_hash = 0
-
-    keys.each do |key|
-      value_hash += m[key].hash
-    end
-
-    41 * (41 + keys.hash) + value_hash
-  end
-
-  def self.map_equals(a, b)
-    # This array comparison works if there are no duplicates, which
-    # the hash keys won't have
-    sets_equal = lambda { |x, y| (x.size == y.size) && (x & y == x) }
-
-    if a == b
-      return true
-    end
-
-    if not sets_equal.call(a.keys, b.keys)
-      return false
-    end
-
-    a.keys.each do |key|
-      if a[key] != b[key]
-        return false
-      end
-    end
-
-    true
-  end
-
   def can_equal(other)
     other.is_a? Hocon::Impl::AbstractConfigObject
   end
@@ -339,5 +303,40 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     else
       SimpleConfigObject.new(origin, {})
     end
+  end
+
+  private
+
+  def self.map_hash(m)
+    # the keys have to be sorted, otherwise we could be equal
+    # to another map but have a different hashcode.
+    keys = m.keys.sort
+
+    value_hash = 0
+
+    keys.each do |key|
+      value_hash += m[key].hash
+    end
+
+    41 * (41 + keys.hash) + value_hash
+  end
+
+  def self.map_equals(a, b)
+    if a == b
+      return true
+    end
+
+    # Hashes aren't ordered in ruby, so sort first
+    if not a.keys.sort == b.keys.sort
+      return false
+    end
+
+    a.keys.each do |key|
+      if a[key] != b[key]
+        return false
+      end
+    end
+
+    true
   end
 end

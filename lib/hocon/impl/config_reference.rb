@@ -74,17 +74,12 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
 
   end
 
-  def self.not_resolved
-    error_message = "need to Config#resolve, see the API docs for Config#resolve; substitution not resolved: #{self}"
-    Hocon::ConfigError::ConfigNotResolvedError.new(error_message, nil)
-  end
-
   def value_type
-    raise self.class.not_resolved
+    raise not_resolved
   end
 
   def unwrapped
-    raise self.class.not_resolved
+    raise not_resolved
   end
 
   def new_copy(new_origin)
@@ -100,7 +95,7 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
   end
 
   def relativized(prefix)
-    new_expr = @expr.change_path(@expr.path,prepend(prefix))
+    new_expr = @expr.change_path(@expr.path.prepend(prefix))
 
     Hocon::Impl::ConfigReference.new(origin, new_expr, @prefix_length + prefix.length)
   end
@@ -123,6 +118,13 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
 
   def render_value_to_sb(sb, indent, at_root, options)
     sb << @expr.to_s
+  end
+
+  private
+
+  def not_resolved
+    error_message = "need to Config#resolve, see the API docs for Config#resolve; substitution not resolved: #{self}"
+    Hocon::ConfigError::ConfigNotResolvedError.new(error_message, nil)
   end
 
 end
