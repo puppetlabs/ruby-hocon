@@ -28,7 +28,7 @@ class Hocon::Impl::PropertiesParser
       # If we didn't start out as properties, then this is an error.
       value_paths.each do |path|
         if scope_paths.include?(path)
-          raise ConfigBugOrBrokenError.new("In the map, path '#{path.render}' occurs as both" +
+          raise Hocon::ConfigError::ConfigBugOrBrokenError.new("In the map, path '#{path.render}' occurs as both" +
                                            " the parent object of a value and as a value. Because Map " +
                                            "has no defined ordering, this is a broken situation.")
         end

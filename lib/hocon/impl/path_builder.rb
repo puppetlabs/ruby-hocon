@@ -2,6 +2,7 @@
 
 require 'hocon/impl'
 require 'hocon/impl/path'
+require 'hocon/config_error'
 
 class Hocon::Impl::PathBuilder
 
@@ -12,7 +13,7 @@ class Hocon::Impl::PathBuilder
 
   def check_can_append
     if @result
-      raise ConfigBugError, "Adding to PathBuilder after getting result"
+      raise Hocon::ConfigError::ConfigBugOrBrokenError, "Adding to PathBuilder after getting result"
     end
   end
 

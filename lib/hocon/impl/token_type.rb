@@ -40,7 +40,7 @@ class Hocon::Impl::TokenType
       when COMMENT then "COMMENT"
       when PLUS_EQUALS then "PLUS_EQUALS"
       when IGNORED_WHITESPACE then "IGNORED_WHITESPACE"
-      else raise ConfigBugError, "Unrecognized token type #{token_type}"
+      else raise ConfigBugOrBrokenError, "Unrecognized token type #{token_type}"
     end
   end
 end

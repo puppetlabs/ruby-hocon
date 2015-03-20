@@ -20,6 +20,8 @@ class Hocon::Impl::Tokens
   ConfigNull = Hocon::Impl::ConfigNull
   ConfigBoolean = Hocon::Impl::ConfigBoolean
 
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+
   START = Token.new_without_origin(TokenType::START, "start of file", "")
   EOF = Token.new_without_origin(TokenType::EOF, "end of file", "")
   COMMA = Token.new_without_origin(TokenType::COMMA, "','", ",")
@@ -223,7 +225,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.message
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem message from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem message from #{token}")
     end
   end
 
@@ -231,7 +233,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.suggest_quotes
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}")
     end
   end
 
@@ -239,7 +241,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.cause
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem cause from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem cause from #{token}")
     end
   end
 
@@ -307,7 +309,7 @@ class Hocon::Impl::Tokens
     if comment?(token)
       token.text
     else
-      raise ConfigBugError, "tried to get comment text from #{token}"
+      raise ConfigBugOrBrokenError, "tried to get comment text from #{token}"
     end
   end
 
@@ -327,7 +329,7 @@ class Hocon::Impl::Tokens
     if unquoted_text?(token)
       token.value
     else
-      raise ConfigBugError, "tried to get unquoted text from #{token}"
+      raise ConfigBugOrBrokenError, "tried to get unquoted text from #{token}"
     end
   end
 
@@ -339,7 +341,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Value)
       token.value
     else
-      raise ConfigBugError, "tried to get value of non-value token #{token}"
+      raise ConfigBugOrBrokenError, "tried to get value of non-value token #{token}"
     end
   end
 

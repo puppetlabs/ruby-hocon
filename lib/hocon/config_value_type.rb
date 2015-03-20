@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'hocon'
+require 'hocon/config_error'
 
 #
 # The type of a configuration value (following the <a
@@ -22,7 +23,7 @@ module Hocon::ConfigValueType
       when BOOLEAN then "BOOLEAN"
       when NULL then "NULL"
       when STRING then "STRING"
-      else raise ConfigBugError, "Unrecognized value type '#{config_value_type}'"
+      else raise Hocon::ConfigError::ConfigBugOrBrokenError, "Unrecognized value type '#{config_value_type}'"
     end
   end
 end

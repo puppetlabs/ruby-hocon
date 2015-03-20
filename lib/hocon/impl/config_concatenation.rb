@@ -68,7 +68,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
       joined = left.concatenate(right)
     elsif (left.is_a?(Hocon::Impl::ConfigConcatenation)) ||
         (right.is_a?(Hocon::Impl::ConfigConcatenation))
-      raise ConfigBugError, "unflattened ConfigConcatenation"
+      raise ConfigBugOrBrokenError, "unflattened ConfigConcatenation"
     elsif (left.is_a?(Unmergeable)) || (right.is_a?(Unmergeable))
       # leave joined=null, cannot join
     else
@@ -191,13 +191,13 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     @pieces = pieces
 
     if pieces.size < 2
-      raise ConfigBugError, "Created concatenation with less than 2 items: #{self}"
+      raise ConfigBugOrBrokenError, "Created concatenation with less than 2 items: #{self}"
     end
 
     had_unmergeable = false
     pieces.each do |p|
       if p.is_a?(Hocon::Impl::ConfigConcatenation)
-        raise ConfigBugError, "ConfigConcatenation should never be nested: #{self}"
+        raise ConfigBugOrBrokenError, "ConfigConcatenation should never be nested: #{self}"
       end
       if p.is_a?(Unmergeable)
         had_unmergeable = true
@@ -205,7 +205,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     end
 
     unless had_unmergeable
-      raise ConfigBugError, "Created concatenation without an unmergeable in it: #{self}"
+      raise ConfigBugOrBrokenError, "Created concatenation without an unmergeable in it: #{self}"
     end
   end
 

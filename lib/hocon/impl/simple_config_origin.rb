@@ -3,6 +3,7 @@
 require 'uri'
 require 'hocon/impl'
 require 'hocon/impl/origin_type'
+require 'hocon/config_error'
 
 class Hocon::Impl::SimpleConfigOrigin
 
@@ -98,7 +99,7 @@ class Hocon::Impl::SimpleConfigOrigin
 
   def self.merge_origins(stack)
     if stack.empty?
-      raise ConfigBugError, "can't merge empty list of origins"
+      raise Hocon::ConfigError::ConfigBugOrBrokenError, "can't merge empty list of origins"
     elsif stack.length == 1
       stack[0]
     elsif stack.length == 2

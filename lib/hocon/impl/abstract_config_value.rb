@@ -9,6 +9,7 @@ require 'hocon/impl/resolve_result'
 require 'hocon/impl/unmergeable'
 require 'hocon/impl/abstract_config_object'
 require 'hocon/impl/config_impl_util'
+require 'hocon/config_error'
 
 ##
 ## Trying very hard to avoid a parent reference in config values; when you have
@@ -17,6 +18,7 @@ require 'hocon/impl/config_impl_util'
 ##
 class Hocon::Impl::AbstractConfigValue
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
   attr_reader :origin
 
@@ -54,7 +56,7 @@ class Hocon::Impl::AbstractConfigValue
   # mergedWith* if we're ignoring fallbacks.
   def require_not_ignoring_fallbacks
     if ignores_fallbacks?
-      raise ConfigBugError, "method should not have been called with ignoresFallbacks=true #{self.class.name}"
+      raise ConfigBugOrBrokenError, "method should not have been called with ignoresFallbacks=true #{self.class.name}"
     end
   end
 
