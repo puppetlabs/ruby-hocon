@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'hocon/impl'
 require 'hocon/impl/path_builder'
 require 'hocon/config_error'

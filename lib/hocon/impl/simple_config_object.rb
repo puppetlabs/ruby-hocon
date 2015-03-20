@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'hocon/impl'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/abstract_config_object'

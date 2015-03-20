@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'hocon'
 require 'hocon/impl/parseable'
 require 'hocon/config_parse_options'

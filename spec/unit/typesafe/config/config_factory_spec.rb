@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'spec_helper'
 require 'hocon/config_factory'
 require 'hocon/config_render_options'

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Hocon
   require 'hocon/config_factory'
 
