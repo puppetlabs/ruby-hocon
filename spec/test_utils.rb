@@ -313,42 +313,42 @@ module TestUtils
   ##################
   # ConfigValue helpers
   ##################
-  def TestUtils.int_value(value)
+  def self.int_value(value)
     ConfigInt.new(fake_origin, value, nil)
   end
 
-  def TestUtils.float_value(value)
+  def self.float_value(value)
     ConfigFloat.new(fake_origin, value, nil)
   end
 
-  def TestUtils.string_value(value)
+  def self.string_value(value)
     ConfigString.new(fake_origin, value)
   end
 
-  def TestUtils.null_value
+  def self.null_value
     ConfigNull.new(fake_origin)
   end
 
-  def TestUtils.bool_value(value)
+  def self.bool_value(value)
     ConfigBoolean.new(fake_origin, value)
   end
 
-  def TestUtils.config_map(input_map)
+  def self.config_map(input_map)
     # Turns {String: Int} maps into {String: ConfigInt} maps
     Hash[ input_map.map { |k, v| [k, int_value(v)] } ]
   end
 
-  def TestUtils.subst(ref, optional = false)
+  def self.subst(ref, optional = false)
     path = Path.new_path(ref)
     ConfigReference.new(fake_origin, SubstitutionExpression.new(path, optional))
   end
 
-  def TestUtils.subst_in_string(ref, optional = false)
+  def self.subst_in_string(ref, optional = false)
     pieces = [string_value("start<"), subst(ref, optional), string_value(">end")]
     ConfigConcatenation.new(fake_origin, pieces)
   end
 
-  def TestUtils.parse_config(config_string)
+  def self.parse_config(config_string)
     options = Hocon::ConfigParseOptions.defaults
     options.origin_description = "test string"
     options.syntax = Hocon::ConfigSyntax::CONF
@@ -382,7 +382,7 @@ module TestUtils
   ##################
   # RSpec Tests
   ##################
-  def TestUtils.check_equal_objects(first_object, second_object)
+  def self.check_equal_objects(first_object, second_object)
     it "should find the two objects to be equal" do
       not_equal_to_anything_else = TestUtils::NotEqualToAnythingElse.new
 
@@ -402,7 +402,7 @@ module TestUtils
     end
   end
 
-  def TestUtils.check_not_equal_objects(first_object, second_object)
+  def self.check_not_equal_objects(first_object, second_object)
 
     it "should find the two objects to be not equal" do
       not_equal_to_anything_else = TestUtils::NotEqualToAnythingElse.new
