@@ -20,7 +20,7 @@ class Hocon::ConfigParseOptions
     @allow_missing
   end
 
-  def with_syntax(syntax)
+  def set_syntax(syntax)
     if @syntax == syntax
       self
     else
@@ -31,7 +31,7 @@ class Hocon::ConfigParseOptions
     end
   end
 
-  def with_origin_description(origin_description)
+  def set_origin_description(origin_description)
     if @origin_description == origin_description
       self
     else
@@ -42,7 +42,7 @@ class Hocon::ConfigParseOptions
     end
   end
 
-  def with_includer(includer)
+  def set_includer(includer)
     if @includer == includer
       self
     else
@@ -57,9 +57,9 @@ class Hocon::ConfigParseOptions
     if @includer == includer
       self
     elsif @includer
-      with_includer(@includer.with_fallback(includer))
+      set_includer(@includer.with_fallback(includer))
     else
-      with_includer(includer)
+      set_includer(includer)
     end
   end
 

@@ -40,7 +40,7 @@ module TestUtils
   end
 
   def TestUtils.token_line(line_number)
-    Tokens.new_line(fake_origin.set_line_number(line_number))
+    Tokens.new_line(fake_origin.with_line_number(line_number))
   end
 
   def TestUtils.token_true
@@ -101,8 +101,8 @@ module TestUtils
 
   def TestUtils.parse_config(s)
     options = Hocon::ConfigParseOptions.defaults
-                  .with_origin_description("test string")
-                  .with_syntax(Hocon::ConfigSyntax::CONF)
+                  .set_origin_description("test string")
+                  .set_syntax(Hocon::ConfigSyntax::CONF)
     Hocon::ConfigFactory.parse_string(s, options)
   end
 

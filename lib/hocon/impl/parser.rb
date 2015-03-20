@@ -253,7 +253,7 @@ class Hocon::Impl::Parser
     end
 
     def line_origin
-      @base_origin.set_line_number(@line_number)
+      @base_origin.with_line_number(@line_number)
     end
 
     def parse_value(t)
@@ -309,11 +309,11 @@ class Hocon::Impl::Parser
       keys = keys.reverse
       # this is just a ruby means for doing first/rest
       deepest, *rest = *keys
-      o = SimpleConfigObject.new(value.origin.set_comments(nil),
+      o = SimpleConfigObject.new(value.origin.with_comments(nil),
                                  {deepest => value})
       while !rest.empty?
         deepest, *rest = *rest
-        o = SimpleConfigObject.new(value.origin.set_comments(nil),
+        o = SimpleConfigObject.new(value.origin.with_comments(nil),
                                    {deepest => o})
       end
 

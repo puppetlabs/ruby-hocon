@@ -153,9 +153,9 @@ class Hocon::Impl::Parseable
       syntax = Hocon::ConfigSyntax::CONF
     end
 
-    modified = base_options.with_syntax(syntax)
+    modified = base_options.set_syntax(syntax)
     modified = modified.append_includer(Hocon::Impl::ConfigImpl.default_includer)
-    modified = modified.with_includer(Hocon::Impl::SimpleIncluder.make_full(modified.includer))
+    modified = modified.set_includer(Hocon::Impl::SimpleIncluder.make_full(modified.includer))
 
     modified
   end

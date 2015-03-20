@@ -41,7 +41,7 @@ class Hocon::Impl::Tokenizer
       end
 
       def line_origin(base_origin, line_number)
-        base_origin.set_line_number(line_number)
+        base_origin.with_line_number(line_number)
       end
 
       private
@@ -116,7 +116,7 @@ class Hocon::Impl::Tokenizer
       @allow_comments = allow_comments
       @buffer = []
       @line_number = 1
-      @line_origin = @origin.set_line_number(@line_number)
+      @line_origin = @origin.with_line_number(@line_number)
       @tokens = []
       @tokens << Tokens::START
       @whitespace_saver = WhitespaceSaver.new
@@ -367,7 +367,7 @@ class Hocon::Impl::Tokenizer
           elsif c == "\n"
             # keep the line number accurate
             @line_number += 1
-            @line_origin = @origin.set_line_number(@line_number)
+            @line_origin = @origin.with_line_number(@line_number)
           end
         end
 
@@ -485,7 +485,7 @@ class Hocon::Impl::Tokenizer
         # newline tokens have the just-ended line number
         line = Tokens.new_line(@line_origin)
         @line_number += 1
-        @line_origin = @origin.set_line_number(@line_number)
+        @line_origin = @origin.with_line_number(@line_number)
         line
       else
         t = nil

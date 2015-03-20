@@ -135,7 +135,7 @@ class Hocon::Impl::SimpleConfigOrigin
   attr_reader :description, :line_number, :end_line_number, :origin_type,
               :url_or_nil, :comments_or_nil
 
-  def set_line_number(line_number)
+  def with_line_number(line_number)
     if (line_number == @line_number) and
         (line_number == @end_line_number)
       self
@@ -146,7 +146,7 @@ class Hocon::Impl::SimpleConfigOrigin
     end
   end
 
-  def set_comments(comments)
+  def with_comments(comments)
     if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(comments, @comments_or_nil)
       self
     else
@@ -160,12 +160,12 @@ class Hocon::Impl::SimpleConfigOrigin
     if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(comments, @comments_or_nil)
       self
     elsif @comments_or_nil.nil?
-      set_comments(comments)
+      with_comments(comments)
     else
       merged = []
       merged.concat(comments)
       merged.concat(@comments_or_nil)
-      set_comments(merged)
+      with_comments(merged)
     end
   end
 
