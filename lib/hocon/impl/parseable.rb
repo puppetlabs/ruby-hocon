@@ -101,7 +101,11 @@ class Hocon::Impl::Parseable
     self.class.force_parsed_to_object(parse_value(options))
   end
 
-  def parse_value(base_options)
+  def parse_value(base_options = nil)
+    if base_options.nil?
+      base_options = options
+    end
+
     # note that we are NOT using our "initialOptions",
     # but using the ones from the passed-in options. The idea is that
     # callers can get our original options and then parse with different
