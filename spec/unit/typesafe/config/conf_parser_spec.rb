@@ -32,10 +32,10 @@ end
 
 describe "Config Parser" do
    context "invalid_conf_throws" do
-     TestUtils.whitespace_variations(TestUtils::InvalidJsonInvalidConf, false).each do |t|
-       TestUtils.add_offending_json_to_exception("config", t.test) {
+     TestUtils.whitespace_variations(TestUtils::InvalidJsonInvalidConf, false).each do |invalid|
+       TestUtils.add_offending_json_to_exception("config", invalid.test) {
          TestUtils.intercept(Hocon::ConfigError) {
-           parse(t.test)
+           parse(invalid.test)
          }
        }
      end
