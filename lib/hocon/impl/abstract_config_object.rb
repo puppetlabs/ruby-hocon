@@ -22,6 +22,47 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     @config = Hocon::Impl::SimpleConfig.new(self)
   end
 
+  def with_only_key(key)
+    with_only_path(Hocon::Impl::Path.new_key(key))
+  end
+
+  # gets the object with only the path if the path
+  # exists, otherwise null if it doesn't. this ensures
+  # that if we have { a : { b : 42 } } and do
+  # withOnlyPath("a.b.c") that we don't keep an empty
+  # "a" object.
+  def with_only_path_or_nil(path)
+    key = path.first
+    remainder = path.remainder
+    v = @value[key]
+
+    if !remainder.nil?
+      if !v.nil? && v.is_a?(AbstractConfigObject)
+        v = v.with_only_path_or_nil(remainder)
+      else
+        # if the path has more elements but we don't have an objec
+        # then the rest of the path does not exist.
+        v = nil
+      end
+    end
+
+    if v.nil?
+      return nil
+    else
+      return Hocon::Impl::SimpleConfigObject.new(origin, Hash[key, v], v.resolve_status, @ignores_fallbacks)
+    end
+  end
+
+  def with_only_path(path)
+    object = with_only_path_or_nil(path)
+
+    if object.nil?
+      Hocon::Impl::SimpleConfigObject.new(origin, {}, Hocon::Impl::ResolveStatus::RESOLVED)
+    else
+      object
+    end
+  end
+
   def to_config
     @config
   end
@@ -138,7 +179,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     super(mergeable)
   end
 
-  def merge_origins(stack)
+  def self.merge_origins(stack)
     if stack.empty?
       raise ConfigBugOrBrokenError, "can't merge origins on empty list"
     end

@@ -78,7 +78,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
       if s1.nil? || s2.nil?
         raise ConfigWrongTypeError.new(left.origin,
                 "Cannot concatenate object or list with a non-object-or-list, #{left} " +
-                    "and #{right} are not compatible")
+                    "and #{right} are not compatible", nil)
       else
         joined_origin = SimpleConfigOrigin.merge_origins([left.origin, right.origin])
         joined = Hocon::Impl::ConfigString.new(joined_origin, s1 + s2)

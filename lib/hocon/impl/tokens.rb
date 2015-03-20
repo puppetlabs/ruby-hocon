@@ -225,6 +225,23 @@ class Hocon::Impl::Tokens
     end
   end
 
+  def self.get_substitution_path_expression(token)
+    if token.is_a?(Substitution)
+      token.value
+    else
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get substitution from #{token}")
+    end
+  end
+
+  def self.get_substitution_optional(token)
+    if token.is_a?(Substitution)
+      token.optional
+    else
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get substitution optionality from #{token}")
+
+    end
+  end
+
   def self.get_problem_message(token)
     if token.is_a?(Problem)
       token.message

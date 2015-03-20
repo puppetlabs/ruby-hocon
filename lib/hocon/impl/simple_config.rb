@@ -106,6 +106,11 @@ class Hocon::Impl::SimpleConfig
     find(@object, parsed_path, nil, parsed_path)
   end
 
+  def get_boolean(path)
+    v = find2(path, ConfigValueType::BOOLEAN)
+    v.unwrapped
+  end
+
   def get_config_number(path_expression)
     path = Path.new_path(path_expression)
     v = find(@object, path, ConfigValueType::NUMBER, path)
@@ -129,6 +134,11 @@ class Hocon::Impl::SimpleConfig
       raise Hocon::Impl::ConfigImpl.improve_not_resolved(path, e)
     end
     (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
+  end
+
+  def with_only_path(path_expression)
+    path = Path.new_path(path_expression)
+    self.class.new(root.with_only_path(path))
   end
 
   def without_path(path_expression)

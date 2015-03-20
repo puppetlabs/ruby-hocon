@@ -170,4 +170,8 @@ class Hocon::Impl::ConfigDelayedMergeObject < Hocon::Impl::AbstractConfigObject
     # note that "origin" is deliberately NOT part of equality
     @stack.hash
   end
+
+  def render_to_sb(sb, indent, at_root, at_key, options)
+    Hocon::Impl::ConfigDelayedMerge.render_value_to_sb_from_stack(@stack, sb, indent, at_root, at_key, options)
+  end
 end
