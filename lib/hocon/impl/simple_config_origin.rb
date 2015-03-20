@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'uri'
 require 'hocon/impl'
 require 'hocon/impl/origin_type'

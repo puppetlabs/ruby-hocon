@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'hocon/impl'
 require 'hocon/impl/simple_includer'
 require 'hocon/config_error'

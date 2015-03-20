@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'hocon/impl'
 require 'stringio'
 require 'hocon/config_render_options'
