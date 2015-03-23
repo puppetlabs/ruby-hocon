@@ -13,6 +13,10 @@ require 'hocon/impl'
 # closely.
 class Hocon::Impl::Url
   class MalformedUrlError < StandardError
+    def initialize(msg, cause = nil)
+      super(msg)
+      @cause = cause
+    end
   end
 
   def initialize(url)
@@ -21,8 +25,8 @@ class Hocon::Impl::Url
       if !(@url.kind_of?(URI::HTTP))
         raise MalformedUrlError, "Unrecognized URL: '#{url}'"
       end
-    rescue URI::InvalidURIError
-      raise MalformedUrlError, "Unrecognized URL: '#{url}'"
+    rescue URI::InvalidURIError => e
+      raise MalformedUrlError.new("Unrecognized URL: '#{url}' (error: #{e})", e)
     end
   end
 end

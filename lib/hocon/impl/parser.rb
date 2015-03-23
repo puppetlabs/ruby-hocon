@@ -1106,7 +1106,7 @@ class Hocon::Impl::Parser
     context = Hocon::Impl::Parser::ParseContext.new(
         options.syntax, origin, tokens,
         Hocon::Impl::SimpleIncluder.make_full(options.includer),
-                                        include_context)
+        include_context)
     context.parse
   end
 end
