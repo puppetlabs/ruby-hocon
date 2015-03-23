@@ -43,6 +43,18 @@ class Hocon::Impl::AbstractConfigValue
     Hocon::Impl::ResolveStatus::RESOLVED
   end
 
+  class NoExceptionsModifier
+    def modify_child_may_throw(key_or_nil, v)
+      begin
+        modify_child(key_or_nil, v)
+      rescue Hocon::ConfigError => e
+        raise e
+      rescue => e
+        raise ConfigBugOrBrokenError("Unexpected exception", e)
+      end
+    end
+  end
+
   # this is virtualized rather than a field because only some subclasses
   # really need to store the boolean, and they may be able to pack it
   # with another boolean to save space.
