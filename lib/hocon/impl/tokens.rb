@@ -80,6 +80,10 @@ class Hocon::Impl::Tokens
       @value = expression
     end
 
+    def optional?
+      @optional
+    end
+
     attr_reader :value
 
     def ==(other)
@@ -319,6 +323,22 @@ class Hocon::Impl::Tokens
 
   def self.substitution?(token)
     token.is_a?(Substitution)
+  end
+
+  def self.get_substitution_path_expression(token)
+    if token.is_a?(Substitution)
+      token.value
+    else
+      raise ConfigBugOrBrokenError, "tried to get substitution from #{token}"
+    end
+  end
+
+  def self.get_substitution_optional(token)
+    if token.is_a?(Substitution)
+      token.optional?
+    else
+      raise ConfigBugOrBrokenError, "tried to get substitution optionality from #{token}"
+    end
   end
 
   def self.unquoted_text?(token)

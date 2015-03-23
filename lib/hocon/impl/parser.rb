@@ -16,6 +16,8 @@ require 'hocon/impl/tokenizer'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/path'
 require 'hocon/impl/url'
+require 'hocon/impl/config_reference'
+require 'hocon/impl/substitution_expression'
 
 class Hocon::Impl::Parser
   
@@ -23,8 +25,10 @@ class Hocon::Impl::Parser
   ConfigSyntax = Hocon::ConfigSyntax
   ConfigValueType = Hocon::ConfigValueType
   ConfigConcatenation = Hocon::Impl::ConfigConcatenation
+  ConfigReference = Hocon::Impl::ConfigReference
   ConfigParseError = Hocon::ConfigError::ConfigParseError
   ConfigBugorBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+  ConfigBadPathError = Hocon::ConfigError::ConfigBadPathError
   SimpleConfigObject = Hocon::Impl::SimpleConfigObject
   SimpleConfigList = Hocon::Impl::SimpleConfigList
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
@@ -210,6 +214,14 @@ class Hocon::Impl::Parser
       end
     end
 
+    def self.token_to_substitution_expression(value_token)
+      expression = Tokens.get_substitution_path_expression(value_token)
+      path = Hocon::Impl::Parser.parse_path_expression(expression, value_token.origin)
+      optional = Tokens.get_substitution_optional(value_token)
+
+      Hocon::Impl::SubstitutionExpression.new(path, optional)
+    end
+
     # merge a bunch of adjacent values into one
     # value; change unquoted text into a string
     # value.
@@ -269,7 +281,8 @@ class Hocon::Impl::Parser
       elsif Tokens.unquoted_text?(t.token)
         v = Hocon::Impl::ConfigString.new(t.token.origin, Tokens.unquoted_text(t.token))
       elsif Tokens.substitution?(t.token)
-        v = ConfigReference.new(t.token.origin, token_to_substitution_expression(t.token))
+        v = ConfigReference.new(t.token.origin,
+                                self.class.token_to_substitution_expression(t.token))
       elsif t.token == Tokens::OPEN_CURLY
         v = parse_object(true)
       elsif t.token == Tokens::OPEN_SQUARE

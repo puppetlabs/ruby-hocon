@@ -126,7 +126,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     elsif consolidated.length == 1
       consolidated[0]
     else
-      merged_origin = SimpleConfigOrigin.merge_origins(consolidated)
+      merged_origin = SimpleConfigOrigin.merge_value_origins(consolidated)
       Hocon::Impl::ConfigConcatenation.new(merged_origin, consolidated)
     end
   end

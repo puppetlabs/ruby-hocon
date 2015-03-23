@@ -9,17 +9,37 @@ class Hocon::Impl::SimpleConfigOrigin
 
   MERGE_OF_PREFIX = "merge of "
 
-  def self.new_file(file_path)
-    url = URI.join('file:///', file_path)
-    self.new(file_path, -1, -1,
-             Hocon::Impl::OriginType::FILE,
-             url, nil)
+
+  def initialize(description, line_number, end_line_number,
+                 origin_type, url_or_nil, resource_or_nil, comments_or_nil)
+    if !description
+      raise ArgumentError, "description may not be nil"
+    end
+
+    @description = description
+    @line_number = line_number
+    @end_line_number = end_line_number
+    @origin_type = origin_type
+    @url_or_nil = url_or_nil
+    @resource_or_nil = resource_or_nil
+    @comments_or_nil = comments_or_nil
   end
+
+  attr_reader :description, :line_number, :end_line_number, :origin_type,
+              :url_or_nil, :resource_or_nil, :comments_or_nil
+
 
   def self.new_simple(description)
     self.new(description, -1, -1,
              Hocon::Impl::OriginType::GENERIC,
-             nil, nil)
+             nil, nil, nil)
+  end
+
+  def self.new_file(file_path)
+    url = URI.join('file:///', file_path)
+    self.new(file_path, -1, -1,
+             Hocon::Impl::OriginType::FILE,
+             url, nil, nil)
   end
 
   def self.remove_merge_of_prefix(desc)
@@ -80,6 +100,13 @@ class Hocon::Impl::SimpleConfigOrigin
           nil
         end
 
+    merged_resource =
+        if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(a.resource_or_nil, b.resource_or_nil)
+          a.resource_or_nil
+        else
+          nil
+        end
+
     if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(a.comments_or_nil, b.comments_or_nil)
       merged_comments = a.comments_or_nil
     else
@@ -94,7 +121,51 @@ class Hocon::Impl::SimpleConfigOrigin
 
     Hocon::Impl::SimpleConfigOrigin.new(
         merged_desc, merged_start_line, merged_end_line,
-        merged_type, merged_url, merged_comments)
+        merged_type, merged_url, merged_resource, merged_comments)
+  end
+
+  def self.similarity(a, b)
+    count = 0
+    if a.origin_type == b.origin_type
+      count += 1
+    end
+
+    if a.description == b.description
+      count += 1
+
+      # only count these if the description field (which is the file
+      # or resource name) also matches.
+      if a.line_number == b.line_number
+        count += 1
+      end
+
+      if a.end_line_number == b.end_line_number
+        count += 1
+      end
+
+      if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(a.url_or_nil, b.url_or_nil)
+        count += 1
+      end
+
+      if Hocon::Impl::ConfigImplUtil.equals_handling_nil?(a.resource_or_nil, b.resource_or_nil)
+        count += 1
+      end
+    end
+
+    count
+  end
+
+  def self.merge_three(a, b, c)
+    if similarity(a, b) >= similarity(b, c)
+      merge_two(merge_two(a, b), c)
+    else
+      merge_two(a, merge_two(b, c))
+    end
+  end
+
+  def self.merge_value_origins(stack)
+    origins = stack.map { |v| v.origin}
+    merge_origins(origins)
   end
 
   def self.merge_origins(stack)
@@ -119,22 +190,6 @@ class Hocon::Impl::SimpleConfigOrigin
   end
 
 
-  def initialize(description, line_number, end_line_number,
-                  origin_type, url, comments)
-    if !description
-      raise ArgumentError, "description may not be nil"
-    end
-
-    @description = description
-    @line_number = line_number
-    @end_line_number = end_line_number
-    @origin_type = origin_type
-    @url_or_nil = url
-    @comments_or_nil = comments
-  end
-
-  attr_reader :description, :line_number, :end_line_number, :origin_type,
-              :url_or_nil, :comments_or_nil
 
   def with_line_number(line_number)
     if (line_number == @line_number) and
@@ -143,7 +198,7 @@ class Hocon::Impl::SimpleConfigOrigin
     else
       Hocon::Impl::SimpleConfigOrigin.new(
           @description, line_number, line_number,
-          @origin_type, @url_or_nil, @comments_or_nil)
+          @origin_type, @url_or_nil, @resource_or_nil, @comments_or_nil)
     end
   end
 
@@ -153,7 +208,7 @@ class Hocon::Impl::SimpleConfigOrigin
     else
       Hocon::Impl::SimpleConfigOrigin.new(
           @description, @line_number, @end_line_number,
-          @origin_type, @url_or_nil, comments)
+          @origin_type, @url_or_nil, @resource_or_nil, comments)
     end
   end
 
