@@ -24,7 +24,7 @@ class Hocon::Impl::ResolveSource
 
     if @path_from_root == nil
       if parent.equal?(@root)
-        return ResolveSource.new(@root, Node.new(parent))
+        return self.class.new(@root, Node.new(parent))
       else
         if Hocon::Impl::ConfigImpl.trace_substitution_enabled
           # this hasDescendant check is super-expensive so it's a

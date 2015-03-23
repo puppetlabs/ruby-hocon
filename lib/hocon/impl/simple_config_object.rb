@@ -275,6 +275,10 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     self.class.new(origin, new_map, ResolveStatus.from_values(new_map.values), @ignores_fallbacks)
   end
 
+  def resolve_status
+    ResolveStatus.from_boolean(@resolved)
+  end
+
   def resolve_substitutions(context, source)
     if resolve_status == ResolveStatus::RESOLVED
       return ResolveResult.make(context, self)

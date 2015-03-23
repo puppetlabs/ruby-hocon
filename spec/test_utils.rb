@@ -121,11 +121,7 @@ module TestUtils
       ParseTest.new(false, true, "[${ ?foo}]"), # space before ? not allowed
       ParseTest.from_s(%q|{ "a" : [1,2], "b" : y${a}z }|), # trying to interpolate an array in a string
       ParseTest.from_s(%q|{ "a" : { "c" : 2 }, "b" : y${a}z }|), # trying to interpolate an object in a string
-
-      # TODO: this test is commented out because our parser doesn't properly
-      #  detect the cycle.  Need to debug and fix, and then uncomment this test.
-      #ParseTest.from_s(%q|{ "a" : ${a} }|), # simple cycle
-
+      ParseTest.from_s(%q|{ "a" : ${a} }|), # simple cycle
       ParseTest.from_s(%q|[ { "a" : 2, "b" : ${${a}} } ]|), # nested substitution
       ParseTest.from_s("[ = ]"), # = is not a valid token in unquoted text
       ParseTest.from_s("[ + ]"),
