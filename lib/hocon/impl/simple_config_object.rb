@@ -334,11 +334,11 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
           # not in the restrictToChild path
           v
         end
+      else
+        # no restrictToChild, resolve everything
+        result = @context.unrestricted.restrict(@original_restrict)
+        result.value
       end
-    else
-      # no restrictToChild, resolve everything
-      result = @context.unrestricted.restrict(@original_restrict)
-      result.value
     end
   end
 
