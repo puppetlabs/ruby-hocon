@@ -335,7 +335,7 @@ describe "ConfigConcatenation equality" do
   end
 end
 
-describe "ConfigDeflayedMerge equality" do
+describe "ConfigDelayedMerge equality" do
   s1 = TestUtils.subst("foo")
   s2 = TestUtils.subst("bar")
   a = ConfigDelayedMerge.new(TestUtils.fake_origin, [s1, s2])
@@ -442,6 +442,7 @@ describe "ConfigList" do
     expect(l.include? TestUtils.string_value("a")).to be_truthy
     expect(l.include_all?([TestUtils.string_value("a")])).to be_truthy
     expect(l.include_all?([TestUtils.string_value("b")])).to be_truthy
+    expect(l.include_all?(values)).to be_truthy
 
     expect(l.index(values[1])).to eq(1)
 
