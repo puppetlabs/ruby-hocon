@@ -15,6 +15,9 @@ require 'hocon/impl/config_impl_util'
 require 'hocon/impl/tokenizer'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/path'
+require 'hocon/impl/url'
+require 'hocon/impl/config_reference'
+require 'hocon/impl/substitution_expression'
 
 class Hocon::Impl::Parser
   
@@ -22,7 +25,10 @@ class Hocon::Impl::Parser
   ConfigSyntax = Hocon::ConfigSyntax
   ConfigValueType = Hocon::ConfigValueType
   ConfigConcatenation = Hocon::Impl::ConfigConcatenation
+  ConfigReference = Hocon::Impl::ConfigReference
   ConfigParseError = Hocon::ConfigError::ConfigParseError
+  ConfigBugorBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+  ConfigBadPathError = Hocon::ConfigError::ConfigBadPathError
   SimpleConfigObject = Hocon::Impl::SimpleConfigObject
   SimpleConfigList = Hocon::Impl::SimpleConfigList
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
@@ -208,6 +214,14 @@ class Hocon::Impl::Parser
       end
     end
 
+    def self.token_to_substitution_expression(value_token)
+      expression = Tokens.get_substitution_path_expression(value_token)
+      path = Hocon::Impl::Parser.parse_path_expression(expression, value_token.origin)
+      optional = Tokens.get_substitution_optional(value_token)
+
+      Hocon::Impl::SubstitutionExpression.new(path, optional)
+    end
+
     # merge a bunch of adjacent values into one
     # value; change unquoted text into a string
     # value.
@@ -232,7 +246,7 @@ class Hocon::Impl::Parser
         end
 
         if v.nil?
-          raise ConfigBugError("no value")
+          raise ConfigBugOrBrokenError("no value")
         end
 
         if values.nil?
@@ -267,7 +281,8 @@ class Hocon::Impl::Parser
       elsif Tokens.unquoted_text?(t.token)
         v = Hocon::Impl::ConfigString.new(t.token.origin, Tokens.unquoted_text(t.token))
       elsif Tokens.substitution?(t.token)
-        v = ConfigReference.new(t.token.origin, token_to_substitution_expression(t.token))
+        v = ConfigReference.new(t.token.origin,
+                                self.class.token_to_substitution_expression(t.token))
       elsif t.token == Tokens::OPEN_CURLY
         v = parse_object(true)
       elsif t.token == Tokens::OPEN_SQUARE
@@ -342,6 +357,107 @@ class Hocon::Impl::Parser
 
         put_back(t)
         Hocon::Impl::Parser.parse_path_expression(expression, line_origin)
+      end
+    end
+
+    def unquoted_whitespace?(t)
+      if !(Tokens.unquoted_text?(t))
+        return false
+      end
+
+      s = Tokens.unquoted_text(t)
+      
+    end
+
+    def parse_include(values)
+      t = next_token_ignoring_newline
+      while unquoted_whitespace?(t.token)
+        t = next_token_ignoring_newline
+      end
+
+      obj = nil
+
+      # we either have a quoted string or the "file()" syntax
+      if Tokens.unquoted_text?(t.token)
+        kind = Tokens.unquoted_text(t.token)
+
+        if kind == "url("
+        elsif kind == "file("
+        elsif kind == "classpath("
+        else
+          raise parse_error("expecting include parameter to be quoted filename, file(), classpath(), or url(). No spaces are allowed before the open paren. Not expecting: " + t)
+        end
+
+        # skip space inside parens
+        t = next_token_ignoring_newline
+        while unquoted_whitespace?(t.token)
+          t = next_token_ignoring_newline
+        end
+
+        # quoted string
+        name = nil
+        if Tokens.value_with_type?(t.token, ConfigValueType::String)
+          name = Tokens.get_value(t.token).unwrapped
+        else
+          raise parse_error("expecting a quoted string inside file(), classpath(), or url(), rather than: " + t)
+        end
+
+        # skip space after string, inside parens
+        t = next_token_ignoring_newline
+        while unquoted_whitespace(t.token)
+          t = next_token_ignoring_newline
+        end
+
+        if Tokens.unquoted_text?(t.token) && (Tokens.unquoted_text(t.token) == ")")
+          # OK, close paren
+        else
+          raise parse_error("expecting a close parentheses ')' here, not: " + t)
+        end
+
+        if kind == "url("
+          url = nil
+          begin
+            url = Hocon::Impl::Url.new(name)
+          rescue Hocon::Impl::Url::MalformedUrlError => e
+            raise parse_error("include url() specifies an invalid URL: " + name, e)
+          end
+          obj = @includer.include_url(@include_context, url)
+        elsif kind == "file("
+          obj = @includer.include_file(@include_context, File.new(name))
+        elsif kind == "classpath("
+          obj = @includer.include_resources(@include_context, name)
+        else
+          raise ConfigBugOrBrokenError, "should not be reached"
+        end
+      elsif Tokens.value_with_type?(t.token, ConfigValueType::STRING)
+        name = Tokens.value(t.token).unwrapped
+        obj = @includer.include(@include_context, name)
+      else
+        raise parse_error("include keyword is not followed by a quoted string, but by: " + t.to_s)
+      end
+
+      # we really should make this work, but for now throwing an
+      # exception is better than producing an incorrect result.
+      # See https://github.com/typesafehub/config/issues/160
+      if @array_count > 0 && (obj.resolve_status != ResolveStatus::RESOLVED)
+        raise parse_error("Due to current limitations of the config parser, when an include statement is nested inside a list value, " +
+          "${} substitutions inside the included file cannot be resolved correctly. Either move the include outside of the list value or " +
+          "remove the ${} statements from the included file.")
+      end
+
+      if !(@path_stack.is_empty?)
+        prefix = full_current_path
+        obj = obj.relativized(prefix)
+      end
+
+      obj.key_set.each do |key|
+        v = obj.get(key)
+        existing = values.get(key)
+        if !(existing.nil?)
+          values.put(key, v.with_fallback(existing))
+        else
+          values.put(key, v)
+        end
       end
     end
     
@@ -454,7 +570,7 @@ class Hocon::Impl::Parser
             values[key] = new_value
           else
             if @flavor == ConfigSyntax::JSON
-              raise ConfigBugError, "somehow got multi-element path in JSON mode"
+              raise ConfigBugOrBrokenError, "somehow got multi-element path in JSON mode"
             end
 
             obj = create_value_under_path(remaining, new_value)
@@ -566,7 +682,7 @@ class Hocon::Impl::Parser
     def parse
       t = next_token_ignoring_newline
       if t.token != Tokens::START
-        raise ConfigBugError, "token stream did not begin with START, had #{t}"
+        raise ConfigBugOrBrokenError, "token stream did not begin with START, had #{t}"
       end
 
       t = next_token_ignoring_newline
@@ -601,7 +717,7 @@ class Hocon::Impl::Parser
 
     def put_back(token)
       if Tokens.comment?(token.token)
-        raise ConfigBugError, "comment token should have been stripped before it was available to put back"
+        raise ConfigBugOrBrokenError, "comment token should have been stripped before it was available to put back"
       end
       @buffer.push(token)
     end
@@ -655,7 +771,7 @@ class Hocon::Impl::Parser
       else
         if @syntax == ConfigSyntax::JSON
           if Tokens.unquoted_text?(t)
-            raise parse_error(add_key_name("Token not allowed in valid JSON: '#{Tokens.get_unquoted_text(t)}'"))
+            raise parse_error(add_key_name("Token not allowed in valid JSON: '#{Tokens.unquoted_text(t)}'"))
           elsif Tokens.substitution?(t)
             raise parse_error(add_key_name("Substitutions (${} syntax) not allowed in JSON"))
           end
@@ -793,7 +909,7 @@ class Hocon::Impl::Parser
         # comments are supposed to get attached to a token,
         # not put back in the buffer. Assert this as an invariant.
         if Tokens.comment?(@buffer.last.token)
-          raise ConfigBugError, "comment token should not have been in buffer: #{@buffer}"
+          raise ConfigBugOrBrokenError, "comment token should not have been in buffer: #{@buffer}"
         end
         with_preceding_comments
       end

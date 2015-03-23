@@ -39,7 +39,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
 
   def merge_origins(stack)
     if stack.empty?
-      raise ConfigBugError, "can't merge origins on empty list"
+      raise ConfigBugOrBrokenError, "can't merge origins on empty list"
     end
     origins = []
     first_origin = nil

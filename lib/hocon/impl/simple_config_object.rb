@@ -29,7 +29,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
                   ignores_fallbacks = false)
     super(origin)
     if value.nil?
-      raise ConfigBugError, "creating config object with null map"
+      raise ConfigBugOrBrokenError, "creating config object with null map"
     end
     @value = value
     @resolved = (status == Hocon::Impl::ResolveStatus::RESOLVED)
@@ -37,7 +37,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
     # Kind of an expensive debug check. Comment out?
     if status != Hocon::Impl::ResolveStatus.from_values(value.values)
-      raise ConfigBugError, "Wrong resolved status on #{self}"
+      raise ConfigBugOrBrokenError, "Wrong resolved status on #{self}"
     end
   end
 
@@ -63,7 +63,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     require_not_ignoring_fallbacks
 
     unless abstract_fallback.is_a?(Hocon::Impl::SimpleConfigObject)
-      raise ConfigBugError, "should not be reached (merging non-SimpleConfigObject)"
+      raise ConfigBugOrBrokenError, "should not be reached (merging non-SimpleConfigObject)"
     end
 
     fallback = abstract_fallback
@@ -273,6 +273,10 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       new_map[key] = v
     end
     self.class.new(origin, new_map, ResolveStatus.from_values(new_map.values), @ignores_fallbacks)
+  end
+
+  def resolve_status
+    ResolveStatus.from_boolean(@resolved)
   end
 
   def resolve_substitutions(context, source)

@@ -30,9 +30,7 @@ module TestUtils
       if e.is_a?(exception_type)
         thrown = e
       else
-        # puts "ERROR!: #{e}"
-        # puts e.backtrace
-        raise ArgumentError, "Expected exception #{exception_type} was not thrown, got #{e}"
+        raise ArgumentError, "Expected exception #{exception_type} was not thrown, got #{e}\n#{e.backtrace.join("\n")}"
       end
     end
     if thrown.nil?
@@ -118,18 +116,13 @@ module TestUtils
       ParseTest.from_s("[${]"), # unclosed substitution
       ParseTest.from_s("[$]"), # '$' by itself
       ParseTest.from_s("[$  ]"), # '$' by itself with spaces after
-
-      # TODO: these are commented out because they need `ConfigReference`, which we
-      #  don't have yet.
-      #
-      # ParseTest.from_s("[${}]"), # empty substitution (no path)
-      # ParseTest.from_s("[${?}]"), # no path with ? substitution
-      # ParseTest.new(false, true, "[${ ?foo}]"), # space before ? not allowed
-      # ParseTest.from_s(%q|{ "a" : [1,2], "b" : y${a}z }|), # trying to interpolate an array in a string
-      # ParseTest.from_s(%q|{ "a" : { "c" : 2 }, "b" : y${a}z }|), # trying to interpolate an object in a string
-      # ParseTest.from_s(%q|{ "a" : ${a} }|), # simple cycle
-      # ParseTest.from_s(%q|[ { "a" : 2, "b" : ${${a}} } ]|), # nested substitution
-      #
+      ParseTest.from_s("[${}]"), # empty substitution (no path)
+      ParseTest.from_s("[${?}]"), # no path with ? substitution
+      ParseTest.new(false, true, "[${ ?foo}]"), # space before ? not allowed
+      ParseTest.from_s(%q|{ "a" : [1,2], "b" : y${a}z }|), # trying to interpolate an array in a string
+      ParseTest.from_s(%q|{ "a" : { "c" : 2 }, "b" : y${a}z }|), # trying to interpolate an object in a string
+      ParseTest.from_s(%q|{ "a" : ${a} }|), # simple cycle
+      ParseTest.from_s(%q|[ { "a" : 2, "b" : ${${a}} } ]|), # nested substitution
       ParseTest.from_s("[ = ]"), # = is not a valid token in unquoted text
       ParseTest.from_s("[ + ]"),
       ParseTest.from_s("[ # ]"),
@@ -151,14 +144,9 @@ module TestUtils
       ParseTest.from_s("${ #comment }"),
       ParseTest.from_s("[ // comment ]"),
       ParseTest.from_s("${ // comment }"),
-
-      # TODO: these are commented out because they require support for
-      #  `parse_include`, which we don't have yet.
-      #
-      # ParseTest.from_s("{ include \"bar\" : 10 }"), # include with a value after it
-      # ParseTest.from_s("{ include foo }"), # include with unquoted string
-      # ParseTest.from_s("{ include : { \"a\" : 1 } }"), # include used as unquoted key
-
+      ParseTest.from_s("{ include \"bar\" : 10 }"), # include with a value after it
+      ParseTest.from_s("{ include foo }"), # include with unquoted string
+      ParseTest.from_s("{ include : { \"a\" : 1 } }"), # include used as unquoted key
       ParseTest.from_s("a="), # no value
       ParseTest.from_s("a:"), # no value with colon
       ParseTest.from_s("a= "), # no value with whitespace after
@@ -173,11 +161,11 @@ module TestUtils
     rescue => e
       tokens =
           begin
-            "tokens: " + TestUtils.tokenize_as_list(s)
+            "tokens: " + TestUtils.tokenize_as_list(s).join("\n")
           rescue => tokenize_ex
-            "tokenizer failed: #{tokenize_ex}"
+            "tokenizer failed: #{tokenize_ex}\n#{tokenize_ex.backtrace.join("\n")}"
           end
-      raise ArgumentError, "#{parser_name} parser did wrong thing on '#{s}', #{tokens}; error: #{e}"
+      raise ArgumentError, "#{parser_name} parser did wrong thing on '#{s}', #{tokens}; error: #{e}\n#{e.backtrace.join("\n")}"
     end
   end
 

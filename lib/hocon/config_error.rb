@@ -22,6 +22,12 @@ class Hocon::ConfigError < StandardError
     end
   end
 
+  class ConfigIOError < Hocon::ConfigError
+    def initialize(origin, message, cause = nil)
+      super(origin, message, cause)
+    end
+  end
+
   class ConfigParseError < Hocon::ConfigError
   end
 

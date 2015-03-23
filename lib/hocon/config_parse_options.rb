@@ -16,10 +16,6 @@ class Hocon::ConfigParseOptions
     @includer = includer
   end
 
-  def allow_missing?
-    @allow_missing
-  end
-
   def set_syntax(syntax)
     if @syntax == syntax
       self
@@ -40,6 +36,21 @@ class Hocon::ConfigParseOptions
                                     @allow_missing,
                                     @includer)
     end
+  end
+
+  def set_allow_missing(allow_missing)
+    if allow_missing? == allow_missing
+      self
+    else
+      Hocon::ConfigParseOptions.new(@syntax,
+                                    @origin_description,
+                                    allow_missing,
+                                    @includer)
+    end
+  end
+
+  def allow_missing?
+    @allow_missing
   end
 
   def set_includer(includer)

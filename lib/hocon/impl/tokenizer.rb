@@ -9,6 +9,7 @@ require 'forwardable'
 
 class Hocon::Impl::Tokenizer
   Tokens = Hocon::Impl::Tokens
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
   class TokenizerProblemError < StandardError
     def initialize(problem)
@@ -89,7 +90,7 @@ class Hocon::Impl::Tokenizer
 
     def self.problem(origin, what, message, suggest_quotes, cause)
       if what.nil? || message.nil?
-        throw Hocon::ConfigError::ConfigBugOrBrokenError.new("internal error, creating bad TokenizerProblemError")
+        raise ConfigBugOrBrokenError.new("internal error, creating bad TokenizerProblemError")
       end
       TokenizerProblemError.new(Tokens.new_problem(origin, what, message, suggest_quotes, cause))
     end
@@ -147,7 +148,7 @@ class Hocon::Impl::Tokenizer
 
     def put_back(c)
       if @buffer.length > 2
-        raise ConfigBugError, "bug: putBack() three times, undesirable look-ahead"
+        raise ConfigBugOrBrokenError, "bug: putBack() three times, undesirable look-ahead"
       end
       @buffer.push(c)
     end
@@ -227,7 +228,7 @@ class Hocon::Impl::Tokenizer
       if first_char == '/'
         discard = next_char_raw
         if discard != '/'
-          raise ConfigBugError, "called pullComment but // not seen"
+          raise ConfigBugOrBrokenError, "called pullComment but // not seen"
         end
         double_slash = true
       end
@@ -519,7 +520,7 @@ class Hocon::Impl::Tokenizer
         end
 
         if t.nil?
-          raise ConfigBugError, "bug: failed to generate next token"
+          raise ConfigBugOrBrokenError, "bug: failed to generate next token"
         end
 
         t
@@ -544,7 +545,7 @@ class Hocon::Impl::Tokenizer
           @tokens.push(e.problem)
         end
         if @tokens.empty?
-          raise ConfigBugError, "bug: tokens queue should not be empty here"
+          raise ConfigBugOrBrokenError, "bug: tokens queue should not be empty here"
         end
       end
       t

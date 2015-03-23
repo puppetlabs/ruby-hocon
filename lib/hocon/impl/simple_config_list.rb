@@ -20,7 +20,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
 
     # kind of an expensive debug check (makes this constructor pointless)
     if status != ResolveStatus.from_values(value)
-      raise ConfigBugError, "SimpleConfigList created with wrong resolve status: #{self}"
+      raise ConfigBugOrBrokenError, "SimpleConfigList created with wrong resolve status: #{self}"
     end
   end
 

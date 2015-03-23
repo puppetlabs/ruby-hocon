@@ -20,6 +20,8 @@ class Hocon::Impl::Tokens
   ConfigNull = Hocon::Impl::ConfigNull
   ConfigBoolean = Hocon::Impl::ConfigBoolean
 
+  ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+
   START = Token.new_without_origin(TokenType::START, "start of file", "")
   EOF = Token.new_without_origin(TokenType::EOF, "end of file", "")
   COMMA = Token.new_without_origin(TokenType::COMMA, "','", ",")
@@ -76,6 +78,10 @@ class Hocon::Impl::Tokens
       super(TokenType::SUBSTITUTION, origin)
       @optional = optional
       @value = expression
+    end
+
+    def optional?
+      @optional
     end
 
     attr_reader :value
@@ -223,7 +229,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.message
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem message from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem message from #{token}")
     end
   end
 
@@ -231,7 +237,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.suggest_quotes
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem suggest_quotes from #{token}")
     end
   end
 
@@ -239,7 +245,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Problem)
       token.cause
     else
-      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("tried to get problem cause from #{token}")
+      raise ConfigBugOrBrokenError.new("tried to get problem cause from #{token}")
     end
   end
 
@@ -307,7 +313,7 @@ class Hocon::Impl::Tokens
     if comment?(token)
       token.text
     else
-      raise ConfigBugError, "tried to get comment text from #{token}"
+      raise ConfigBugOrBrokenError, "tried to get comment text from #{token}"
     end
   end
 
@@ -319,6 +325,22 @@ class Hocon::Impl::Tokens
     token.is_a?(Substitution)
   end
 
+  def self.get_substitution_path_expression(token)
+    if token.is_a?(Substitution)
+      token.value
+    else
+      raise ConfigBugOrBrokenError, "tried to get substitution from #{token}"
+    end
+  end
+
+  def self.get_substitution_optional(token)
+    if token.is_a?(Substitution)
+      token.optional?
+    else
+      raise ConfigBugOrBrokenError, "tried to get substitution optionality from #{token}"
+    end
+  end
+
   def self.unquoted_text?(token)
     token.is_a?(UnquotedText)
   end
@@ -327,7 +349,7 @@ class Hocon::Impl::Tokens
     if unquoted_text?(token)
       token.value
     else
-      raise ConfigBugError, "tried to get unquoted text from #{token}"
+      raise ConfigBugOrBrokenError, "tried to get unquoted text from #{token}"
     end
   end
 
@@ -339,7 +361,7 @@ class Hocon::Impl::Tokens
     if token.is_a?(Value)
       token.value
     else
-      raise ConfigBugError, "tried to get value of non-value token #{token}"
+      raise ConfigBugOrBrokenError, "tried to get value of non-value token #{token}"
     end
   end
 
