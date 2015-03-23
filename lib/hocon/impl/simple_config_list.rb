@@ -5,8 +5,11 @@ require 'hocon/impl/resolve_status'
 require 'hocon/config_value_type'
 require 'hocon/config_error'
 require 'hocon/impl/abstract_config_object'
+require 'forwardable'
 
 class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
+  extend Forwardable
+
   ResolveStatus = Hocon::Impl::ResolveStatus
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
@@ -20,6 +23,8 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       raise ConfigBugError, "SimpleConfigList created with wrong resolve status: #{self}"
     end
   end
+
+  def_delegators :@value, :[], :include?, :empty?, :size, :index, :rindex, :each, :map
 
   def value_type
     Hocon::ConfigValueType::LIST
@@ -146,5 +151,9 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
 
   def new_copy(origin)
     Hocon::Impl::SimpleConfigList.new(origin, @value)
+  end
+
+  def include_all?(value_list)
+    value_list.all? { |v| @value.include?(v)}
   end
 end

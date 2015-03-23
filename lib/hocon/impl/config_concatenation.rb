@@ -18,6 +18,31 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
+  def initialize(origin, pieces)
+    super(origin)
+    @pieces = pieces
+
+    if pieces.size < 2
+      raise ConfigBugError, "Created concatenation with less than 2 items: #{self}"
+    end
+
+    had_unmergeable = false
+    pieces.each do |p|
+      if p.is_a?(Hocon::Impl::ConfigConcatenation)
+        raise ConfigBugError, "ConfigConcatenation should never be nested: #{self}"
+      end
+      if p.is_a?(Unmergeable)
+        had_unmergeable = true
+      end
+    end
+
+    unless had_unmergeable
+      raise ConfigBugError, "Created concatenation without an unmergeable in it: #{self}"
+    end
+  end
+
+  attr_reader :pieces
+
   #
   # Add left and right, or their merger, to builder
   #
@@ -189,5 +214,27 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     # is self-referential we have to look lower in the merge stack
     # for its value.
     false
+  end
+
+  def can_equal(other)
+    other.is_a? Hocon::Impl::ConfigConcatenation
+  end
+
+  def ==(other)
+    if other.is_a? Hocon::Impl::ConfigConcatenation
+      can_equal(other) && @pieces == other.pieces
+    else
+      false
+    end
+  end
+
+  def hash
+    @pieces.hash
+  end
+
+  def render_value_to_sb(sb, indent, at_root, options)
+    @pieces.each do |piece|
+      piece.render_value_to_sb(sb, indent, at_root, options)
+    end
   end
 end

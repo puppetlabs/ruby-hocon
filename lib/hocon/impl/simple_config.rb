@@ -23,6 +23,7 @@ class Hocon::Impl::SimpleConfig
   def initialize(object)
     @object = object
   end
+  attr_reader :object
 
   def root
     @object
@@ -54,12 +55,12 @@ class Hocon::Impl::SimpleConfig
     if v.value_type == ConfigValueType::NULL
       raise ConfigNullError.new(v.origin,
                                 (ConfigNullError.make_message(original_path.render,
-                                                              (not expected.nil?) ? expected.name : nil)),
+                                                              (not expected.nil?) ? ConfigValueType.name(expected) : nil)),
                                 nil)
     elsif (not expected.nil?) && v.value_type != expected
       raise ConfigWrongTypeError.new(v.origin,
-                                     "#{original_path.render} has type #{v.value_type.name} " +
-                                         "rather than #{expected.name}",
+                                     "#{original_path.render} has type #{ConfigValueType.name(v.value_type)} " +
+                                         "rather than #{ConfigValueType.name(expected)}",
                                      nil)
     else
       return v
@@ -88,12 +89,34 @@ class Hocon::Impl::SimpleConfig
     find3(path, expected, path)
   end
 
+  def ==(other)
+    if other.is_a? Hocon::Impl::SimpleConfig
+      @object == other.object
+    else
+      false
+    end
+  end
+
+  def hash
+    41 * @object.hash
+  end
+
   def get_value(path)
     parsed_path = Path.new_path(path)
     find(@object, parsed_path, nil, parsed_path)
   end
 
-  def get_string(path)
+  def get_config_number(path_expression)
+    path = Path.new_path(path_expression)
+    v = find(@object, path, ConfigValueType::NUMBER, path)
+    v.unwrapped
+  end
+
+  def get_int(path)
+    get_config_number(path)
+  end
+
+  def get_string(path)                                                                                                                                                                                                                                                                 
     v = find2(path, ConfigValueType::STRING)
     v.unwrapped
   end

@@ -1,17 +1,19 @@
 # encoding: utf-8
 
 require 'hocon/impl'
+require 'hocon/impl/config_string'
 require 'hocon/config_value_type'
 
 class Hocon::Impl::DefaultTransformer
 
   ConfigValueType = Hocon::ConfigValueType
+  ConfigString = Hocon::Impl::ConfigString
 
   def self.transform(value, requested)
     if value.value == ConfigValueType::STRING
       s = value.unwrapped
       case requested
-        when NUMBER
+        when ConfigValueType::NUMBER
           begin
             v = Integer(s)
             return ConfigInt.new(value.origin, v, s)
@@ -24,21 +26,21 @@ class Hocon::Impl::DefaultTransformer
           rescue ArgumentError
             # oh well.
           end
-        when NULL
+        when ConfigValueType::NULL
           if s == "null"
             return ConfigNull.new(value.origin)
           end
-        when BOOLEAN
+        when ConfigValueType::BOOLEAN
           if s == "true" || s == "yes" || s == "on"
             return ConfigBoolean.new(value.origin, true)
           elsif s == "false" || s == "no" || s == "off"
             return ConfigBoolean.new(value.origin, false)
           end
-        when LIST
+        when ConfigValueType::LIST
           # can't go STRING to LIST automatically
-        when OBJECT
+        when ConfigValueType::OBJECT
           # can't go STRING to OBJECT automatically
-        when STRING
+        when ConfigValueType::STRING
           # no-op STRING to STRING
       end
     elsif requested == ConfigValueType::STRING
@@ -46,17 +48,20 @@ class Hocon::Impl::DefaultTransformer
       # get a missing-value error if you tried to get a null value
       # as a string.
       case value.value_type
-        # NUMBER case removed since you can't fallthrough in a ruby case statement
-        when Hocon::ConfigValueType::BOOLEAN
+        # Ruby note: can't fall through in ruby. In the java code, NUMBER
+        # just rolls over to the BOOLEAN case
+        when ConfigValueType::NUMBER
           return ConfigString.new(value.origin, value.transform_to_string)
-        when Hocon::ConfigValueType::NULL
+        when ConfigValueType::BOOLEAN
+          return ConfigString.new(value.origin, value.transform_to_string)
+        when ConfigValueType::NULL
           # want to be sure this throws instead of returning "null" as a
           # string
-        when Hocon::ConfigValueType::OBJECT
+        when ConfigValueType::OBJECT
           # no OBJECT to STRING automatically
-        when Hocon::ConfigValueType::LIST
+        when ConfigValueType::LIST
           # no LIST to STRING automatically
-        when Hocon::ConfigValueType::STRING
+        when ConfigValueType::STRING
           # no-op STRING to STRING
       end
     elsif requested == ConfigValueType::LIST && value.value_type == ConfigValueType::OBJECT
