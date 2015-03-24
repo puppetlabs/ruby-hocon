@@ -5,6 +5,7 @@ require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/abstract_config_object'
 require 'hocon/impl/resolve_status'
 require 'hocon/impl/resolve_result'
+require 'hocon/impl/path'
 require 'hocon/config_error'
 require 'set'
 require 'forwardable'
@@ -17,16 +18,12 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
   ResolveStatus = Hocon::Impl::ResolveStatus
   ResolveResult = Hocon::Impl::ResolveResult
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
+  Path = Hocon::Impl::Path
 
-  def self.empty_missing(base_origin)
-    self.new(
-        Hocon::Impl::SimpleConfigOrigin.new_simple("#{base_origin.description} (not found)"),
-        {})
-  end
 
   def initialize(origin, value,
-                  status = Hocon::Impl::ResolveStatus.from_values(value.values),
-                  ignores_fallbacks = false)
+                 status = Hocon::Impl::ResolveStatus.from_values(value.values),
+                 ignores_fallbacks = false)
     super(origin)
     if value.nil?
       raise ConfigBugOrBrokenError, "creating config object with null map"
@@ -46,9 +43,161 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
   def_delegators :@value, :[], :has_key?, :has_value?, :empty?, :size, :keys, :values, :each, :map
 
 
+  def with_only_key(key)
+    with_only_path(Path.new_key(key))
+  end
+
+  def without_key(key)
+    without_path(Path.new_key(key))
+  end
+
+  # gets the object with only the path if the path
+  # exists, otherwise null if it doesn't. this ensures
+  # that if we have { a : { b : 42 } } and do
+  # withOnlyPath("a.b.c") that we don't keep an empty
+  # "a" object.
+  def with_only_path_or_nil(path)
+    key = path.first
+    path_next = path.remainder
+    v = value[key]
+
+    if ! path_next.nil?
+      if (!v.nil?) && (v.is_a?(Hocon::Impl::AbstractConfigObject))
+        v = v.with_only_path_or_nil(path_next)
+      else
+        # if the path has more elements but we don't have an object,
+        # then the rest of the path does not exist.
+        v = nil
+      end
+    end
+
+    if v.nil?
+      nil
+    else
+      self.class.new(origin, {key => v}, v.resolve_status, @ignores_fallbacks)
+    end
+  end
+
+  def with_only_path(path)
+    o = with_only_path_or_nil(path)
+    if o.nil?
+      self.class.new(origin, {}, ResolveStatus::RESOLVED, @ignores_fallbacks)
+    else
+      o
+    end
+  end
+
+  def without_path(path)
+    key = path.first
+    remainder = path.remainder
+    v = @value[key]
+
+    if (not v.nil?) && (not remainder.nil?) && v.is_a?(Hocon::Impl::AbstractConfigObject)
+      v = v.without_path(remainder)
+      updated = @value.clone
+      updated[key] = v
+      Hocon::Impl::SimpleConfigObject.new(origin,
+                                          updated,
+                                          ResolveStatus.from_values(updated.values), @ignores_fallbacks)
+    elsif (not remainder.nil?) || v.nil?
+      return self
+    else
+      smaller = Hash.new
+      @value.each do |old_key, old_value|
+        unless old_key == key
+          smaller[old_key] = old_value
+        end
+      end
+      Hocon::Impl::SimpleConfigObject.new(origin,
+                                          smaller,
+                                          ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
+    end
+  end
+
+  def with_value(path, v)
+    key = path.first
+    remainder = path.remainder
+
+    if remainder.nil?
+      with_key_value(key, v)
+    else
+      child = @value[key]
+      if (not child.nil?) && child.is_a?(Hocon::Impl::AbstractConfigObject)
+        return with_key_value(key, child.with_value(remainder, v))
+      else
+        subtree = v.at_path(
+            SimpleConfigOrigin.new_simple("with_value(#{remainder.render})"), remainder)
+        with_key_value(key, subtree.root)
+      end
+    end
+  end
+
+  def with_key_value(key, v)
+    if v.nil?
+      raise ConfigBugOrBrokenError.new("Trying to store null ConfigValue in a ConfigObject")
+    end
+
+    new_map = Hash.new
+    if @value.empty?
+      new_map[key] = v
+    else
+      new_map = @value.clone
+      new_map[key] = v
+    end
+    self.class.new(origin, new_map, ResolveStatus.from_values(new_map.values), @ignores_fallbacks)
+  end
+
+  def attempt_peek_with_partial_resolve(key)
+    @value[key]
+  end
+
   def new_copy_with_status(new_status, new_origin, new_ignores_fallbacks = nil)
-    Hocon::Impl::SimpleConfigObject.new(new_origin,
-              @value, new_status, new_ignores_fallbacks)
+    self.class.new(new_origin, @value, new_status, new_ignores_fallbacks)
+  end
+
+  def with_fallbacks_ignored()
+    if @ignores_fallbacks
+      self
+    else
+      new_copy_with_status(resolve_status, origin, true)
+    end
+  end
+
+  def resolve_status
+    ResolveStatus.from_boolean(@resolved)
+  end
+
+  def replace_child(child, replacement)
+    new_children = value.clone
+    new_children.each do |k, v|
+      if v == child
+        if ! replacement.nil?
+          new_children[k] = replacement
+        else
+          new_children.delete(k)
+        end
+
+        self.class.new(origin, new_children, ResolveStatus.from_values(new_children.values),
+                       @ignores_fallbacks)
+      end
+    end
+    raise ConfigBugOrBroken, "SimpleConfigObject.replaceChild did not find #{child} in #{self}"
+  end
+
+  def has_descendant(descendant)
+    value.values.each do |child|
+      if child.equal?(descendant)
+        return true
+      end
+    end
+    # now do the expensive search
+    value.values.each do |child|
+      if child.is_a?(Hocon::Impl::Container) && child.has_descendant(descendant)
+        return true
+      end
+    end
+
+    false
   end
 
   def ignores_fallbacks?
@@ -98,12 +247,159 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
     if changed
       Hocon::Impl::SimpleConfigObject.new(merge_origins([self, fallback]),
-                             merged, new_resolve_status,
-                             new_ignores_fallbacks)
+                                          merged, new_resolve_status,
+                                          new_ignores_fallbacks)
     elsif (new_resolve_status != resolve_status) || (new_ignores_fallbacks != ignores_fallbacks?)
       newCopy(new_resolve_status, origin, new_ignores_fallbacks)
     else
       self
+    end
+  end
+
+  def modify(modifier)
+    begin
+      modify_may_throw(modifier)
+    rescue Hocon::ConfigError => e
+      raise e
+    rescue => e
+      raise ConfigBugOrBrokenError.new("unexpected exception", e)
+    end
+  end
+
+  def modify_may_throw(modifier)
+    changes = nil
+    keys.each do |k|
+      v = value[k]
+      # "modified" may be null, which means remove the child;
+      # to do that we put null in the "changes" map.
+      modified = modifier.modify_child_may_throw(k, v)
+      if ! modified.equal?(v)
+        if changes.nil?
+          changes = {}
+        end
+        changes[k] = modified
+      end
+    end
+    if changes.nil?
+      self
+    else
+      modified = {}
+      saw_unresolved = false
+      keys.each do |k|
+        if changes.has_key?(k)
+          new_value = changes[k]
+          if ! new_value.nil?
+            modified[k] = new_value
+            if new_value.resolve_status == ResolveStatus::UNRESOLVED
+              saw_unresolved = true
+            end
+          else
+            # remove this child; don't put it in the new map
+          end
+        else
+          new_value = value[k]
+          modified[k] = new_value
+          if new_value.resolve_status == ResolveStatus::UNRESOLVED
+            saw_unresolved = true
+          end
+        end
+      end
+      self.class.new(origin, modified,
+                     saw_unresolved ? ResolveStatus::UNRESOLVED : ResolveStatus::RESOLVED,
+                     @ignores_fallbacks)
+    end
+  end
+
+
+  class ResolveModifier
+    def initialize(context, source)
+      @context = context
+      @source = source
+      @original_restrict = context.restrict_to_child
+    end
+
+    def modify_child_may_throw(key, v)
+      if @context.restricted_to_child?
+        if key == @context.restrict_to_child.first
+          remainder = @context.restrict_to_child.remainder
+          if remainder.nil?
+            result = @context.restrict(remainder).resolve(v, @source)
+            @context = result.context.unrestricted.restrict(@original_restrict)
+            result.value
+          else
+            # we don't want to resolve the leaf child
+            v
+          end
+        else
+          # not in the restrictToChild path
+          v
+        end
+      else
+        # no restrictToChild, resolve everything
+        result = @context.unrestricted.resolve(v, @source)
+        @context = result.context.unrestricted.restrict(@original_restrict)
+        result.value
+      end
+    end
+  end
+
+  def resolve_substitutions(context, source)
+    if resolve_status == ResolveStatus::RESOLVED
+      return ResolveResult.make(context, self)
+    end
+
+    source_with_parent = source.push_parent(self)
+
+    begin
+      modifier = ResolveModifier.new(context, source_with_parent)
+
+      value = modify_may_throw(modifier)
+      ResolveResult.make(modifier.context, value)
+
+    rescue NotPossibleToResolve => e
+      raise e
+    rescue Hocon::ConfigError => e
+      raise e
+    rescue Exception => e
+      raise ConfigBugOrBrokenError.new("unexpected exception", e)
+    end
+  end
+
+  def relativized(prefix)
+    modifier = Class.new do
+      extend Hocon::Impl::AbstractConfigValue::NoExceptionsModifier
+
+      def modify_child(key, v)
+        v.relativized(prefix)
+      end
+    end
+
+    modify(modifier.new)
+  end
+
+  class RenderComparator
+    def self.all_digits?(s)
+      s =~ /^\d+$/
+    end
+
+    # This is supposed to sort numbers before strings,
+    # and sort the numbers numerically. The point is
+    # to make objects which are really list-like
+    # (numeric indices) appear in order.
+    def self.sort(arr)
+      arr.sort do |a, b|
+        a_digits = all_digits?(a)
+        b_digits = all_digits?(b)
+        if a_digits && b_digits
+          Integer(a) <=> Integer(b)
+        elsif a_digits
+          -1
+        elsif b_digits
+          1
+        else
+          a <=> b
+        end
+      end
     end
   end
 
@@ -114,18 +410,19 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       outer_braces = options.json? || !at_root
 
       inner_indent =
-        if outer_braces
-          sb << "{"
-          if options.formatted?
-            sb << "\n"
+          if outer_braces
+            sb << "{"
+            if options.formatted?
+              sb << "\n"
+            end
+            indent_size + 1
+          else
+            indent_size
           end
-          indent_size + 1
-        else
-          indent_size
-        end
 
       separator_count = 0
-      key_set.each do |k|
+      sorted_keys = RenderComparator.sort(keys)
+      sorted_keys.each do |k|
         v = @value[k]
 
         if options.origin_comments?
@@ -182,9 +479,37 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     end
   end
 
+  def self.map_equals(a, b)
+    if a == b
+      return true
+    end
 
-  def key_set
-    Set.new(@value.keys)
+    # Hashes aren't ordered in ruby, so sort first
+    if not a.keys.sort == b.keys.sort
+      return false
+    end
+
+    a.keys.each do |key|
+      if a[key] != b[key]
+        return false
+      end
+    end
+
+    true
+  end
+
+  def self.map_hash(m)
+    # the keys have to be sorted, otherwise we could be equal
+    # to another map but have a different hashcode.
+    keys = m.keys.sort
+
+    value_hash = 0
+
+    keys.each do |key|
+      value_hash += m[key].hash
+    end
+
+    41 * (41 + keys.hash) + value_hash
   end
 
   def can_equal(other)
@@ -207,98 +532,16 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     self.class.map_hash(@value)
   end
 
-  def empty?
-    @value.empty?
+  def contains_key?(key)
+    @value.has_key?(key)
   end
 
-  def attempt_peek_with_partial_resolve(key)
-    @value[key]
+  def key_set
+    Set.new(@value.keys)
   end
 
-  def without_path(path)
-    key = path.first
-    remainder = path.remainder
-    v = @value[key]
-
-    if (not v.nil?) && (not remainder.nil?) && v.is_a?(Hocon::Impl::AbstractConfigObject)
-      v = v.without_path(remainder)
-      updated = @value.clone
-      updated[key] = v
-      Hocon::Impl::SimpleConfigObject.new(origin,
-                                          updated,
-                                          ResolveStatus.from_values(updated.values), @ignores_fallbacks)
-    elsif (not remainder.nil?) || v.nil?
-      return self
-    else
-      smaller = Hash.new
-      @value.each do |old_key, old_value|
-        unless old_key == key
-          smaller[old_key] = old_value
-        end
-      end
-      Hocon::Impl::SimpleConfigObject.new(origin,
-                                          smaller,
-                                          ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
-    end
-  end
-
-  def with_value(path, v)
-    key = path.first
-    remainder = path.remainder
-
-    if remainder.nil?
-      with_value_impl(key, v)
-    else
-      child = @value[key]
-      if (not child.nil?) && child.is_a?(Hocon::Impl::AbstractConfigObject)
-        return with_value_impl(key, child.with_value(remainder, v))
-      else
-        subtree = v.at_path(
-            SimpleConfigOrigin.new_simple("with_value(#{remainder.render})"), remainder)
-        with_value_impl(key, subtree.root)
-      end
-    end
-  end
-
-  def with_value_impl(key, v)
-    if v.nil?
-      raise ConfigBugOrBrokenError.new("Trying to store null ConfigValue in a ConfigObject")
-    end
-
-    new_map = Hash.new
-    if @value.empty?
-      new_map[key] = v
-    else
-      new_map = @value.clone
-      new_map[key] = v
-    end
-    self.class.new(origin, new_map, ResolveStatus.from_values(new_map.values), @ignores_fallbacks)
-  end
-
-  def resolve_status
-    ResolveStatus.from_boolean(@resolved)
-  end
-
-  def resolve_substitutions(context, source)
-    if resolve_status == ResolveStatus::RESOLVED
-      return ResolveResult.make(context, self)
-    end
-
-    source_with_parent = source.push_parent(self)
-
-    begin
-      modifier = ResolveModifier.new(context, source_with_parent)
-
-      value = modify_may_throw(modifier)
-      ResolveResult.make(modifier.context, value)
-
-    rescue NotPossibleToResolve => e
-      raise e
-    rescue RuntimeError => e
-      raise e
-    rescue Exception => e
-      raise ConfigBugOrBrokenError.new("unexpected exception", e)
-    end
+  def contains_value?(v)
+    @value.has_value?(v)
   end
 
   def self.empty(origin = nil)
@@ -309,38 +552,9 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     end
   end
 
-  private
-
-  def self.map_hash(m)
-    # the keys have to be sorted, otherwise we could be equal
-    # to another map but have a different hashcode.
-    keys = m.keys.sort
-
-    value_hash = 0
-
-    keys.each do |key|
-      value_hash += m[key].hash
-    end
-
-    41 * (41 + keys.hash) + value_hash
-  end
-
-  def self.map_equals(a, b)
-    if a == b
-      return true
-    end
-
-    # Hashes aren't ordered in ruby, so sort first
-    if not a.keys.sort == b.keys.sort
-      return false
-    end
-
-    a.keys.each do |key|
-      if a[key] != b[key]
-        return false
-      end
-    end
-
-    true
+  def self.empty_missing(base_origin)
+    self.new(
+        Hocon::Impl::SimpleConfigOrigin.new_simple("#{base_origin.description} (not found)"),
+        {})
   end
 end
