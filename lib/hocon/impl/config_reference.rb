@@ -4,10 +4,12 @@ require 'hocon'
 require 'hocon/impl'
 require 'hocon/impl/abstract_config_value'
 require 'hocon/impl/resolve_source'
+require 'hocon/impl/resolve_result'
 
 class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
   include Hocon::Impl::Unmergeable
   NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve
+  UnresolvedSubstitutionError = Hocon::ConfigError::UnresolvedSubstitutionError
 
   attr_reader :expr, :prefix_length
 
@@ -56,7 +58,7 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
       if @expr.optional
         v = nil
       else
-        raise ConfigException.UnresolvedSubstitution(
+        raise UnresolvedSubstitutionError.new(
                   origin,
                   "#{@expr} was part of a cycle of substitutions involving #{e.trace_string}", e)
       end
@@ -66,10 +68,10 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
       if new_context.options.allow_unresolved
         ResolveResult.make(new_context.remove_cycle_marker(self), self)
       else
-        raise ConfigException.UnresolvedSubstitution(origin, @expr.to_s)
+        raise UnresolvedSubstitutionError.new(origin, @expr.to_s)
       end
     else
-      ResolveResult.make(new_context.remove_cycle_marker(self), v)
+      Hocon::Impl::ResolveResult.make(new_context.remove_cycle_marker(self), v)
     end
 
   end
@@ -118,6 +120,10 @@ class Hocon::Impl::ConfigReference < Hocon::Impl::AbstractConfigValue
 
   def render_value_to_sb(sb, indent, at_root, options)
     sb << @expr.to_s
+  end
+
+  def expression
+    @expr
   end
 
   private

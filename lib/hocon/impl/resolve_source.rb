@@ -35,7 +35,7 @@ class Hocon::Impl::ResolveSource
     new_context = partially_resolved.context.restrict(restriction)
     if partially_resolved.value.is_a?(Hocon::Impl::AbstractConfigObject)
       pair = self.class.find_in_object_impl(partially_resolved.value, path)
-      ResultWithPair.new(Hocon::Impl::ResolveResult.make(new_context, pair.value), pair.path_from_root)
+      ResultWithPath.new(Hocon::Impl::ResolveResult.make(new_context, pair.value), pair.path_from_root)
     else
       raise ConfigBugOrBrokenError.new("resolved object to non-object " + obj + " to " + partially_resolved)
     end
