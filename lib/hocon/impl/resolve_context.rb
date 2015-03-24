@@ -31,7 +31,7 @@ class Hocon::Impl::ResolveContext
 
   def add_cycle_marker(value)
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("++ Cycle marker " + value + "@" + value.hash,
+      Hocon::Impl::ConfigImpl.trace("++ Cycle marker #{value}@#{value.hash}",
                        depth)
     end
     if @cycle_markers.include?(value)
@@ -45,7 +45,7 @@ class Hocon::Impl::ResolveContext
 
   def remove_cycle_marker(value)
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("-- Cycle marker " + value + "@" + value.hash,
+      Hocon::Impl::ConfigImpl.trace("-- Cycle marker #{value}@#{value.hash}",
                                     depth)
     end
 
@@ -58,6 +58,10 @@ class Hocon::Impl::ResolveContext
   def memoize(key, value)
     changed = @memos.put(key, value)
     self.class.new(changed, @options, @restrict_to_child, @resolve_stack, @cycle_markers)
+  end
+
+  def options
+    @options
   end
 
   def is_restricted_to_child

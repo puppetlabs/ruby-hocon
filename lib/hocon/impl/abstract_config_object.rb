@@ -10,9 +10,12 @@ require 'hocon/impl/simple_config_origin'
 require 'hocon/config_error'
 require 'hocon/impl/config_impl'
 require 'hocon/impl/unsupported_operation_error'
+require 'hocon/impl/container'
 
-class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
+module Hocon::Impl::AbstractConfigObject
   include Hocon::ConfigObject
+  include Hocon::Impl::Container
+  include Hocon::Impl::AbstractConfigValue
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError

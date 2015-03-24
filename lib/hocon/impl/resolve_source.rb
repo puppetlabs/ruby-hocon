@@ -4,6 +4,7 @@ require 'hocon'
 require 'hocon/config_error'
 require 'hocon/impl'
 require 'hocon/impl/config_impl'
+require 'hocon/impl/container'
 
 class Hocon::Impl::ResolveSource
 
@@ -28,7 +29,7 @@ class Hocon::Impl::ResolveSource
   def find_in_object(obj, context, path)
     # resolve ONLY portions of the object which are along our path
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("*** finding '" + path + "' in " + obj)
+      Hocon::Impl::ConfigImpl.trace("*** finding '#{path}' in #{obj}")
     end
     restriction = context.restrict_to_child
     partially_resolved = context.restrict(path).resolve(obj, self.class.new(obj))
@@ -43,12 +44,12 @@ class Hocon::Impl::ResolveSource
 
   def lookup_subst(context, subst, prefix_length)
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("searching for " + subst, depth)
+      Hocon::Impl::ConfigImpl.trace("searching for #{subst}", context.depth)
     end
 
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace(subst + " - looking up relative to file it occurred in",
-                                    depth)
+      Hocon::Impl::ConfigImpl.trace("#{subst} - looking up relative to file it occurred in",
+                                    context.depth)
     end
     # First we look up the full path, which means relative to the
     # included file if we were not a root file
@@ -81,7 +82,7 @@ class Hocon::Impl::ResolveSource
 
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
       Hocon::Impl::ConfigImpl.trace(
-          "resolved to " + result,
+          "resolved to #{result}",
           result.result.context.depth)
     end
 
@@ -138,16 +139,16 @@ class Hocon::Impl::ResolveSource
 
   def replace_current_parent(old, replacement)
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("replaceCurrentParent old " + old + "@" + old.hash + " replacement " +
-                                        replacement + "@" + old.hash + " in " + self)
+      Hocon::Impl::ConfigImpl.trace("replaceCurrentParent old #{old}@#{old.hash} replacement " +
+                                        "#{replacement}@#{old.hash} in #{self}")
     end
     if old.equal?(replacement)
       self
     elsif @path_from_root != nil
-      new_path = replace(@path_from_root, old, replacement)
+      new_path = self.class.replace(@path_from_root, old, replacement)
       if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-        Hocon::Impl::ConfigImpl.trace("replaced " + old + " with " + replacement + " in " + self)
-        Hocon::Impl::ConfigImpl.trace("path was: " + @path_from_root + " is now " + new_path)
+        Hocon::Impl::ConfigImpl.trace("replaced #{old} with #{replacement} in #{self}")
+        Hocon::Impl::ConfigImpl.trace("path was: #{@path_from_root} is now #{new_path}")
       end
       # if we end up nuking the root object itself, we replace it with an
       # empty root
@@ -160,7 +161,7 @@ class Hocon::Impl::ResolveSource
       if old.equal?(@root)
         return self.class.new(rust_must_be_obj(replacement))
       else
-        raise ConfigBugOrBrokenError.new("attempt to replace root " + root + " with " + replacement)
+        raise ConfigBugOrBrokenError.new("attempt to replace root #{root} with #{replacement}")
       end
     end
   end
@@ -168,8 +169,8 @@ class Hocon::Impl::ResolveSource
   # replacement may be null to delete
   def replace_within_current_parent(old, replacement)
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("replaceWithinCurrentParent old " + old + "@" + old.hash +
-                                        " replacement " + replacement + "@" + old.hash + " in " + self)
+      Hocon::Impl::ConfigImpl.trace("replaceWithinCurrentParent old #{old}@#{old.hash}" +
+                                        " replacement #{replacement}@#{old.hash} in #{self}")
     end
     if old.equal?(replacement)
       self
@@ -181,14 +182,14 @@ class Hocon::Impl::ResolveSource
       if old.equal?(@root) && replacement.is_a?(Hocon::Impl::Container)
         return self.class.new(root_must_be_obj(replacement))
       else
-        raise ConfigBugOrBrokenError.new("replace in parent not possible " + old + " with " + replacement +
-                                             " in " + self)
+        raise ConfigBugOrBrokenError.new("replace in parent not possible #{old} with #{replacement}" +
+                                             " in #{self}")
       end
     end
   end
 
   def to_s
-    "ResolveSource(root=" + @root + ", pathFromRoot=" + @path_from_root + ")"
+    "ResolveSource(root=#{@root}, pathFromRoot=#{@path_from_root})"
   end
 
   # a persistent list
@@ -240,10 +241,10 @@ class Hocon::Impl::ResolveSource
       to_append_value = self.reverse
       while to_append_value != nil
         sb << to_append_value.value.to_s
-        if to_append_value.next != nil
+        if to_append_value.next_node != nil
           sb << " <= "
         end
-        to_append_value = to_append_value.next
+        to_append_value = to_append_value.next_node
       end
       sb << "]"
       sb
@@ -273,7 +274,7 @@ class Hocon::Impl::ResolveSource
     end
 
     def to_s
-      "ResultWithPath(result=" + @result + ", pathFromRoot=" + @path_from_root + ")"
+      "ResultWithPath(result=#{@result}, pathFromRoot=#{@path_from_root})"
     end
   end
 
@@ -301,7 +302,7 @@ class Hocon::Impl::ResolveSource
     key = path.first
     remainder = path.remainder
     if Hocon::Impl::ConfigImpl.trace_substitution_enabled
-      Hocon::Impl::ConfigImpl.trace("*** looking up '" + key + "' in " + obj)
+      Hocon::Impl::ConfigImpl.trace("*** looking up '#{key}' in #{obj}")
     end
     v = obj.attempt_peek_with_partial_resolve(key)
     new_parents = parents == nil ? Node.new(obj) : parents.prepend(obj)
