@@ -14,22 +14,27 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
 
   SimpleConfigList = Hocon::Impl::SimpleConfigList
   ConfigObject = Hocon::ConfigObject
+  ConfigString = Hocon::Impl::ConfigString
+  ResolveStatus = Hocon::Impl::ResolveStatus
   Unmergeable = Hocon::Impl::Unmergeable
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+  ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
+
+  attr_reader :pieces
 
   def initialize(origin, pieces)
     super(origin)
     @pieces = pieces
 
     if pieces.size < 2
-      raise ConfigBugError, "Created concatenation with less than 2 items: #{self}"
+      raise ConfigBugOrBrokenError, "Created concatenation with less than 2 items: #{self}"
     end
 
     had_unmergeable = false
     pieces.each do |p|
       if p.is_a?(Hocon::Impl::ConfigConcatenation)
-        raise ConfigBugError, "ConfigConcatenation should never be nested: #{self}"
+        raise ConfigBugOrBrokenError, "ConfigConcatenation should never be nested: #{self}"
       end
       if p.is_a?(Unmergeable)
         had_unmergeable = true
@@ -37,11 +42,32 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     end
 
     unless had_unmergeable
-      raise ConfigBugError, "Created concatenation without an unmergeable in it: #{self}"
+      raise ConfigBugOrBrokenError, "Created concatenation without an unmergeable in it: #{self}"
     end
   end
 
-  attr_reader :pieces
+  def value_type
+    raise not_resolved
+  end
+
+  def unwrapped
+    raise not_resolved
+  end
+
+  def new_copy(new_origin)
+    self.class.new(new_origin, @pieces)
+  end
+
+  def ignores_fallbacks?
+    # we can never ignore fallbacks because if a child ConfigReference
+    # is self-referential we have to look lower in the merge stack
+    # for its value.
+    false
+  end
+
+  def unmerged_values
+    [self]
+  end
 
   #
   # Add left and right, or their merger, to builder
@@ -186,34 +212,34 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     end
   end
 
-  def initialize(origin, pieces)
-    super(origin)
-    @pieces = pieces
+  def resolve_status
+    ResolveStatus::UNRESOLVED
+  end
 
-    if pieces.size < 2
-      raise ConfigBugOrBrokenError, "Created concatenation with less than 2 items: #{self}"
-    end
-
-    had_unmergeable = false
-    pieces.each do |p|
-      if p.is_a?(Hocon::Impl::ConfigConcatenation)
-        raise ConfigBugOrBrokenError, "ConfigConcatenation should never be nested: #{self}"
-      end
-      if p.is_a?(Unmergeable)
-        had_unmergeable = true
-      end
-    end
-
-    unless had_unmergeable
-      raise ConfigBugOrBrokenError, "Created concatenation without an unmergeable in it: #{self}"
+  def replace_child(child, replacement)
+    new_pieces = replace_child_in_list(@pieces, child, replacement)
+    if new_pieces == nil
+      nil
+    else
+      self.class.new(origin, new_pieces)
     end
   end
 
-  def ignores_fallbacks?
-    # we can never ignore fallbacks because if a child ConfigReference
-    # is self-referential we have to look lower in the merge stack
-    # for its value.
-    false
+  def has_descendant(descendant)
+    has_descendant_in_list(@pieces, descendant)
+  end
+
+  # when you graft a substitution into another object,
+  # you have to prefix it with the location in that object
+  # where you grafted it; but save prefixLength so
+  # system property and env variable lookups don 't get
+  # broken.
+  def relativized(prefix)
+    new_pieces = []
+    @pieces.each { |p|
+      new_pieces << p.relativized(prefix)
+    }
+    self.class.new(origin, new_pieces)
   end
 
   def can_equal(other)
@@ -229,6 +255,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
   end
 
   def hash
+    # note that "origin" is deliberately NOT part of equality
     @pieces.hash
   end
 
@@ -236,5 +263,15 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     @pieces.each do |piece|
       piece.render_value_to_sb(sb, indent, at_root, options)
     end
+  end
+
+  private
+
+  def not_resolved
+    ConfigNotResolvedError.new("need to Config#resolve(), see the API docs for Config#resolve(); substitution not resolved: #{self}")
+  end
+
+  def self.is_ignoring_whitespace(value)
+    return value.is_a?(ConfigString) && !value.was_quoted?
   end
 end
