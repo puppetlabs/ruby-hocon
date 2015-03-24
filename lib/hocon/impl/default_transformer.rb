@@ -10,7 +10,7 @@ class Hocon::Impl::DefaultTransformer
   ConfigString = Hocon::Impl::ConfigString
 
   def self.transform(value, requested)
-    if value.value == ConfigValueType::STRING
+    if value.value_type == ConfigValueType::STRING
       s = value.unwrapped
       case requested
         when ConfigValueType::NUMBER

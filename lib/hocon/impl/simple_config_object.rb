@@ -312,6 +312,10 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
 
   class ResolveModifier
+
+    attr_accessor :context
+    attr_reader :source
+
     def initialize(context, source)
       @context = context
       @source = source
@@ -319,7 +323,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     end
 
     def modify_child_may_throw(key, v)
-      if @context.restricted_to_child?
+      if @context.is_restricted_to_child
         if key == @context.restrict_to_child.first
           remainder = @context.restrict_to_child.remainder
           if remainder.nil?
@@ -360,8 +364,6 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       raise e
     rescue Hocon::ConfigError => e
       raise e
-    rescue Exception => e
-      raise ConfigBugOrBrokenError.new("unexpected exception", e)
     end
   end
 

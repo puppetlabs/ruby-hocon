@@ -38,7 +38,7 @@ class Hocon::Impl::SimpleConfig
     if resolved.eql?(@object)
       self
     else
-      Hocon::SimpleConfig.new(resolved)
+      Hocon::Impl::SimpleConfig.new(resolved)
     end
   end
 

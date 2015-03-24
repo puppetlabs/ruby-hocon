@@ -13,6 +13,8 @@ class Hocon::Impl::ResolveContext
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve
 
+  attr_reader :restrict_to_child
+
   def initialize(memos, options, restrict_to_child, resolve_stack, cycle_markers)
     @memos = memos
     @options = options
@@ -25,6 +27,32 @@ class Hocon::Impl::ResolveContext
     # This looks crazy, but wtf else should we do with
     # return Collections.newSetFromMap(new IdentityHashMap<AbstractConfigValue, Boolean>());
     Set.new
+  end
+
+  def add_cycle_marker(value)
+    if Hocon::Impl::ConfigImpl.trace_substitution_enabled
+      Hocon::Impl::ConfigImpl.trace("++ Cycle marker " + value + "@" + value.hash,
+                       depth)
+    end
+    if @cycle_markers.include?(value)
+      raise ConfigBugOrBrokenError.new("Added cycle marker twice " + value)
+    end
+    copy = self.class.new_cycle_markers
+    copy.merge(@cycle_markers)
+    copy.add(value)
+    self.class.new(@memos, @options, @restrict_to_child, @resolve_stack, copy)
+  end
+
+  def remove_cycle_marker(value)
+    if Hocon::Impl::ConfigImpl.trace_substitution_enabled
+      Hocon::Impl::ConfigImpl.trace("++ Cycle marker " + value + "@" + value.hash,
+                                    depth)
+    end
+
+    copy = self.class.new_cycle_markers
+    copy.merge(@cycle_markers)
+    copy.delete(value)
+    self.class.new(@memos, @options, @restrict_to_child, @resolve_stack, copy)
   end
 
   def memoize(key, value)
