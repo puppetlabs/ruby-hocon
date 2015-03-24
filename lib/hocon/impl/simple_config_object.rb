@@ -358,7 +358,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
 
     rescue NotPossibleToResolve => e
       raise e
-    rescue RuntimeError => e
+    rescue Hocon::ConfigError => e
       raise e
     rescue Exception => e
       raise ConfigBugOrBrokenError.new("unexpected exception", e)
