@@ -456,12 +456,12 @@ describe "ConfigList" do
 
     expect(l.size).to eq(3)
 
-    expect { l.push(TestUtils.int_value(3)) }.to raise_error(NoMethodError)
-    expect { l << TestUtils.int_value(3) }.to raise_error(NoMethodError)
-    expect { l.clear }.to raise_error(NoMethodError)
-    expect { l.delete(TestUtils.int_value(2)) }.to raise_error(NoMethodError)
-    expect { l.delete(1) }.to raise_error(NoMethodError)
-    expect { l[0] = TestUtils.int_value(42) }.to raise_error(NoMethodError)
+    expect { l.push(TestUtils.int_value(3)) }.to raise_error(ConfigBugOrBrokenError)
+    expect { l << TestUtils.int_value(3) }.to raise_error(ConfigBugOrBrokenError)
+    expect { l.clear }.to raise_error(ConfigBugOrBrokenError)
+    expect { l.delete(TestUtils.int_value(2)) }.to raise_error(ConfigBugOrBrokenError)
+    expect { l.delete(1) }.to raise_error(ConfigBugOrBrokenError)
+    expect { l[0] = TestUtils.int_value(42) }.to raise_error(ConfigBugOrBrokenError)
   end
 end
 

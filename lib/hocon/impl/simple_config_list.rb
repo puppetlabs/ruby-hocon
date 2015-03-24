@@ -24,6 +24,8 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
     end
   end
 
+  attr_reader :value
+
   def_delegators :@value, :[], :include?, :empty?, :size, :index, :rindex, :each, :map
 
   def value_type
@@ -32,6 +34,34 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
 
   def unwrapped
     @value.map { |v| v.unwrapped }
+  end
+
+  def resolve_status
+    ResolveStatus.from_boolean(@resolved)
+  end
+
+  def replace_child(child, replacement)
+    new_list = replace_child_in_list(@value, child, replacement)
+    if new_list.nil?
+      nil
+    else
+      # we use the constructor flavor that will recompute the resolve status
+      SimpleConfigList.new(origin, new_list)
+    end
+  end
+
+  def has_descendant(descendant)
+    has_descendant_in_list(@value, descendant)
+  end
+
+  def modify(modifier, new_resolve_status)
+    begin
+      modify_may_throw(modifier, new_resolve_status)
+    rescue Hocon::ConfigError => e
+      raise e
+    rescue => e
+      raise ConfigBugOrBrokenError.new("unexpected exception", e)
+    end
   end
 
   def modify_may_throw(modifier, new_resolve_status)
@@ -78,6 +108,12 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       @context = context
       @source = source
     end
+
+    def modify_child_may_throw(key, v)
+      result = @context.resolve(v, source)
+      @context = result.context
+      result.value
+    end
   end
 
   def resolve_substitutions(context, source)
@@ -104,6 +140,37 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
     end
   end
 
+  def relativized(prefix)
+    modifier = Class.new do
+      extend Hocon::Impl::AbstractConfigValue::NoExceptionsModifier
+
+      def modify_child(key, v)
+        v.relativized(prefix)
+      end
+    end
+
+    modify(modifier.new, resolve_status)
+  end
+
+  def can_equal(other)
+    other.is_a?(SimpleConfigList)
+  end
+
+  def ==(other)
+    # note that "origin" is deliberately NOT part of equality
+    if other.is_a?(SimpleConfigList)
+      # optimization to avoid unwrapped() for two ConfigList
+      can_equal(other) &&
+          (value.equal?(other.value) || (value == other.value))
+    else
+      false
+    end
+  end
+
+  def hash
+    # note that "origin" is deliberately NOT part of equality
+    value.hash
+  end
 
   def render_value_to_sb(sb, indent_size, at_root, options)
     if @value.empty?
@@ -149,11 +216,122 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
     end
   end
 
-  def new_copy(origin)
-    Hocon::Impl::SimpleConfigList.new(origin, @value)
+  def contains?(o)
+    value.include?(o)
   end
 
   def include_all?(value_list)
     value_list.all? { |v| @value.include?(v)}
   end
+
+  def contains_all?(c)
+    include_all?(c)
+  end
+
+  def get(index)
+    value[index]
+  end
+
+  def index_of(o)
+    value.index(o)
+  end
+
+  def is_empty
+    empty?
+  end
+
+  # Skipping upstream definition of "iterator", because that's not really a thing
+  # in Ruby.
+
+  def last_index_of(o)
+    value.rindex(o)
+  end
+
+  # skipping upstream definitions of "wrapListIterator", "listIterator", and
+  # "listIterator(int)", because those don't really apply in Ruby.
+
+  def sub_list(from_index, to_index)
+    value[from_index..to_index]
+  end
+
+  def to_array
+    value
+  end
+
+  def we_are_immutable(method)
+    ConfigBugOrBrokenError.new("ConfigList is immutable, you can't call List. '#{method}'")
+  end
+
+  def add(e)
+    raise we_are_immutable("add")
+  end
+
+  def add_at(index, element)
+    raise we_are_immutable("add_at")
+  end
+
+  def add_all(c)
+    raise we_are_immutable("add_all")
+  end
+
+  def add_all_at(index, c)
+    raise we_are_immutable("add_all_at")
+  end
+
+  def clear
+    raise we_are_immutable("clear")
+  end
+
+  def remove(o)
+    raise we_are_immutable("remove")
+  end
+
+  def remove_at(i)
+    raise we_are_immutable("remove_at")
+  end
+
+  def delete(o)
+    raise we_are_immutable("delete")
+  end
+
+  def remove_all(c)
+    raise we_are_immutable("remove_all")
+  end
+
+  def retain_all(c)
+    raise we_are_immutable("retain_all")
+  end
+
+  def set(index, element)
+    raise we_are_immutable("set")
+  end
+
+  def []=(index, element)
+    raise we_are_immutable("[]=")
+  end
+
+  def push(e)
+    raise we_are_immutable("push")
+  end
+
+  def <<(e)
+    raise we_are_immutable("<<")
+  end
+
+  def new_copy(origin)
+    Hocon::Impl::SimpleConfigList.new(origin, @value)
+  end
+
+  def concatenate(other)
+    combined_origin = Hocon::Impl::SimpleConfigOrigin.merge_origins(origin, other.origin)
+    combined = value + other.value
+    SimpleConfigList.new(combined_origin, combined)
+  end
+
+  # Skipping upstream "writeReplace" until we see that we need it for something
+
+  def with_origin(origin)
+    super(origin)
+  end
+
 end
