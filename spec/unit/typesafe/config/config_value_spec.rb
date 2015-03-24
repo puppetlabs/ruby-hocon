@@ -4,6 +4,7 @@ require 'test_utils'
 
 require 'hocon/impl/config_delayed_merge'
 require 'hocon/impl/config_delayed_merge_object'
+require 'hocon/config_error'
 
 
 
@@ -16,6 +17,7 @@ ConfigConcatenation = Hocon::Impl::ConfigConcatenation
 ConfigDelayedMerge = Hocon::Impl::ConfigDelayedMerge
 ConfigDelayedMergeObject = Hocon::Impl::ConfigDelayedMergeObject
 ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
+ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 AbstractConfigObject = Hocon::Impl::AbstractConfigObject
 
 describe "SimpleConfigOrigin equality" do
@@ -425,8 +427,8 @@ describe "ConfigObject" do
     keys = [:a, :b, :c]
     expect(keys).to eq(m.keys)
 
-    expect { m["hello"] = TestUtils.int_value(41) }.to raise_error(NoMethodError)
-    expect { m.delete(:a) }.to raise_error(NoMethodError)
+    expect { m["hello"] = TestUtils.int_value(41) }.to raise_error(ConfigBugOrBrokenError)
+    expect { m.delete(:a) }.to raise_error(ConfigBugOrBrokenError)
   end
 end
 
