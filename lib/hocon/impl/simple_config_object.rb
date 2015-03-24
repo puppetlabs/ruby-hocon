@@ -337,6 +337,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
       else
         # no restrictToChild, resolve everything
         result = @context.unrestricted.restrict(@original_restrict)
+        @context = result.context.unrestricted.restrict(@original_restrict)
         result.value
       end
     end
