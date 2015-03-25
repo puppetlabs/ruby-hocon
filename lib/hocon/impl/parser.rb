@@ -28,6 +28,7 @@ class Hocon::Impl::Parser
   ConfigReference = Hocon::Impl::ConfigReference
   ConfigParseError = Hocon::ConfigError::ConfigParseError
   ConfigBugorBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
+  SubstitutionExpression = Hocon::Impl::SubstitutionExpression
   ConfigBadPathError = Hocon::ConfigError::ConfigBadPathError
   SimpleConfigObject = Hocon::Impl::SimpleConfigObject
   SimpleConfigList = Hocon::Impl::SimpleConfigList
@@ -36,6 +37,7 @@ class Hocon::Impl::Parser
   PathBuilder = Hocon::Impl::PathBuilder
   Tokenizer = Hocon::Impl::Tokenizer
   Path = Hocon::Impl::Path
+
   
   class TokenWithComments
     def initialize(token, comments = [])

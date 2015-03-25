@@ -9,6 +9,8 @@ class Hocon::Impl::ConfigBoolean < Hocon::Impl::AbstractConfigValue
     @value = value
   end
 
+  attr_reader :value
+
   def value_type
     Hocon::ConfigValueType::BOOLEAN
   end

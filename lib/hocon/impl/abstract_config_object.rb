@@ -138,7 +138,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
     super(mergeable)
   end
 
-  def merge_origins(stack)
+  def self.merge_origins(stack)
     if stack.empty?
       raise ConfigBugOrBrokenError, "can't merge origins on empty list"
     end

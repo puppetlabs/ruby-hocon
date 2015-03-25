@@ -246,7 +246,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     new_ignores_fallbacks = fallback.ignores_fallbacks?
 
     if changed
-      Hocon::Impl::SimpleConfigObject.new(merge_origins([self, fallback]),
+      Hocon::Impl::SimpleConfigObject.new(self.class.merge_origins([self, fallback]),
                                           merged, new_resolve_status,
                                           new_ignores_fallbacks)
     elsif (new_resolve_status != resolve_status) || (new_ignores_fallbacks != ignores_fallbacks?)
@@ -426,14 +426,14 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
         v = @value[k]
 
         if options.origin_comments?
-          indent(sb, inner_indent, options)
+          self.class.indent(sb, inner_indent, options)
           sb << "# "
           sb << v.origin.description
           sb << "\n"
         end
         if options.comments?
           v.origin.comments.each do |comment|
-            indent(sb, inner_indent, options)
+            self.class.indent(sb, inner_indent, options)
             sb << "#"
             if !comment.start_with?(" ")
               sb << " "
@@ -442,7 +442,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
             sb << "\n"
           end
         end
-        indent(sb, inner_indent, options)
+        self.class.indent(sb, inner_indent, options)
         v.render_to_sb(sb, inner_indent, false, k.to_s, options)
 
         if options.formatted?
@@ -468,7 +468,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
         if options.formatted?
           sb << "\n" # put a newline back
           if outer_braces
-            indent(sb, indent_size, options)
+            self.class.indent(sb, indent_size, options)
           end
         end
         sb << "}"

@@ -327,7 +327,7 @@ class Hocon::Impl::SimpleConfigOrigin
   def self.merge_value_origins(stack)
     # stack is an array of AbstractConfigValue
     origins = stack.map { |v| v.origin}
-    merge_origins(origins)
+    self.class.merge_origins(origins)
   end
 
   def self.merge_origins(stack)
@@ -341,14 +341,16 @@ class Hocon::Impl::SimpleConfigOrigin
     else
       remaining = stack.clone
       while remaining.length > 2
-        merged = merge_three(remaining[0], remaining[1], remaining[2])
+        merged = merge_three(remaining[-3], remaining[-2], remaining[-1])
         remaining.pop
         remaining.pop
         remaining.pop
+
+        remaining << merged
       end
 
       # should be down to either 1 or 2
-      merge_origins(remaining)
+      self.merge_origins(remaining)
     end
   end
 

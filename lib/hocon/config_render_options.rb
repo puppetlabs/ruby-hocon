@@ -10,7 +10,7 @@ class Hocon::ConfigRenderOptions
     @json = json
   end
 
-  attr_writer :origin_comments, :comments, :formatted, :json
+  attr_accessor :origin_comments, :comments, :formatted, :json
 
   def origin_comments?
     @origin_comments

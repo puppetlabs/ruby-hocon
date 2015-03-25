@@ -3,14 +3,16 @@
 require 'hocon/impl'
 require 'hocon/impl/config_string'
 require 'hocon/config_value_type'
+require 'hocon/impl/config_boolean'
 
 class Hocon::Impl::DefaultTransformer
 
   ConfigValueType = Hocon::ConfigValueType
   ConfigString = Hocon::Impl::ConfigString
+  ConfigBoolean = Hocon::Impl::ConfigBoolean
 
   def self.transform(value, requested)
-    if value.value == ConfigValueType::STRING
+    if value.value_type == ConfigValueType::STRING
       s = value.unwrapped
       case requested
         when ConfigValueType::NUMBER

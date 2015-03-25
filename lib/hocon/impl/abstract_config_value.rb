@@ -285,7 +285,7 @@ class Hocon::Impl::AbstractConfigValue
     "#{self.class.name}(#{sb.string})"
   end
 
-  def indent(sb, indent_size, options)
+  def self.indent(sb, indent_size, options)
     if options.formatted?
       remaining = indent_size
       while remaining > 0

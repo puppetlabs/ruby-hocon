@@ -183,7 +183,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       end
       @value.each do |v|
         if options.origin_comments?
-          indent(sb, indent_size + 1, options)
+          self.class.indent(sb, indent_size + 1, options)
           sb << "# "
           sb << v.origin.description
           sb << "\n"
@@ -195,7 +195,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
             sb << "\n"
           end
         end
-        indent(sb, indent_size + 1, options)
+        self.class.indent(sb, indent_size + 1, options)
 
         v.render_value_to_sb(sb, indent_size + 1, at_root, options)
         sb << ","
@@ -211,7 +211,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       if options.formatted?
         sb.pos = sb.pos - 1 # also chop comma
         sb << "\n"
-        indent(sb, indent_size, options)
+        self.class.indent(sb, indent_size, options)
       end
       sb << "]"
     end
