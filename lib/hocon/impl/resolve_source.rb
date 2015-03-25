@@ -31,7 +31,7 @@ class Hocon::Impl::ResolveSource
       Hocon::Impl::ConfigImpl.trace("*** finding '" + path + "' in " + obj)
     end
     restriction = context.restrict_to_child
-    partially_resolved = context.restrict(path).resolve(obj, Hocon::Impl::ResolveSource.new(obj))
+    partially_resolved = context.restrict(path).resolve(obj, self.class.new(obj))
     new_context = partially_resolved.context.restrict(restriction)
     if partially_resolved.value.is_a?(Hocon::Impl::AbstractConfigObject)
       pair = self.class.find_in_object_impl(partially_resolved.value, path)
@@ -124,7 +124,7 @@ class Hocon::Impl::ResolveSource
         end
       end
 
-      ResolveSource.new(@root, @path_from_root.prepend(parent))
+      self.class.new(@root, @path_from_root.prepend(parent))
     end
   end
 
@@ -132,7 +132,7 @@ class Hocon::Impl::ResolveSource
     if @path_from_root == nil
       this
     else
-      Hocon::Impl::ResolveSource.new(@root)
+      self.class.new(@root)
     end
   end
 
@@ -152,13 +152,13 @@ class Hocon::Impl::ResolveSource
       # if we end up nuking the root object itself, we replace it with an
       # empty root
       if new_path != nil
-        return ResolveSource.new(new_path.last, new_path)
+        return self.class.new(new_path.last, new_path)
       else
-        return ResolveSource.new(Hocon::Impl::SimpleConfigObject.empty)
+        return self.class.new(Hocon::Impl::SimpleConfigObject.empty)
       end
     else
       if old.equal?(@root)
-        return ResolveSource.new(rust_must_be_obj(replacement))
+        return self.class.new(rust_must_be_obj(replacement))
       else
         raise ConfigBugOrBrokenError.new("attempt to replace root " + root + " with " + replacement)
       end
@@ -179,7 +179,7 @@ class Hocon::Impl::ResolveSource
       return replace_current_parent(parent, new_parent.is_a?(Hocon::Impl::Container) ? new_parent : nil)
     else
       if old.equal?(@root) && replacement.is_a?(Hocon::Impl::Container)
-        return ResolveSource.new(root_must_be_obj(replacement))
+        return self.class.new(root_must_be_obj(replacement))
       else
         raise ConfigBugOrBrokenError.new("replace in parent not possible " + old + " with " + replacement +
                                              " in " + self)
