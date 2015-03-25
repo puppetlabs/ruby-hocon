@@ -9,6 +9,7 @@ require 'hocon/impl/resolve_status'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/config_error'
 require 'hocon/impl/config_impl'
+require 'hocon/impl/unsupported_operation_error'
 
 class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   include Hocon::ConfigObject
@@ -186,7 +187,7 @@ class Hocon::Impl::AbstractConfigObject < Hocon::Impl::AbstractConfigValue
   end
 
   def we_are_immutable(method)
-    ConfigBugOrBrokenError.new("ConfigObject is immutable, you can't call Map.#{method}")
+    Hocon::Impl::UnsupportedOperationError.new("ConfigObject is immutable, you can't call Map.#{method}")
   end
 
   def clear
