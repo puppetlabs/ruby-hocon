@@ -271,7 +271,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
     ConfigNotResolvedError.new("need to Config#resolve(), see the API docs for Config#resolve(); substitution not resolved: #{self}")
   end
 
-  def self.is_ignoring_whitespace(value)
+  def self.is_ignored_whitespace(value)
     return value.is_a?(ConfigString) && !value.was_quoted?
   end
 end
