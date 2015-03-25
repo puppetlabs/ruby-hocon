@@ -49,4 +49,10 @@ class Hocon::ConfigError < StandardError
       super(origin, error_message, cause)
     end
   end
+
+  class UnresolvedSubstitutionError < ConfigParseError
+    def initialize(origin, detail, cause = nil)
+      super(origin, "Could not resolve substitution to a value: " + detail, cause)
+    end
+  end
 end
