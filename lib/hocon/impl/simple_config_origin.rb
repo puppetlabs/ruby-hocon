@@ -95,9 +95,7 @@ class Hocon::Impl::SimpleConfigOrigin
     elsif @comments_or_nil.nil?
       with_comments(comments)
     else
-      merged = []
-      merged.concat(comments)
-      merged.concat(@comments_or_nil)
+      merged = comments + @comments_or_nil
       with_comments(merged)
     end
   end
@@ -129,7 +127,8 @@ class Hocon::Impl::SimpleConfigOrigin
           @line_number == other.line_number &&
           @end_line_number == other.end_line_number &&
           @origin_type == other.origin_type &&
-          Hocon::Impl::ConfigImplUtil.equals_handling_nil?(@url_or_nil, other.url_or_nil)
+          Hocon::Impl::ConfigImplUtil.equals_handling_nil?(@url_or_nil, other.url_or_nil) &&
+          Hocon::Impl::ConfigImplUtil.equals_handling_nil?(@resource_or_nil, other.resource_or_nil)
     else
       false
     end
@@ -143,6 +142,10 @@ class Hocon::Impl::SimpleConfigOrigin
 
     unless @url_or_nil.nil?
       h = 41 * (h + @url_or_nil.hash)
+    end
+
+    unless @resource_or_nil.nil?
+      h = 41 * (h + @resource_or_nil.hash)
     end
 
     h

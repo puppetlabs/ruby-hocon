@@ -5,6 +5,7 @@ require 'test_utils'
 require 'hocon/impl/config_delayed_merge'
 require 'hocon/impl/config_delayed_merge_object'
 require 'hocon/config_error'
+require 'hocon/impl/unsupported_operation_error'
 
 
 
@@ -19,6 +20,7 @@ ConfigDelayedMergeObject = Hocon::Impl::ConfigDelayedMergeObject
 ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
 ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 AbstractConfigObject = Hocon::Impl::AbstractConfigObject
+UnsupportedOperationError = Hocon::Impl::UnsupportedOperationError
 
 describe "SimpleConfigOrigin equality" do
   context "different origins with the same name should be equal" do
@@ -427,8 +429,8 @@ describe "ConfigObject" do
     keys = [:a, :b, :c]
     expect(keys).to eq(m.keys)
 
-    expect { m["hello"] = TestUtils.int_value(41) }.to raise_error(ConfigBugOrBrokenError)
-    expect { m.delete(:a) }.to raise_error(ConfigBugOrBrokenError)
+    expect { m["hello"] = TestUtils.int_value(41) }.to raise_error(UnsupportedOperationError)
+    expect { m.delete(:a) }.to raise_error(UnsupportedOperationError)
   end
 end
 
@@ -456,12 +458,12 @@ describe "ConfigList" do
 
     expect(l.size).to eq(3)
 
-    expect { l.push(TestUtils.int_value(3)) }.to raise_error(ConfigBugOrBrokenError)
-    expect { l << TestUtils.int_value(3) }.to raise_error(ConfigBugOrBrokenError)
-    expect { l.clear }.to raise_error(ConfigBugOrBrokenError)
-    expect { l.delete(TestUtils.int_value(2)) }.to raise_error(ConfigBugOrBrokenError)
-    expect { l.delete(1) }.to raise_error(ConfigBugOrBrokenError)
-    expect { l[0] = TestUtils.int_value(42) }.to raise_error(ConfigBugOrBrokenError)
+    expect { l.push(TestUtils.int_value(3)) }.to raise_error(UnsupportedOperationError)
+    expect { l << TestUtils.int_value(3) }.to raise_error(UnsupportedOperationError)
+    expect { l.clear }.to raise_error(UnsupportedOperationError)
+    expect { l.delete(TestUtils.int_value(2)) }.to raise_error(UnsupportedOperationError)
+    expect { l.delete(1) }.to raise_error(UnsupportedOperationError)
+    expect { l[0] = TestUtils.int_value(42) }.to raise_error(UnsupportedOperationError)
   end
 end
 

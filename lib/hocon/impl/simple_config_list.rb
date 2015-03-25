@@ -6,6 +6,7 @@ require 'hocon/config_value_type'
 require 'hocon/config_error'
 require 'hocon/impl/abstract_config_object'
 require 'forwardable'
+require 'hocon/impl/unsupported_operation_error'
 
 class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   extend Forwardable
@@ -259,7 +260,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   end
 
   def we_are_immutable(method)
-    ConfigBugOrBrokenError.new("ConfigList is immutable, you can't call List. '#{method}'")
+    Hocon::Impl::UnsupportedOperationError.new("ConfigList is immutable, you can't call List. '#{method}'")
   end
 
   def add(e)
