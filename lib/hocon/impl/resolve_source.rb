@@ -58,7 +58,7 @@ class Hocon::Impl::ResolveSource
       # Then we want to check relative to the root file.We don 't
       # want the prefix we were included at to be used when looking
       # up env variables either.
-      unprefixed = subst.plath.sub_path(prefix_length)
+      unprefixed = subst.path.sub_path(prefix_length)
 
       if prefix_length > 0
         if Hocon::Impl::ConfigImpl.trace_substitution_enabled
