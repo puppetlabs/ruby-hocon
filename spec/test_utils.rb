@@ -119,7 +119,7 @@ module TestUtils
       ParseTest.from_s("[${}]"), # empty substitution (no path)
       ParseTest.from_s("[${?}]"), # no path with ? substitution
       ParseTest.new(false, true, "[${ ?foo}]"), # space before ? not allowed
-      # Commenting out the following 2 tests because we suspect missing code in SimpleConfigList/Object
+      # TODO Commenting out the following 2 tests because we suspect missing code in SimpleConfigList/Object
       # is screwing something up.
       # Discovered the problem when I modified SimpleConfigOrigin::merge_origins and implemented
       # SimpleConfigOrigins::merge_three

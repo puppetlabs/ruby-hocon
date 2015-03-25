@@ -596,12 +596,6 @@ describe "SimpleConfig#has_path" do
     empty = TestUtils.parse_config("{}")
 
     expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
-    expect(empty.has_path("foo")).to be_falsey
 
     object = TestUtils.parse_config("a=null, b.c.d=11, foo=bar")
 

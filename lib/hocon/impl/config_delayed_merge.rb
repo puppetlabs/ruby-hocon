@@ -83,7 +83,8 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
       if comment_merge
         self.indent(sb, indent, options)
         if !at_key.nil?
-          sb << "#     unmerged value #{i} for key "
+          rendered_key = Hocon::Impl::ConfigImplUtil.render_json_string(at_key)
+          sb << "#     unmerged value #{i} for key #{rendered_key}"
         else
           sb << "#     unmerged value #{i} from "
         end
