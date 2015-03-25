@@ -73,7 +73,7 @@ class Hocon::Impl::ResolveSource
       if result.result.value == nil && result.result.context.options.use_system_environment
         if Hocon::Impl::ConfigImpl.trace_substitution_enabled
           Hocon::Impl::ConfigImpl.trace(
-              unprefixed + " - looking up in system environment",
+              "#{unprefixed} - looking up in system environment",
               result.result.context.depth)
         end
         result = find_in_object(Hocon::Impl::ConfigImpl.env_variables_as_config_object, context, unprefixed)

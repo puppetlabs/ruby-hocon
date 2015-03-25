@@ -126,18 +126,18 @@ class Hocon::Impl::SimpleConfigList
 
   def resolve_substitutions(context, source)
     if @resolved
-      return ResolveResult.make(context, self)
+      return Hocon::Impl::ResolveResult.make(context, self)
     end
 
     if context.is_restricted_to_child
       # if a list restricts to a child path, then it has no child paths,
       # so nothing to do.
-      ResolveResult.make(context, self)
+      Hocon::Impl::ResolveResult.make(context, self)
     else
       begin
         modifier = ResolveModifier.new(context, source.push_parent(self))
         value = modify_may_throw(modifier, context.options.allow_unresolved ? nil : ResolveStatus::RESOLVED)
-        ResolveResult.make(modifier.context, value)
+        Hocon::Impl::ResolveResult.make(modifier.context, value)
       rescue NotPossibleToResolve => e
         raise e
       rescue RuntimeError => e
@@ -331,9 +331,9 @@ class Hocon::Impl::SimpleConfigList
   end
 
   def concatenate(other)
-    combined_origin = Hocon::Impl::SimpleConfigOrigin.merge_origins(origin, other.origin)
+    combined_origin = Hocon::Impl::SimpleConfigOrigin.merge_two_origins(origin, other.origin)
     combined = value + other.value
-    SimpleConfigList.new(combined_origin, combined)
+    Hocon::Impl::SimpleConfigList.new(combined_origin, combined)
   end
 
   # Skipping upstream "writeReplace" until we see that we need it for something

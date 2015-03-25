@@ -330,6 +330,7 @@ class Hocon::Impl::SimpleConfigOrigin
     merge_origins(origins)
   end
 
+  # see also 'merge_two_origins' and 'merge_three_origins'
   def self.merge_origins(stack)
     # stack is an array of ConfigOrigin
     if stack.empty?

@@ -32,6 +32,14 @@ class Hocon::ConfigError < StandardError
   end
 
   class ConfigWrongTypeError < Hocon::ConfigError
+    # If you need the 4 or 5-arg constructor version, use 'construct' instead.
+    def initialize(origin, message, cause = nil)
+      super(origin, message, cause)
+    end
+
+    def self.construct(origin, path, expected, actual, cause = nil)
+      self.class.new(origin, "#{path} has type #{actual} rather than #{expected}", cause)
+    end
   end
 
   class ConfigBugOrBrokenError < Hocon::ConfigError

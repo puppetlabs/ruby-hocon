@@ -29,6 +29,23 @@ class Hocon::Impl::ConfigNumber
     @original_text
   end
 
+  def int_value_range_checked(path)
+    l = long_value
+
+    # guess we don't need to bother with this ...
+    #
+    # if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
+    #   {
+    #       throw new ConfigException.WrongType(origin(), path, "32-bit integer",
+    #                                           "out-of-range value " + l);
+    #   }
+    l
+  end
+
+  def long_value
+    raise "long_value needs to be overriden by sub-classes of #{Hocon::Impl::ConfigNumber}, in this case #{self.class}"
+  end
+
   def can_equal(other)
     other.is_a?(Hocon::Impl::ConfigNumber)
   end
@@ -48,9 +65,9 @@ class Hocon::Impl::ConfigNumber
 
     # If the value is an integer or a floating point equal to an integer
     if to_int == @value
-      return to_int.hash
+      to_int.hash
     else
-      return @value.hash
+      @value.hash
     end
   end
 end
