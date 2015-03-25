@@ -20,6 +20,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
   SimpleConfigOrigin = Hocon::Impl::SimpleConfigOrigin
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
+  ConfigWrongTypeError = Hocon::ConfigError::ConfigWrongTypeError
 
   attr_reader :pieces
 

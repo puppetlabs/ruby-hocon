@@ -21,7 +21,8 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
   Path = Hocon::Impl::Path
 
 
-  def initialize(origin, value,
+  def initialize(origin,
+                 value,
                  status = Hocon::Impl::ResolveStatus.from_values(value.values),
                  ignores_fallbacks = false)
     super(origin)
