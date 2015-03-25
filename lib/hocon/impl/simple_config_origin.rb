@@ -327,7 +327,7 @@ class Hocon::Impl::SimpleConfigOrigin
   def self.merge_value_origins(stack)
     # stack is an array of AbstractConfigValue
     origins = stack.map { |v| v.origin}
-    self.class.merge_origins(origins)
+    merge_origins(origins)
   end
 
   def self.merge_origins(stack)
