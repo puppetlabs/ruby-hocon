@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/impl/replaceable_merge_stack'
 require 'hocon/impl/config_delayed_merge_object'
 require 'hocon/impl/config_impl'
+require 'hocon/impl/abstract_config_value'
 
 #
 # The issue here is that we want to first merge our stack of config files, and
@@ -191,7 +192,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
   end
 
   def has_descendant(descendant)
-    has_descendant_in_list(stack, descendant)
+    Hocon::Impl::AbstractConfigValue.has_descendant_in_list(stack, descendant)
   end
 
   def relativized(prefix)
@@ -214,7 +215,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
   end
 
   def merged_with_the_unmergeable(fallback)
-    merged_stack_with_the_unmergeabls(stack, fallback)
+    merged_stack_with_the_unmergeable(stack, fallback)
   end
 
   def merged_with_object(fallback)
