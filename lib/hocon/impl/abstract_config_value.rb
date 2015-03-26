@@ -9,13 +9,16 @@ require 'hocon/impl/resolve_result'
 require 'hocon/impl/unmergeable'
 require 'hocon/impl/config_impl_util'
 require 'hocon/config_error'
+require 'hocon/config_value'
 
 ##
 ## Trying very hard to avoid a parent reference in config values; when you have
 ## a tree like this, the availability of parent() tends to result in a lot of
 ## improperly-factored and non-modular code. Please don't add parent().
 ##
-class Hocon::Impl::AbstractConfigValue
+module Hocon::Impl::AbstractConfigValue
+  include Hocon::ConfigValue
+
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ResolveStatus = Hocon::Impl::ResolveStatus
@@ -129,7 +132,7 @@ class Hocon::Impl::AbstractConfigValue
   end
 
   def new_copy(origin)
-    raise ConfigBugOrBrokenError, "subclasses of AbstractConfigValue should provide their own implementation of `new_copy`"
+    raise ConfigBugOrBrokenError, "subclasses of AbstractConfigValue should provide their own implementation of `new_copy` (#{self.class})"
   end
 
   # this is virtualized rather than a field because only some subclasses
@@ -160,6 +163,7 @@ class Hocon::Impl::AbstractConfigValue
   def construct_delayed_merge(origin, stack)
     # TODO: this might not work because ConfigDelayedMerge inherits
     # from this class, so we can't `require` it from this file
+    require 'hocon/impl/config_delayed_merge'
     Hocon::Impl::ConfigDelayedMerge.new(origin, stack)
   end
 

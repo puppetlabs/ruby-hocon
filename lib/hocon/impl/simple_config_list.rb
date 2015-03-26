@@ -7,11 +7,18 @@ require 'hocon/config_error'
 require 'hocon/impl/abstract_config_object'
 require 'forwardable'
 require 'hocon/impl/unsupported_operation_error'
+require 'hocon/impl/resolve_result'
+require 'hocon/impl/container'
+require 'hocon/config_list'
 
-class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
+class Hocon::Impl::SimpleConfigList
+  include Hocon::Impl::Container
+  include Hocon::ConfigList
+  include Hocon::Impl::AbstractConfigValue
   extend Forwardable
 
   ResolveStatus = Hocon::Impl::ResolveStatus
+  ResolveResult = Hocon::Impl::ResolveResult
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 
   def initialize(origin, value, status = ResolveStatus.from_values(value))
@@ -154,12 +161,12 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
   end
 
   def can_equal(other)
-    other.is_a?(SimpleConfigList)
+    other.is_a?(self.class)
   end
 
   def ==(other)
     # note that "origin" is deliberately NOT part of equality
-    if other.is_a?(SimpleConfigList)
+    if other.is_a?(self.class)
       # optimization to avoid unwrapped() for two ConfigList
       can_equal(other) &&
           (value.equal?(other.value) || (value == other.value))
@@ -183,7 +190,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       end
       @value.each do |v|
         if options.origin_comments?
-          self.class.indent(sb, indent_size + 1, options)
+          Hocon::Impl::AbstractConfigValue.indent(sb, indent_size + 1, options)
           sb << "# "
           sb << v.origin.description
           sb << "\n"
@@ -195,7 +202,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
             sb << "\n"
           end
         end
-        self.class.indent(sb, indent_size + 1, options)
+        Hocon::Impl::AbstractConfigValue.indent(sb, indent_size + 1, options)
 
         v.render_value_to_sb(sb, indent_size + 1, at_root, options)
         sb << ","
@@ -211,7 +218,7 @@ class Hocon::Impl::SimpleConfigList < Hocon::Impl::AbstractConfigValue
       if options.formatted?
         sb.pos = sb.pos - 1 # also chop comma
         sb << "\n"
-        self.class.indent(sb, indent_size, options)
+        Hocon::Impl::AbstractConfigValue.indent(sb, indent_size, options)
       end
       sb << "]"
     end

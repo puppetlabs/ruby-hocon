@@ -2,6 +2,7 @@ require 'hocon/impl'
 require 'hocon/impl/replaceable_merge_stack'
 require 'hocon/impl/config_delayed_merge_object'
 require 'hocon/impl/config_impl'
+require 'hocon/impl/resolve_result'
 require 'hocon/impl/abstract_config_value'
 
 #
@@ -12,11 +13,13 @@ require 'hocon/impl/abstract_config_value'
 # stack of values that should be merged, and resolve the merge when we evaluate
 # substitutions.
 #
-class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
+class Hocon::Impl::ConfigDelayedMerge
   include Hocon::Impl::Unmergeable
   include Hocon::Impl::ReplaceableMergeStack
+  include Hocon::Impl::AbstractConfigValue
 
   ConfigImpl = Hocon::Impl::ConfigImpl
+  ResolveResult = Hocon::Impl::ResolveResult
 
   def initialize(origin, stack)
     super(origin)
@@ -47,11 +50,11 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
     raise Hocon::ConfigError::ConfigNotResolvedError.new(error_message, nil)
   end
 
-  def resolve_substitution(context, source)
-    self.class.resolve_substitution(self, stack, context, source)
+  def resolve_substitutions(context, source)
+    self.class.resolve_substitutions(self, stack, context, source)
   end
 
-  def self.resolve_substitution(context, source, replaceable = self, stack = @stack)
+  def self.resolve_substitutions(replaceable, stack, context, source)
     if ConfigImpl.trace_substitution_enabled
       ConfigImpl.trace("delayed merge stack has #{stack.size} items:", context.depth)
       count = 0
@@ -75,9 +78,9 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
 
       source_for_end = nil
 
-      if stack_end.is_a?(ReplaceableMergeStack)
+      if stack_end.is_a?(Hocon::Impl::ReplaceableMergeStack)
         raise ConfigBugOrBrokenError, "A delayed merge should not contain another one: #{replaceable}"
-      elsif stack_end.is_a?(Unmergeable)
+      elsif stack_end.is_a?(Hocon::Impl::Unmergeable)
         # the remainder could be any kind of value, including another
         # ConfigDelayedMerge
         remainder = replaceable.make_replacement(context, count + 1)
@@ -120,7 +123,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
 
       if ConfigImpl.trace_substitution_enabled
         ConfigImpl.trace("Resolving highest-priority item in delayed merge #{stack_end}" +
-                          " against #{source_for_end} endWasRemoved=#{(source != sourceForEnd)}")
+                          " against #{source_for_end} endWasRemoved=#{(source != source_for_end)}")
       end
 
       result = new_context.resolve(stack_end, source_for_end)
@@ -132,7 +135,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
           merged = resolved_end
         else
           if ConfigImpl.trace_substitution_enabled
-            ConfigImpl.trace("merging #{merged} with fallback #{resolvedEnd}",
+            ConfigImpl.trace("merging #{merged} with fallback #{resolved_end}",
                              new_context.depth + 1)
           end
           merged = merged.with_fallback(resolved_end)
@@ -156,7 +159,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
 
   # static method also used by ConfigDelayedMergeObject; end may be null
   def self.make_replacement(context, stack, skipping)
-    sub_stack = stack.sub_list(skipping, stack.size)
+    sub_stack = stack.slice(skipping..stack.size)
 
     if sub_stack.empty?
       if ConfigImpl.trace_substitution_enabled
@@ -291,7 +294,7 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
           sb << "\n"
         end
       end
-      self.indent(sb, indent, options)
+      Hocon::Impl::AbstractConfigValue.indent(sb, indent, options)
 
       if !at_key.nil?
         sb << Hocon::Impl::ConfigImplUtil.render_json_string(at_key)
@@ -311,9 +314,12 @@ class Hocon::Impl::ConfigDelayedMerge < Hocon::Impl::AbstractConfigValue
     end
 
     # chop comma or newline
-    sb.string = sb.string[0...-1]
+    # couldn't figure out a better way to chop characters off of the end of
+    # the StringIO.  This relies on making sure that, prior to returning the
+    # final string, we take a substring that ends at sb.pos.
+    sb.pos = sb.pos - 1
     if options.formatted
-      sb.string = sb.string[0...-1]
+      sb.pos = sb.pos - 1
       sb << "\n"
     end
 
