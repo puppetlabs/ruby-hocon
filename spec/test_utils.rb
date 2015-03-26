@@ -318,7 +318,7 @@ module TestUtils
   end
 
   def self.string_value(value)
-    ConfigString.new(fake_origin, value)
+    ConfigString::Quoted.new(fake_origin, value)
   end
 
   def self.null_value

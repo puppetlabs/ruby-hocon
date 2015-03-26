@@ -281,7 +281,7 @@ class Hocon::Impl::Parser
         # or substitution already.
         v = Tokens.value(t.token)
       elsif Tokens.unquoted_text?(t.token)
-        v = Hocon::Impl::ConfigString.new(t.token.origin, Tokens.unquoted_text(t.token))
+        v = Hocon::Impl::ConfigString::Unquoted.new(t.token.origin, Tokens.unquoted_text(t.token))
       elsif Tokens.substitution?(t.token)
         v = ConfigReference.new(t.token.origin,
                                 self.class.token_to_substitution_expression(t.token))

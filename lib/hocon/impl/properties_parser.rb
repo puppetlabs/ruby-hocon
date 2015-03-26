@@ -47,7 +47,7 @@ class Hocon::Impl::PropertiesParser
       raw_value = path_map.get(path)
       if converted_from_properties
         if raw_value.is_a?(String)
-          value = Hocon::Impl::ConfigString.new(origin, raw_value)
+          value = Hocon::Impl::ConfigString::Quoted.new(origin, raw_value)
         else
           value = nil
         end

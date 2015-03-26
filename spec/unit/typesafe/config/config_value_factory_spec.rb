@@ -33,7 +33,7 @@ describe Hocon::ConfigValueFactory do
 
     it "should convert an string into a ConfigString object" do
       value = Hocon::ConfigValueFactory.from_any_ref("Hello, World!", nil)
-      expect(value).to be_instance_of(Hocon::Impl::ConfigString)
+      expect(value).to be_a(Hocon::Impl::ConfigString)
       expect(value.unwrapped).to eq("Hello, World!")
     end
 
