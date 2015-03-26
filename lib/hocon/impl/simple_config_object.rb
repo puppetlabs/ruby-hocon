@@ -21,7 +21,8 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
   Path = Hocon::Impl::Path
 
 
-  def initialize(origin, value,
+  def initialize(origin,
+                 value,
                  status = Hocon::Impl::ResolveStatus.from_values(value.values),
                  ignores_fallbacks = false)
     super(origin)
@@ -405,22 +406,22 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
     end
   end
 
-  def render_value_to_sb(sb, indent_size, at_root, options)
+  def render_value_to_sb(sb, indent, at_root, options)
     if empty?
       sb << "{}"
     else
       outer_braces = options.json? || !at_root
 
-      inner_indent =
-          if outer_braces
-            sb << "{"
-            if options.formatted?
-              sb << "\n"
-            end
-            indent_size + 1
-          else
-            indent_size
-          end
+      if outer_braces
+        inner_indent = indent + 1
+        sb << "{"
+
+        if options.formatted?
+          sb << "\n"
+        end
+      else
+        inner_indent = indent
+      end
 
       separator_count = 0
       sorted_keys = RenderComparator.sort(keys)
@@ -428,10 +429,16 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
         v = @value[k]
 
         if options.origin_comments?
-          self.class.indent(sb, inner_indent, options)
-          sb << "# "
-          sb << v.origin.description
-          sb << "\n"
+          lines = v.origin.description.split("\n")
+          lines.each { |l|
+            self.class.indent(sb, indent + 1, options)
+            sb << '#'
+            unless l.empty?
+              sb << ' '
+            end
+            sb << l
+            sb << "\n"
+          }
         end
         if options.comments?
           v.origin.comments.each do |comment|
@@ -470,7 +477,7 @@ class Hocon::Impl::SimpleConfigObject < Hocon::Impl::AbstractConfigObject
         if options.formatted?
           sb << "\n" # put a newline back
           if outer_braces
-            self.class.indent(sb, indent_size, options)
+            self.class.indent(sb, indent, options)
           end
         end
         sb << "}"

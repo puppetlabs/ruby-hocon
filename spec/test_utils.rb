@@ -30,11 +30,11 @@ module TestUtils
       if e.is_a?(exception_type)
         thrown = e
       else
-        raise ArgumentError, "Expected exception #{exception_type} was not thrown, got #{e}\n#{e.backtrace.join("\n")}"
+        raise "Expected exception #{exception_type} was not thrown, got #{e.class}: #{e}\n#{e.backtrace.join("\n")}"
       end
     end
     if thrown.nil?
-      raise ArgumentError, "Expected exception #{exception_type} was not thrown, no exception was thrown and got result #{result}"
+      raise "Expected exception #{exception_type} was not thrown, no exception was thrown and got result #{result}"
     end
     thrown
   end

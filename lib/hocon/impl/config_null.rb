@@ -16,8 +16,8 @@ class Hocon::Impl::ConfigNull < Hocon::Impl::AbstractConfigValue
     "null"
   end
 
-  def render(sb, indent, atRoot, options)
-    sb.append("null")
+  def render_value_to_sb(sb, indent, at_root, options)
+    sb << "null"
   end
 
   def newCopy(origin)
