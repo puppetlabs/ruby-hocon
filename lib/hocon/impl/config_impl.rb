@@ -84,7 +84,7 @@ class Hocon::Impl::ConfigImpl
         return @default_false_value
       end
     elsif object.is_a?(String)
-      return Hocon::Impl::ConfigString.new(origin, object)
+      return Hocon::Impl::ConfigString::Quoted.new(origin, object)
     elsif object.is_a?(Numeric)
       # here we always keep the same type that was passed to us,
       # rather than figuring out if a Long would fit in an Int

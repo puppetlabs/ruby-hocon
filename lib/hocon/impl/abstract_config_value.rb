@@ -282,7 +282,7 @@ class Hocon::Impl::AbstractConfigValue
   def to_s
     sb = StringIO.new
     render_to_sb(sb, 0, true, nil, Hocon::ConfigRenderOptions.concise)
-    "#{self.class.name}(#{sb.string})"
+    "#{self.class.name.split('::').last}(#{sb.string})"
   end
 
   def self.indent(sb, indent_size, options)

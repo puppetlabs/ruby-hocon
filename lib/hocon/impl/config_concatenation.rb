@@ -108,7 +108,7 @@ class Hocon::Impl::ConfigConcatenation < Hocon::Impl::AbstractConfigValue
                     "and #{right} are not compatible", nil)
       else
         joined_origin = SimpleConfigOrigin.merge_origins([left.origin, right.origin])
-        joined = Hocon::Impl::ConfigString.new(joined_origin, s1 + s2)
+        joined = Hocon::Impl::ConfigString::Quoted.new(joined_origin, s1 + s2)
       end
     end
 

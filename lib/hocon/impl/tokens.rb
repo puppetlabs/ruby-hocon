@@ -295,7 +295,7 @@ class Hocon::Impl::Tokens
   end
 
   def self.new_string(origin, value, orig_text)
-    new_value(ConfigString.new(origin, value), orig_text)
+    new_value(ConfigString::Quoted.new(origin, value), orig_text)
   end
 
   def self.new_int(origin, value, orig_text)

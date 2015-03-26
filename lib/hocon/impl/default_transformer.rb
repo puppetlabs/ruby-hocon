@@ -53,9 +53,9 @@ class Hocon::Impl::DefaultTransformer
         # Ruby note: can't fall through in ruby. In the java code, NUMBER
         # just rolls over to the BOOLEAN case
         when ConfigValueType::NUMBER
-          return ConfigString.new(value.origin, value.transform_to_string)
+          return ConfigString::Quoted.new(value.origin, value.transform_to_string)
         when ConfigValueType::BOOLEAN
-          return ConfigString.new(value.origin, value.transform_to_string)
+          return ConfigString::Quoted.new(value.origin, value.transform_to_string)
         when ConfigValueType::NULL
           # want to be sure this throws instead of returning "null" as a
           # string

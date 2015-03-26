@@ -8,11 +8,50 @@ require 'hocon/impl/config_impl_util'
 class Hocon::Impl::ConfigString < Hocon::Impl::AbstractConfigValue
   ConfigImplUtil = Hocon::Impl::ConfigImplUtil
 
-  attr_accessor :value
+  attr_reader :value
 
-  def initialize(origin, value)
-    super(origin)
-    @value = value
+  class Quoted < Hocon::Impl::ConfigString
+    def initialize(origin, value)
+      super(origin, value)
+    end
+
+    def new_copy(origin)
+      self.class.new(origin, @value)
+    end
+
+    private
+
+    # serialization all goes through SerializedConfigValue
+    def write_replace
+      Hocon::Impl::SerializedConfigValue.new(self)
+    end
+  end
+
+  # this is sort of a hack; we want to preserve whether whitespace
+  # was quoted until we process substitutions, so we can ignore
+  # unquoted whitespace when concatenating lists or objects.
+  # We dump this distinction when serializing and deserializing,
+  # but that 's OK because it isn' t in equals/hashCode, and we
+  # don 't allow serializing unresolved objects which is where
+  # quoted-ness matters. If we later make ConfigOrigin point
+  # to the original token range, we could use that to implement
+  # wasQuoted()
+  class Unquoted < Hocon::Impl::ConfigString
+    def initialize(origin, value)
+      super(origin, value)
+    end
+
+    def new_copy(origin)
+      self.class.new(origin, @value)
+    end
+
+    def write_replace
+      Hocon::Impl::SerializedConfigValue.new(self)
+    end
+  end
+
+  def was_quoted?
+    self.is_a?(Quoted)
   end
 
   def value_type
@@ -35,7 +74,10 @@ class Hocon::Impl::ConfigString < Hocon::Impl::AbstractConfigValue
     end
   end
 
-  def new_copy(origin)
-    Hocon::Impl::ConfigString.new(origin, @value)
+  private
+
+  def initialize(origin, value)
+    super(origin)
+    @value = value
   end
 end
