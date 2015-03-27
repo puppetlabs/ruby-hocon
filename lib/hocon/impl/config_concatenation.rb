@@ -83,9 +83,9 @@ class Hocon::Impl::ConfigConcatenation
     # check for an object which can be converted to a list
     # (this will be an object with numeric keys, like foo.0, foo.1)
     if (left.is_a?(ConfigObject)) && (right.is_a?(SimpleConfigList))
-      left = DefaultTransformer.transform(left, ConfigValueType::LIST)
+      left = Hocon::Impl::DefaultTransformer.transform(left, Hocon::ConfigValueType::LIST)
     elsif (left.is_a?(SimpleConfigList)) && (right.is_a?(ConfigObject))
-      right = DefaultTransformer.transform(right, ConfigValueType::LIST)
+      right = Hocon::Impl::DefaultTransformer.transform(right, Hocon::ConfigValueType::LIST)
     end
 
     # Since this depends on the type of two instances, I couldn't think
