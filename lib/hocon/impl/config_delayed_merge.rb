@@ -76,8 +76,6 @@ class Hocon::Impl::ConfigDelayedMerge
     stack.each do |stack_end|
       # the end value may or may not be resolved already
 
-      source_for_end = nil
-
       if stack_end.is_a?(Hocon::Impl::ReplaceableMergeStack)
         raise ConfigBugOrBrokenError, "A delayed merge should not contain another one: #{replaceable}"
       elsif stack_end.is_a?(Hocon::Impl::Unmergeable)
@@ -204,13 +202,13 @@ class Hocon::Impl::ConfigDelayedMerge
   end
 
   # static utility shared with ConfigDelayedMergeObject
-  def self.stack_ignores_fallbacks(stack)
+  def self.stack_ignores_fallbacks?(stack)
     last = stack[-1]
-    last.ignores_fallbacks
+    last.ignores_fallbacks?
   end
 
-  def ignores_fallbacks
-    self.class.stack_ignores_fallbacks(stack)
+  def ignores_fallbacks?
+    self.class.stack_ignores_fallbacks?(stack)
   end
 
   def new_copy(new_origin)

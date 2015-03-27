@@ -128,6 +128,31 @@ class Hocon::Impl::SimpleConfig
     v.unwrapped
   end
 
+  def get_list(path)
+    find2(path, ConfigValueType::LIST)
+  end
+
+  def get_object(path)
+    find2(path, ConfigValueType::OBJECT)
+  end
+
+  def get_int_list(path)
+    l = []
+    numbers = get_homogeneous_wrapped_list(path, ConfigValueType::NUMBER)
+    numbers.each { |v|
+      l << v.int_value_range_checked(path)
+    }
+    l
+  end
+
+  def get_string_list(path)
+    get_homogeneous_unwrapped_list(path, ConfigValueType::STRING)
+  end
+
+  def get_object_list(path)
+    get_homogeneous_wrapped_list(path, ConfigValueType::OBJECT)
+  end
+
   def has_path(path_expression)
     path = Path.new_path(path_expression)
     begin
@@ -151,5 +176,45 @@ class Hocon::Impl::SimpleConfig
   def with_value(path_expression, v)
     path = Path.new_path(path_expression)
     self.class.new(root.with_value(path, v))
+  end
+
+  private
+
+  def get_homogeneous_unwrapped_list(path, expected)
+    l = []
+    list = get_list(path)
+    list.each { |cv|
+      v = cv
+      if expected != nil
+        v = DefaultTransformer.transform(v, expected)
+      end
+      if v.value_type != expected
+        raise ConfigWrongTypeError.construct(v.origin,
+                                             path,
+                                             "list of #{expected.name}",
+                                             "list of #{v.value_type.name}")
+      end
+      l << v.unwrapped
+    }
+    l
+  end
+
+  def get_homogeneous_wrapped_list(path, expected)
+    l = []
+    list = get_list(path)
+    list.each { |cv|
+      v = cv
+      if expected != nil
+        v = DefaultTransformer.transform(v, expected)
+      end
+      if v.value_type != expected
+        raise ConfigWrongTypeError.construct(v.origin,
+                                             path,
+                                             "list of #{expected.name}",
+                                             "list of #{v.value_type.name}")
+      end
+      l << v
+    }
+    l
   end
 end

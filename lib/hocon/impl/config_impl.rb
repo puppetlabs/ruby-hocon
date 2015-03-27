@@ -134,6 +134,14 @@ class Hocon::Impl::ConfigImpl
     end
   end
 
+
+
+  def self.env_variables_as_config_object
+    begin
+      # TODO
+    end
+  end
+
   # This class is a lot simpler than the Java version ...
   # The Java version uses system properties to toggle these settings.
   # We don't have system properties in MRI so it's not clear what to do here.
@@ -181,5 +189,25 @@ class Hocon::Impl::ConfigImpl
       indent_level -= 1
     end
     $stderr.puts(message)
+  end
+
+  private
+
+  def self.load_env_variables
+    env = ENV
+    m = {}
+    env.each { |key, value|
+      m[key] = Hocon::Impl::ConfigString::Quoted.new(
+          Hocon::Impl::SimpleConfigOrigin.new_simple("env var #{key}"), value)
+    }
+    Hocon::Impl::SimpleConfigObject.new(
+        Hocon::Impl::SimpleConfigOrigin.new_simple("env variables"),
+        m,
+        Hocon::Impl::ResolveStatus::RESOLVED,
+        false)
+  end
+
+  class EnvVariablesHolder
+    ENV_VARIABLES = Hocon::Impl::ConfigImpl.load_env_variables
   end
 end

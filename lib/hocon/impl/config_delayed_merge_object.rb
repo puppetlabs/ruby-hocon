@@ -96,7 +96,7 @@ class Hocon::Impl::ConfigDelayedMergeObject
         v = layer.attempt_peek_with_partial_resolve(key)
 
         if !v.nil?
-          if v.ignores_fallbacks
+          if v.ignores_fallbacks?
             # we know we won't need to merge anything in to this
             # value
             return v
@@ -139,7 +139,7 @@ class Hocon::Impl::ConfigDelayedMergeObject
         # we would only have this in the stack in case something
         # else "looks back" to it due to a cycle.
         # anyway at this point we know we can't find the key anymore.
-        if !layer.ignores_fallbacks
+        if !layer.ignores_fallbacks?
           error_message = "resolved non-object should ignore fallbacks"
           raise Hocon::ConfigError::ConfigBugOrBrokenError.new(error_message, nil)
         end

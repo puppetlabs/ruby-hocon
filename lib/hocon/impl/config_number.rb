@@ -29,6 +29,16 @@ class Hocon::Impl::ConfigNumber
     @original_text
   end
 
+  def int_value_range_checked(path)
+    # We don't need to do any range checking here due to the way Ruby handles
+    # integers (doesn't have the 32-bit/64-bit distinction that Java does).
+    long_value
+  end
+
+  def long_value
+    raise "long_value needs to be overriden by sub-classes of #{Hocon::Impl::ConfigNumber}, in this case #{self.class}"
+  end
+
   def can_equal(other)
     other.is_a?(Hocon::Impl::ConfigNumber)
   end
@@ -48,9 +58,9 @@ class Hocon::Impl::ConfigNumber
 
     # If the value is an integer or a floating point equal to an integer
     if to_int == @value
-      return to_int.hash
+      to_int.hash
     else
-      return @value.hash
+      @value.hash
     end
   end
 end

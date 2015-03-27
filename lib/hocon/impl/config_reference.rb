@@ -21,6 +21,10 @@ class Hocon::Impl::ConfigReference
     @prefix_length = prefix_length
   end
 
+  def unmerged_values
+    [self]
+  end
+
   # ConfigReference should be a firewall against NotPossibleToResolve going
   # further up the stack; it should convert everything to ConfigException.
   # This way it 's impossible for NotPossibleToResolve to "escape" since
@@ -90,7 +94,7 @@ class Hocon::Impl::ConfigReference
     Hocon::Impl::ConfigReference.new(new_origin, @expr, @prefix_length)
   end
 
-  def ignores_fallbacks
+  def ignores_fallbacks?
     false
   end
 
