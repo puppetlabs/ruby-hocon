@@ -135,7 +135,6 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
     else
       conf_handle = source.name_to_parseable(name + ".conf", options)
       json_handle = source.name_to_parseable(name + ".json", options)
-      props_handle = source.name_to_parseable(name + ".properties", options)
       got_something = false
       fails = []
 
@@ -163,16 +162,8 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
         end
       end
 
-      if syntax.nil? || (syntax == Hocon::ConfigSyntax::PROPERTIES)
-        begin
-          parsed = props_handle.parse(props_handle.options.set_allow_missing(false).
-                      set_syntax(Hocon::ConfigSyntax::PROPERTIES))
-          obj = obj.with_fallback(parsed)
-          got_something = true
-        rescue ConfigIOError => e
-          fails << e
-        end
-      end
+      # NOTE: skipping the upstream block here that would attempt to parse
+      # a java properties file.
 
       if (! options.allow_missing?) && (! got_something)
         if Hocon::Impl::ConfigImpl.trace_loads_enabled

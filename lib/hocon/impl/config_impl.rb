@@ -115,7 +115,7 @@ class Hocon::Impl::ConfigImpl
         end
         return Hocon::Impl::SimpleConfigObject.new(origin, values)
       else
-        return Hocon::Impl::PropertiesParser.from_path_map(origin, object)
+        raise ConfigBugOrBrokenError, "java properties format not supported"
       end
     elsif object.is_a?(Enumerable)
       if object.count == 0
