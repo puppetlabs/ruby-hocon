@@ -136,12 +136,66 @@ class Hocon::Impl::SimpleConfig
     find2(path, ConfigValueType::OBJECT)
   end
 
+  def get_config(path)
+    get_object(path).to_config
+  end
+
+  def get_any_ref(path)
+    v = find2(path, nil)
+    v.unwrapped
+  end
+
+  def get_bytes(path)
+    size = null
+    begin
+      size = get_long(path)
+    rescue ConfigWrongTypeError => e
+      v = find2(path, ConfigValueType::STRING)
+      size = self.class.parse_bytes(v.unwrapped, v.origin, path)
+    end
+    size
+  end
+
+  def get_homogeneous_unwrapped_list(path, expected)
+    l = []
+    list = get_list(path)
+    list.each do |cv|
+      if !expected.nil?
+        v = DefaultTransformer.transform(cv, expected)
+      end
+      if v.value_type != expected
+        raise ConfigWrongTypeError.with_expected_actual(origin, path,
+              "list of #{expected.name}",
+              "list of #{v.value_type.name}")
+      end
+      l << v.unwrapped
+    end
+    l
+  end
+
+  def get_boolean_list(path)
+    get_homogeneous_unwrapped_list(path, ConfigValueType::BOOLEAN)
+  end
+
+  def get_number_list(path)
+    get_homogeneous_unwrapped_list(path, ConfigValueType::NUMBER)
+  end
+
   def get_int_list(path)
     l = []
     numbers = get_homogeneous_wrapped_list(path, ConfigValueType::NUMBER)
-    numbers.each { |v|
+    numbers.each do |v|
       l << v.int_value_range_checked(path)
-    }
+    end
+    l
+  end
+
+  def get_double_list(path)
+    l = []
+    numbers = get_number_list(path)
+    numbers.each do |n|
+      l << n.double_value
+    end
     l
   end
 
@@ -151,6 +205,23 @@ class Hocon::Impl::SimpleConfig
 
   def get_object_list(path)
     get_homogeneous_wrapped_list(path, ConfigValueType::OBJECT)
+  end
+
+  def get_homogeneous_wrapped_list(path, expected)
+    l = []
+    list = get_list(path)
+    list.each do |cv|
+      if !expected.nil?
+        v = DefaultTransformer.transform(cv, expected)
+      end
+      if v.value_type != expected
+        raise ConfigWrongTypeError.with_expected_actual(origin, path,
+                                                        "list of #{expected.name}",
+                                                        "list of #{v.value_type.name}")
+      end
+      l << v
+    end
+    l
   end
 
   def has_path(path_expression)
@@ -176,45 +247,5 @@ class Hocon::Impl::SimpleConfig
   def with_value(path_expression, v)
     path = Path.new_path(path_expression)
     self.class.new(root.with_value(path, v))
-  end
-
-  private
-
-  def get_homogeneous_unwrapped_list(path, expected)
-    l = []
-    list = get_list(path)
-    list.each { |cv|
-      v = cv
-      if expected != nil
-        v = DefaultTransformer.transform(v, expected)
-      end
-      if v.value_type != expected
-        raise ConfigWrongTypeError.construct(v.origin,
-                                             path,
-                                             "list of #{expected.name}",
-                                             "list of #{v.value_type.name}")
-      end
-      l << v.unwrapped
-    }
-    l
-  end
-
-  def get_homogeneous_wrapped_list(path, expected)
-    l = []
-    list = get_list(path)
-    list.each { |cv|
-      v = cv
-      if expected != nil
-        v = DefaultTransformer.transform(v, expected)
-      end
-      if v.value_type != expected
-        raise ConfigWrongTypeError.construct(v.origin,
-                                             path,
-                                             "list of #{expected.name}",
-                                             "list of #{v.value_type.name}")
-      end
-      l << v
-    }
-    l
   end
 end

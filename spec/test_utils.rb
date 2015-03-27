@@ -429,9 +429,9 @@ module TestUtils
   end
 
   def self.parse_config(s)
-    options = Hocon::ConfigParseOptions.defaults
-                  .set_origin_description("test string")
-                  .set_syntax(Hocon::ConfigSyntax::CONF)
+    options = Hocon::ConfigParseOptions.defaults.
+                  set_origin_description("test string").
+                  set_syntax(Hocon::ConfigSyntax::CONF)
     Hocon::ConfigFactory.parse_string(s, options)
   end
 
