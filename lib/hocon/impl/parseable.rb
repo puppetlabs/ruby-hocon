@@ -183,8 +183,14 @@ class Hocon::Impl::Parseable
     if base_options.nil?
       base_options = options
     end
+
+    # note that we are NOT using our "initialOptions",
+    # but using the ones from the passed-in options. The idea is that
+    # callers can get our original options and then parse with different
+    # ones if they want.
     options = fixup_options(base_options)
 
+    # passed-in option can override origin
     origin = nil
     if ! options.origin_description.nil?
       origin = Hocon::Impl::SimpleConfigOrigin.new_simple(options.origin_description)
@@ -221,7 +227,7 @@ class Hocon::Impl::Parseable
       if Hocon::Impl::ConfigImpl.trace_loads_enabled && (! final_options.get_syntax.nil?)
         self.class.trace("Overriding syntax #{final_options.get_syntax} with Content-Type which specified #{content-type}")
       end
-      options_with_content_type = final_options.set_syntax(content-type)
+      options_with_content_type = final_options.set_syntax(content_type)
     else
       options_with_content_type = final_options
     end
@@ -245,7 +251,7 @@ class Hocon::Impl::Parseable
       if Hocon::Impl::ConfigImpl.trace_loads_enabled && (! final_options.get_syntax.nil?)
         self.class.trace("Overriding syntax #{final_options.get_syntax} with Content-Type which specified #{content-type}")
       end
-      options_with_content_type = final_options.set_syntax(content-type)
+      options_with_content_type = final_options.set_syntax(content_type)
     else
       options_with_content_type = final_options
     end
