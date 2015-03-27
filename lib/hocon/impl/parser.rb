@@ -750,7 +750,8 @@ class Hocon::Impl::Parser
           inside_equals = false
 
           # path must be on-stack while we parse the value
-          @path_stack.push(path)
+          # Note that, in upstream, pathStack is a LinkedList, so use unshift instead of push
+          @path_stack.unshift(path)
 
           if after_key.token == Tokens::PLUS_EQUALS
             # we really should make this work, but for now throwing
@@ -812,7 +813,8 @@ class Hocon::Impl::Parser
 
           new_value = add_any_comments_after_any_comma(new_value)
 
-          last_path = @path_stack.pop
+          # Note that, in upstream, pathStack is a LinkedList, so use shift instead of pop
+          last_path = @path_stack.shift
           if inside_equals
             @equals_count -= 1
           end

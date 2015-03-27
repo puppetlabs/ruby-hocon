@@ -125,17 +125,16 @@ class Hocon::Impl::PathParser
           # We need to split the tokens on a . so that we can get sub-paths but still preserve
           # the original path text when doing an insertion
           if ! path_tokens.nil?
-            path_tokens.remove(path_tokens.size - 1)
-            path_tokens.add_all(split_token_on_period(t, flavor))
+            path_tokens.delete_at(path_tokens.size - 1)
+            path_tokens.concat(split_token_on_period(t, flavor))
           end
-
           text = v.transform_to_string
         elsif Tokens.unquoted_text?(t)
           # We need to split the tokens on a . so that we can get sub-paths but still preserve
           # the original path text when doing an insertion on ConfigNodeObjects
           if ! path_tokens.nil?
-            path_tokens.remove(path_tokens.size - 1)
-            path_tokens.add_all(split_token_on_period(t, flavor))
+            path_tokens.delete_at(path_tokens.size - 1)
+            path_tokens.concat(split_token_on_period(t, flavor))
           end
           text = Tokens.unquoted_text(t)
         else

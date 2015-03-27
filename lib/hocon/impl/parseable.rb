@@ -281,7 +281,7 @@ class Hocon::Impl::Parseable
   end
 
   def to_s
-    self.class.name
+    self.class.name.split('::').last
   end
 
   def self.syntax_from_extension(name)
@@ -371,7 +371,7 @@ class Hocon::Impl::Parseable
     end
 
     def to_s
-      "#{self.class.name} (#{@input})"
+      "#{self.class.name.split('::').last} (#{@input})"
     end
   end
 
@@ -435,7 +435,7 @@ class Hocon::Impl::Parseable
     end
 
     def to_s
-      "#{self.class.name} (#{@input})"
+      "#{self.class.name.split('::').last} (#{@input})"
     end
 
   end
@@ -517,7 +517,7 @@ class Hocon::Impl::Parseable
     end
 
     def to_s
-      "#{self.class.name}(#{@resource})"
+      "#{self.class.name.split('::').last}(#{@resource})"
     end
   end
 

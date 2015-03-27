@@ -159,7 +159,7 @@ class Hocon::Impl::ResolveSource
       end
     else
       if old.equal?(@root)
-        return self.class.new(rust_must_be_obj(replacement))
+        return self.class.new(root_must_be_obj(replacement))
       else
         raise ConfigBugOrBrokenError.new("attempt to replace root #{root} with #{replacement}")
       end

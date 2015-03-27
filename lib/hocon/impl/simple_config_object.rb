@@ -170,13 +170,13 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def replace_child(child, replacement)
-    new_children = value.clone
-    new_children.each do |k, v|
-      if v == child
-        if ! replacement.nil?
-          new_children[k] = replacement
+    new_children = @value.clone
+    new_children.each do |old, old_value|
+      if old_value.equal?(child)
+        if replacement != nil
+          new_children[old] = replacement
         else
-          new_children.delete(k)
+          new_children.delete(old)
         end
 
         return self.class.new(origin, new_children, ResolveStatus.from_values(new_children.values),
@@ -207,7 +207,11 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def unwrapped
-    @value.merge(@value) { |k,v| v.unwrapped }
+    m = {}
+    @value.each do |k,v|
+      m[k] = v.unwrapped
+    end
+    m
   end
 
   def merged_with_object(abstract_fallback)
@@ -328,17 +332,17 @@ class Hocon::Impl::SimpleConfigObject
       if @context.is_restricted_to_child
         if key == @context.restrict_to_child.first
           remainder = @context.restrict_to_child.remainder
-          if remainder.nil?
+          if remainder != nil
             result = @context.restrict(remainder).resolve(v, @source)
             @context = result.context.unrestricted.restrict(@original_restrict)
-            result.value
+            return result.value
           else
             # we don't want to resolve the leaf child
-            v
+            return v
           end
         else
           # not in the restrictToChild path
-          v
+          return v
         end
       else
         # no restrictToChild, resolve everything
