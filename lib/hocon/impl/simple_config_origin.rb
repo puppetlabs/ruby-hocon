@@ -45,19 +45,16 @@ class Hocon::Impl::SimpleConfigOrigin
              url, nil, nil)
   end
 
-  def self.new_url(url)
-    u = url.to_external_form
-    SimpleConfigOrigin.new(u, -1, -1, OriginType::URL, u, nil, nil)
-  end
+  # NOTE: not porting `new_url` because we're not going to support URLs for now
 
   def self.new_resource(resource, url = nil)
     desc = nil
-    if url.nil?
+    if ! url.nil?
       desc = resource + " @ " + url.to_external_form
     else
       desc = resource
     end
-    SimpleConfigOrigin.new(desc, -1, -1, OriginType::RESOURCE,
+    Hocon::Impl::SimpleConfigOrigin.new(desc, -1, -1, OriginType::RESOURCE,
                            url.nil? ? nil : url.to_external_form,
                            resource, nil)
   end

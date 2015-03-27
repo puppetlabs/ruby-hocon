@@ -7,5 +7,9 @@ module Hocon::Impl::OriginType
   GENERIC = 0
   FILE = 1
   #URL = 2
-  #RESOURCE = 3
+  # We don't actually support loading from the classpath / loadpath, which is
+  # what 'RESOURCE' is about in the upstream library.  However, some code paths
+  # still flow through our simplistic implementation of `ParseableResource`, so
+  # we need this constant.
+  RESOURCE = 3
 end

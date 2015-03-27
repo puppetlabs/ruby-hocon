@@ -9,6 +9,9 @@ require 'hocon/config_error'
 require 'hocon/config_syntax'
 require 'hocon/impl/simple_config_object'
 require 'hocon/impl/simple_config_origin'
+require 'hocon/config_includer_file'
+require 'hocon/config_factory'
+require 'hocon/impl/parseable'
 
 class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
 
@@ -61,16 +64,61 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
     end
   end
 
+  # NOTE: not porting `include_url` or `include_url_without_fallback` from upstream,
+  #  because we probably won't support URL includes for now.
+
+  def include_file(context, file)
+    obj = self.class.include_file_without_fallback(context, file)
+
+    # now use the fallback includer if any and merge its result
+    if (!@fallback.nil?) && @fallback.is_a?(Hocon::ConfigIncluderFile)
+      obj.with_fallback(@fallback).include_file(context, file)
+    else
+      obj
+    end
+  end
+
+  def self.include_file_without_fallback(context, file)
+    Hocon::ConfigFactory.parse_file_any_syntax(file, context.parse_options).root
+  end
+
+  # NOTE: not porting `include_resources` or `include_resources_without_fallback`
+  # for now because we're not going to support looking for things on the ruby
+  # load path for now.
+
+  def with_fallback(fallback)
+    if self.equal?(fallback)
+      raise ConfigBugOrBrokenError, "trying to create includer cycle"
+    elsif @fallback.equal(fallback)
+      self
+    elsif @fallback.nil?
+      self.class.new(@fallback.with_fallback(fallback))
+    else
+      self.class.new(fallback)
+    end
+  end
+
+
   class NameSource
     def name_to_parseable(name, parse_options)
       raise Hocon::ConfigError::ConfigBugOrBrokenError,
-            "name_to_parseable must be implemented by subclass"
+            "name_to_parseable must be implemented by subclass (#{self.class})"
     end
   end
 
   class RelativeNameSource < NameSource
     def initialize(context)
       @context = context
+    end
+
+    def name_to_parseable(name, options)
+      p = @context.relative_to(name)
+      if p.nil?
+        # avoid returning nil
+        Hocon::Impl::Parseable.new_not_found(name, "include was not found: '#{name}'", options)
+      else
+        p
+      end
     end
   end
 
@@ -87,11 +135,10 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
     else
       conf_handle = source.name_to_parseable(name + ".conf", options)
       json_handle = source.name_to_parseable(name + ".json", options)
-      props_handle = source.name_to_parseable(name + ".properties", options)
       got_something = false
       fails = []
 
-      syntax = options.get_syntax
+      syntax = options.syntax
 
       obj = SimpleConfigObject.empty(SimpleConfigOrigin.new_simple(name))
       if syntax.nil? || (syntax == Hocon::ConfigSyntax::CONF)
@@ -115,16 +162,8 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
         end
       end
 
-      if syntax.nil? || (syntax == Hocon::ConfigSyntax::PROPERTIES)
-        begin
-          parsed = props_handle.parse(props_handle.options).set_allow_missing(false).
-                      set_syntax(Hocon::ConfigSyntax::PROPERTIES)
-          obj = obj.with_fallback(parsed)
-          got_something = true
-        rescue ConfigIOError => e
-          fails.add(e)
-        end
-      end
+      # NOTE: skipping the upstream block here that would attempt to parse
+      # a java properties file.
 
       if (! options.allow_missing?) && (! got_something)
         if Hocon::Impl::ConfigImpl.trace_loads_enabled

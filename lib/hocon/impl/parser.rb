@@ -689,7 +689,7 @@ class Hocon::Impl::Parser
                               "remove the ${} statements from the included file.")
       end
 
-      if !(@path_stack.is_empty?)
+      if !(@path_stack.empty?)
         prefix = full_current_path
         obj = obj.relativized(prefix)
       end

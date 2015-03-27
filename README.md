@@ -7,7 +7,7 @@ This is a port of the [Typesafe Config](https://github.com/typesafehub/config) l
 
 The library provides Ruby support for the [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) configuration file format.
 
-At present, the only features it supports are explicit parsing of config files (.conf/HOCON, .json, .properties) via `ConfigFactory.parse_file`, and rendering a parsed config object back to a String.  Testing is minimal and not all data types are supported yet.  It also does not yet support `include` or interpolated settings.
+At present, the only features it supports are explicit parsing of config files (.conf/HOCON, .json) via `ConfigFactory.parse_file`, and rendering a parsed config object back to a String.  Testing is minimal and not all data types are supported yet.  It also does not yet support `include` or interpolated settings.
 PLEASE NOTE that as a result this project is in a very experimental state, and in some cases may not work properly, so
 please be wary when using it. If you find a problem, feel free to open a github issue.
 

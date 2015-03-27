@@ -228,20 +228,13 @@ module TestUtils
       ParseTest.from_s("[ truex ]"),
       ParseTest.from_s("[ 10x ]"), # number token with trailing junk
       ParseTest.from_s("[ / ]"), # unquoted string "slash"
-
-
-# TODO: this chunk is failing, presumably due to 'include'
-
-#       ParseTest.from_s("{ include \"foo\" }"), # valid include
-#       ParseTest.from_s("{ include\n\"foo\" }"), # include with just a newline separating from string
-#       ParseTest.from_s("{ include\"foo\" }"), # include with no whitespace after it
-#       ParseTest.from_s("[ include ]"), # include can be a string value in an array
-#       ParseTest.from_s("{ foo : include }"), # include can be a field value also
-#       ParseTest.from_s("{ include \"foo\", \"a\" : \"b\" }"), # valid include followed by comma and field
-#       ParseTest.from_s("{ foo include : 42 }"), # valid to have a key not starting with include
-
-
-
+      ParseTest.from_s("{ include \"foo\" }"), # valid include
+      ParseTest.from_s("{ include\n\"foo\" }"), # include with just a newline separating from string
+      ParseTest.from_s("{ include\"foo\" }"), # include with no whitespace after it
+      ParseTest.from_s("[ include ]"), # include can be a string value in an array
+      ParseTest.from_s("{ foo : include }"), # include can be a field value also
+      ParseTest.from_s("{ include \"foo\", \"a\" : \"b\" }"), # valid include followed by comma and field
+      ParseTest.from_s("{ foo include : 42 }"), # valid to have a key not starting with include
       ParseTest.from_s("[ ${foo} ]"),
       ParseTest.from_s("[ ${?foo} ]"),
       ParseTest.from_s("[ ${\"foo\"} ]"),
