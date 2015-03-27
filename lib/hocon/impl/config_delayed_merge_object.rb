@@ -1,6 +1,8 @@
 require 'hocon/impl'
 require 'hocon/impl/unmergeable'
 
+# This is just like ConfigDelayedMerge except we know statically
+# that it will turn out to be an object.
 class Hocon::Impl::ConfigDelayedMergeObject
   include Hocon::Impl::Unmergeable
   include Hocon::Impl::ReplaceableMergeStack
@@ -29,6 +31,121 @@ class Hocon::Impl::ConfigDelayedMergeObject
   end
 
   attr_reader :stack
+
+  def new_copy(status, origin)
+    if status != resolve_status
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new(
+                "attempt to create resolved ConfigDelayedMergeObject")
+    end
+    Hocon::Impl::ConfigDelayedMergeObject.new(origin, @stack)
+  end
+
+  def resolve_substitutions(context, source)
+    merged = Hocon::Impl::ConfigDelayedMerge.resolve_substitutions(self, @stack, context, source)
+    merged.as_object_result
+  end
+
+  def make_replacement(context, skipping)
+    Hocon::Impl::ConfigDelayedMerge.make_replacement(context, @stack, skipping)
+  end
+
+  def resolve_status
+    Hocon::Impl::ResolveStatus::UNRESOLVED
+  end
+
+  def replace_child(child, replacement)
+    new_stack = Hocon::Impl::AbstractConfigValue.replace_child_in_list(@stack, child, replacement)
+    if new_stack == nil
+      nil
+    else
+      self.class.new(origin, new_stack)
+    end
+  end
+
+  def has_descendant?(descendant)
+    has_descendant_in_list?(@stack, descendant)
+  end
+
+  def relativized(prefix)
+    new_stack = []
+    @stack.each { |o|
+      new_stack << o.relativized(prefix)
+    }
+    self.class.new(origin, new_stack)
+  end
+
+  def ignores_fallbacks?
+    Hocon::Impl::ConfigDelayedMerge.stack_ignores_fallbacks?(@stack)
+  end
+
+  def merged_with_the_unmergeable(fallback)
+    require_not_ignoring_fallbacks
+
+    merged_stack_with_the_unmergeable(@stack, fallback)
+  end
+
+  def merged_with_object(fallback)
+    merged_with_non_object(fallback)
+  end
+
+  def merged_with_non_object(fallback)
+    require_not_ignoring_fallbacks
+
+    merged_stack_with_non_object(@stack, fallback)
+  end
+
+  # No implementation of withFallback here,
+  # just use the implementation in the super-class
+
+  def with_only_key(key)
+    raise self.class.not_resolved
+  end
+
+  def without_key(key)
+    raise self.class.not_resolved
+  end
+
+  def with_only_path_or_nil(key)
+    raise self.class.not_resolved
+  end
+
+  def with_only_path(key)
+    raise self.class.not_resolved
+  end
+
+  def without_path(key)
+    raise self.class.not_resolved
+  end
+
+  def with_value(key_or_path, value = nil)
+    raise self.class.not_resolved
+  end
+
+  def unmerged_values
+    @stack
+  end
+
+  def can_equal(other)
+    other.is_a? Hocon::Impl::ConfigDelayedMergeObject
+  end
+
+  def ==(other)
+    # note that "origin" is deliberately NOT part of equality
+    if other.is_a? Hocon::Impl::ConfigDelayedMergeObject
+      can_equal(other) && (@stack == other.stack || @stack.equal?(other.stack))
+    else
+      false
+    end
+  end
+
+  def hash
+    # note that "origin" is deliberately NOT part of equality
+    @stack.hash
+  end
+
+  def render_to_sb(sb, indent, at_root, at_key, options)
+    Hocon::Impl::ConfigDelayedMerge.render_value_to_sb_from_stack(@stack, sb, indent, at_root, at_key, options)
+  end
 
   def self.not_resolved
     error_message = "need to Config#resolve() before using this object, see the API docs for Config#resolve()"
@@ -152,27 +269,5 @@ class Hocon::Impl::ConfigDelayedMergeObject
     # invariant was violated.
     error_message = "Delayed merge stack does not contain any unmergeable values"
     raise Hocon::ConfigError::ConfigBugOrBrokenError.new(error_message, nil)
-  end
-
-  def can_equal(other)
-    other.is_a? Hocon::Impl::ConfigDelayedMergeObject
-  end
-
-  def ==(other)
-    # note that "origin" is deliberately NOT part of equality
-    if other.is_a? Hocon::Impl::ConfigDelayedMergeObject
-      can_equal(other) && (@stack == other.stack || @stack.equal?(other.stack))
-    else
-      false
-    end
-  end
-
-  def hash
-    # note that "origin" is deliberately NOT part of equality
-    @stack.hash
-  end
-
-  def render_to_sb(sb, indent, at_root, at_key, options)
-    Hocon::Impl::ConfigDelayedMerge.render_value_to_sb_from_stack(@stack, sb, indent, at_root, at_key, options)
   end
 end

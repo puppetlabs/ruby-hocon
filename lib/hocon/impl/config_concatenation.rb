@@ -229,8 +229,8 @@ class Hocon::Impl::ConfigConcatenation
     end
   end
 
-  def has_descendant(descendant)
-    has_descendant_in_list(@pieces, descendant)
+  def has_descendant?(descendant)
+    has_descendant_in_list?(@pieces, descendant)
   end
 
   # when you graft a substitution into another object,

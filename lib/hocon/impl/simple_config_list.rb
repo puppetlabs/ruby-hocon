@@ -58,8 +58,8 @@ class Hocon::Impl::SimpleConfigList
     end
   end
 
-  def has_descendant(descendant)
-    has_descendant_in_list(@value, descendant)
+  def has_descendant?(descendant)
+    has_descendant_in_list?(@value, descendant)
   end
 
   def modify(modifier, new_resolve_status)

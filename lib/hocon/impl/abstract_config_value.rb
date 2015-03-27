@@ -86,7 +86,7 @@ module Hocon::Impl::AbstractConfigValue
     end
   end
 
-  def self.has_descendant_in_list(list, descendant)
+  def self.has_descendant_in_list?(list, descendant)
     list.each do |v|
       if v.equal?(descendant)
         return true
@@ -94,7 +94,7 @@ module Hocon::Impl::AbstractConfigValue
     end
     # now the expensive traversal
     list.each do |v|
-      if v.is_a?(Hocon::Impl::Container) && v.has_descendant(descendant)
+      if v.is_a?(Hocon::Impl::Container) && v.has_descendant?(descendant)
         return true
       end
     end

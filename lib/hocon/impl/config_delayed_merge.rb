@@ -152,7 +152,7 @@ class Hocon::Impl::ConfigDelayedMerge
   end
 
   def make_replacement(context, skipping)
-    self.class.make_replacement(context, stack, skipping)
+    self.class.make_replacement(context, @stack, skipping)
   end
 
   # static method also used by ConfigDelayedMergeObject; end may be null
@@ -192,8 +192,8 @@ class Hocon::Impl::ConfigDelayedMerge
     end
   end
 
-  def has_descendant(descendant)
-    Hocon::Impl::AbstractConfigValue.has_descendant_in_list(stack, descendant)
+  def has_descendant?(descendant)
+    Hocon::Impl::AbstractConfigValue.has_descendant_in_list?(stack, descendant)
   end
 
   def relativized(prefix)

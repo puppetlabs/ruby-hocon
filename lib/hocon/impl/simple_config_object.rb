@@ -186,7 +186,7 @@ class Hocon::Impl::SimpleConfigObject
     raise ConfigBugOrBrokenError, "SimpleConfigObject.replaceChild did not find #{child} in #{self}"
   end
 
-  def has_descendant(descendant)
+  def has_descendant?(descendant)
     value.values.each do |child|
       if child.equal?(descendant)
         return true
@@ -194,7 +194,7 @@ class Hocon::Impl::SimpleConfigObject
     end
     # now do the expensive search
     value.values.each do |child|
-      if child.is_a?(Hocon::Impl::Container) && child.has_descendant(descendant)
+      if child.is_a?(Hocon::Impl::Container) && child.has_descendant?(descendant)
         return true
       end
     end
