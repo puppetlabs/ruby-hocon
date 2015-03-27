@@ -30,16 +30,9 @@ class Hocon::Impl::ConfigNumber
   end
 
   def int_value_range_checked(path)
-    l = long_value
-
-    # guess we don't need to bother with this ...
-    #
-    # if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
-    #   {
-    #       throw new ConfigException.WrongType(origin(), path, "32-bit integer",
-    #                                           "out-of-range value " + l);
-    #   }
-    l
+    # We don't need to do any range checking here due to the way Ruby handles
+    # integers (doesn't have the 32-bit/64-bit distinction that Java does).
+    long_value
   end
 
   def long_value
