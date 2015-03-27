@@ -490,7 +490,7 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def self.map_equals(a, b)
-    if a == b
+    if a.equal?(b)
       return true
     end
 
@@ -523,16 +523,16 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def can_equal(other)
-    other.is_a? Hocon::Impl::AbstractConfigObject
+    other.is_a? Hocon::ConfigObject
   end
 
   def ==(other)
     # note that "origin" is deliberately NOT part of equality.
     # neither are other "extras" like ignoresFallbacks or resolve status.
-    if other.is_a? Hocon::Impl::AbstractConfigObject
+    if other.is_a? Hocon::ConfigObject
       # optimization to avoid unwrapped() for two ConfigObject,
       # which is what AbstractConfigValue does.
-      can_equal(other) && self.class.map_equals(@value, other.value)
+      can_equal(other) && self.class.map_equals(self, other)
     else
       false
     end
