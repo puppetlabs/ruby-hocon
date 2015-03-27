@@ -98,9 +98,9 @@ class Hocon::Impl::SimpleConfigObject
       v = v.without_path(remainder)
       updated = @value.clone
       updated[key] = v
-      Hocon::Impl::SimpleConfigObject.new(origin,
-                                          updated,
-                                          ResolveStatus.from_values(updated.values), @ignores_fallbacks)
+      self.class.new(origin,
+                     updated,
+                     ResolveStatus.from_values(updated.values), @ignores_fallbacks)
     elsif (not remainder.nil?) || v.nil?
       return self
     else
@@ -110,9 +110,9 @@ class Hocon::Impl::SimpleConfigObject
           smaller[old_key] = old_value
         end
       end
-      Hocon::Impl::SimpleConfigObject.new(origin,
-                                          smaller,
-                                          ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
+      self.class.new(origin,
+                     smaller,
+                     ResolveStatus.from_values(smaller.values), @ignores_fallbacks)
     end
   end
 
@@ -558,7 +558,7 @@ class Hocon::Impl::SimpleConfigObject
     if origin.nil?
       empty(SimpleConfigOrigin.new_simple("empty config"))
     else
-      SimpleConfigObject.new(origin, {})
+      self.new(origin, {})
     end
   end
 
