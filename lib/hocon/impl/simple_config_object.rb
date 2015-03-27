@@ -127,7 +127,7 @@ class Hocon::Impl::SimpleConfigObject
       if (not child.nil?) && child.is_a?(Hocon::Impl::AbstractConfigObject)
         return with_key_value(key, child.with_value(remainder, v))
       else
-        subtree = v.at_path(
+        subtree = v.at_path_with_origin(
             SimpleConfigOrigin.new_simple("with_value(#{remainder.render})"), remainder)
         with_key_value(key, subtree.root)
       end
@@ -560,7 +560,7 @@ class Hocon::Impl::SimpleConfigObject
 
   def self.empty(origin = nil)
     if origin.nil?
-      empty(SimpleConfigOrigin.new_simple("empty config"))
+      empty(Hocon::Impl::SimpleConfigOrigin.new_simple("empty config"))
     else
       self.new(origin, {})
     end

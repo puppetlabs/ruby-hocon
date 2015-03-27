@@ -31,6 +31,10 @@ class Hocon::Impl::SimpleConfig
     @object
   end
 
+  def origin
+    @object.origin
+  end
+
   def resolve(options = Hocon::ConfigResolveOptions.defaults)
     resolve_with(self, options)
   end

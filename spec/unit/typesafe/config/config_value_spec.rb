@@ -6,6 +6,8 @@ require 'hocon/impl/config_delayed_merge'
 require 'hocon/impl/config_delayed_merge_object'
 require 'hocon/config_error'
 require 'hocon/impl/unsupported_operation_error'
+require 'hocon/config_value_factory'
+require 'hocon/config_render_options'
 
 
 
@@ -18,10 +20,14 @@ ConfigConcatenation = Hocon::Impl::ConfigConcatenation
 ConfigDelayedMerge = Hocon::Impl::ConfigDelayedMerge
 ConfigDelayedMergeObject = Hocon::Impl::ConfigDelayedMergeObject
 ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
+UnresolvedSubstitutionError = Hocon::ConfigError::UnresolvedSubstitutionError
 ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
 AbstractConfigObject = Hocon::Impl::AbstractConfigObject
+ConfigValueFactory = Hocon::ConfigValueFactory
+ConfigFactory = Hocon::ConfigFactory
 UnsupportedOperationError = Hocon::Impl::UnsupportedOperationError
 ConfigNumber = Hocon::Impl::ConfigNumber
+ConfigRenderOptions = Hocon::ConfigRenderOptions
 
 describe "SimpleConfigOrigin equality" do
   context "different origins with the same name should be equal" do
@@ -639,5 +645,251 @@ describe "Boolean conversions" do
 
     falses = TestUtils.parse_object("{ a=false, b=no, c=off }").to_config
     ["a", "b", "c"].map { |x| expect(falses.get_boolean(x)).to be false }
+  end
+end
+
+describe "SimpleConfigOrigin" do
+  let(:has_filename) { SimpleConfigOrigin.new_file("foo") }
+  let(:no_filename) { SimpleConfigOrigin.new_simple("bar") }
+  let(:filename_with_line) { has_filename.with_line_number(3) }
+  let(:no_filename_with_line) { no_filename.with_line_number(4) }
+
+  specify "filename matches what was specified" do
+    expect(has_filename.filename).to eq("foo")
+    expect(filename_with_line.filename).to eq("foo")
+    expect(no_filename.filename).to be nil
+    expect(no_filename_with_line.filename).to be nil
+  end
+
+  specify "description matches correctly" do
+    expect(has_filename.description).to eq("foo")
+    expect(no_filename.description).to eq("bar")
+    expect(filename_with_line.description).to eq("foo: 3")
+    expect(no_filename_with_line.description).to eq("bar: 4")
+  end
+
+  specify "origins with no line number should have line number of -1" do
+    expect(has_filename.line_number).to eq(-1)
+    expect(no_filename.line_number).to eq(-1)
+  end
+
+  specify "line_number returns the right line number" do
+    expect(filename_with_line.line_number).to eq(3)
+    expect(no_filename_with_line.line_number).to eq(4)
+  end
+end
+
+describe "Config#with_only_key and with_only_path" do
+  specify "should keep the correct data" do
+    object = TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }")
+
+    expect(object.with_only_key("a")).to eq(TestUtils.parse_object("{ a=1 }"))
+    expect(object.with_only_key("e")).to eq(TestUtils.parse_object("{ e.f.g=4 }"))
+    expect(object.to_config.with_only_path("c.d").root).to eq(TestUtils.parse_object("{ c.d.y=3, c.d.z=5 }"))
+    expect(object.to_config.with_only_path("c.d.z").root).to eq(TestUtils.parse_object("{ c.d.z=5 }"))
+
+    expect(object.with_only_key("nope")).to eq(TestUtils.parse_object("{ }"))
+    expect(object.to_config.with_only_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ }"))
+    expect(object.to_config.with_only_path("a.nonextistent").root).to eq(TestUtils.parse_object("{ }"))
+    expect(object.to_config.with_only_path("c.d.z.nonexistent").root).to eq(TestUtils.parse_object("{ }"))
+  end
+
+  specify "should handle unresolved correctly" do
+    object = TestUtils.parse_object("{ a = {}, a=${x}, b=${y}, b=${z}, x={asf:1}, y=2, z=3 }")
+
+    expect(object.to_config.resolve.with_only_path("a.asf").root).to eq(TestUtils.parse_object("{ a={asf:1} }"))
+
+    TestUtils.intercept(UnresolvedSubstitutionError) do
+      object.with_only_key("a").to_config.resolve
+    end
+
+    TestUtils.intercept(UnresolvedSubstitutionError) do
+      object.with_only_key("b").to_config.resolve
+    end
+
+    expect(object.resolve_status).to eq(Hocon::Impl::ResolveStatus::UNRESOLVED)
+    expect(object.with_only_key("z").resolve_status).to eq(Hocon::Impl::ResolveStatus::RESOLVED)
+  end
+end
+
+describe "Config#without_key/path" do
+
+  specify "should remove keys correctly" do
+    object = TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }")
+
+    expect(object.without_key("a")).to eq(TestUtils.parse_object("{ b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    expect(object.without_key("c")).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4 }"))
+    expect(object.to_config.without_path("c.d").root).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4, c={} }"))
+    expect(object.to_config.without_path("c.d.z").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4 }"))
+
+    # Nonexistant key
+    expect(object.without_key("nonexistent")).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+
+    # Nonexistant path
+    expect(object.to_config.without_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+
+    # Nonexistant path with existing prefix
+    expect(object.to_config.without_path("a.foo").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+  end
+end
+
+describe "Config#without_key/path involving unresolved" do
+
+  specify "should handle unresolved correctly" do
+    object = TestUtils.parse_object("{ a = {}, a=${x}, b=${y}, b=${z}, x={asf:1}, y=2, z=3 }")
+
+    expect(object.to_config.resolve.without_path("a.asf").root).to eq(TestUtils.parse_object("{ a={}, b=3, x={asf:1}, y=2, z=3 }"))
+
+    TestUtils.intercept(UnresolvedSubstitutionError) do
+      object.without_key("x").to_config.resolve
+    end
+
+    TestUtils.intercept(UnresolvedSubstitutionError) do
+      object.without_key("z").to_config.resolve
+    end
+
+    expect(object.resolve_status).to eq(Hocon::Impl::ResolveStatus::UNRESOLVED)
+    expect(object.without_key("a").resolve_status).to eq(Hocon::Impl::ResolveStatus::UNRESOLVED)
+    expect(object.without_key("a").without_key("b").resolve_status).to eq(Hocon::Impl::ResolveStatus::RESOLVED)
+  end
+end
+
+describe "Config#at_path" do
+  specify "works with one element" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = v.at_path("a")
+
+    expect(config).to eq(TestUtils.parse_config("a=42"))
+    expect(v).to eq(config.get_value("a"))
+    expect(config.origin.description).to include("at_path")
+  end
+
+  specify "works with two elements" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = v.at_path("a.b")
+
+    expect(config).to eq(TestUtils.parse_config("a.b=42"))
+    expect(v).to eq(config.get_value("a.b"))
+    expect(config.origin.description).to include("at_path")
+  end
+
+  specify "works with four elements" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = v.at_path("a.b.c.d")
+
+    expect(config).to eq(TestUtils.parse_config("a.b.c.d=42"))
+    expect(v).to eq(config.get_value("a.b.c.d"))
+    expect(config.origin.description).to include("at_path")
+  end
+end
+
+describe "Config#at_key" do
+  specify "at_key works" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = v.at_key("a")
+
+    expect(config).to eq(TestUtils.parse_config("a=42"))
+    expect(v).to eq(config.get_value("a"))
+    expect(config.origin.description).to include("at_key")
+  end
+
+  specify "works with value depth 1 from empty" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = ConfigFactory.empty.with_value("a", v)
+
+    expect(config).to eq(TestUtils.parse_config("a=42"))
+    expect(v).to eq(config.get_value("a"))
+  end
+
+  specify "works with value depth 2 from empty" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = ConfigFactory.empty.with_value("a.b", v)
+
+    expect(config).to eq(TestUtils.parse_config("a.b=42"))
+    expect(v).to eq(config.get_value("a.b"))
+  end
+
+  specify "works with value depth 3 from empty" do
+    v = ConfigValueFactory.from_any_ref(42)
+    config = ConfigFactory.empty.with_value("a.b.c", v)
+
+    expect(config).to eq(TestUtils.parse_config("a.b.c=42"))
+    expect(v).to eq(config.get_value("a.b.c"))
+  end
+
+  specify "with value depth 1 overwrites existing" do
+    v = ConfigValueFactory.from_any_ref(47)
+    old = v.at_path("a")
+    config = old.with_value("a", ConfigValueFactory.from_any_ref(42))
+
+    expect(config).to eq(TestUtils.parse_config("a=42"))
+    expect(config.get_int("a")).to eq(42)
+  end
+
+  specify "with value depth 2 overwrites existing" do
+    v = ConfigValueFactory.from_any_ref(47)
+    old = v.at_path("a.b")
+    config = old.with_value("a.b", ConfigValueFactory.from_any_ref(42))
+
+    expect(config).to eq(TestUtils.parse_config("a.b=42"))
+    expect(config.get_int("a.b")).to eq(42)
+  end
+
+  specify "with value inside existing object" do
+    v = ConfigValueFactory.from_any_ref(47)
+    old = v.at_path("a.c")
+    config = old.with_value("a.b", ConfigValueFactory.from_any_ref(42))
+
+    expect(config).to eq(TestUtils.parse_config("a.b=42,a.c=47"))
+    expect(config.get_int("a.b")).to eq(42)
+    expect(config.get_int("a.c")).to eq(47)
+  end
+
+  specify "with value build complex config" do
+    v1 = ConfigValueFactory.from_any_ref(1)
+    v2 = ConfigValueFactory.from_any_ref(2)
+    v3 = ConfigValueFactory.from_any_ref(3)
+    v4 = ConfigValueFactory.from_any_ref(4)
+
+    config = ConfigFactory.empty.with_value("a", v1)
+      .with_value("b.c", v2)
+      .with_value("b.d", v3)
+      .with_value("x.y.z", v4)
+
+    expect(config).to eq(TestUtils.parse_config("a=1,b.c=2,b.d=3,x.y.z=4"))
+  end
+end
+
+describe "#render" do
+  specify "has newlines in description" do
+    v = ConfigValueFactory.from_any_ref(89, "this is a description\nwith some\nnewlines")
+
+    list = SimpleConfigList.new(SimpleConfigOrigin.new_simple("\n5\n6\n7\n"), [v])
+
+    conf = ConfigFactory.empty.with_value("bar", list)
+
+    rendered = conf.root.render
+
+    expect(rendered).to include("is a description\n")
+    expect(rendered).to include("with some\n")
+    expect(rendered).to include("newlines\n")
+    expect(rendered).to include("#\n")
+    expect(rendered).to include("5\n")
+    expect(rendered).to include("6\n")
+    expect(rendered).to include("7\n")
+
+    # parsing the rendered config should give back the original config
+    parsed = ConfigFactory.parse_string(rendered)
+
+    # TODO Commented out do to unknown bug related to comments that will probably be affected
+    # by the upstream changes involving how comments are parsed
+    # expect(parsed).to eq(conf)
+  end
+
+  specify "should sort properly" do
+    config = TestUtils.parse_config('0=a,1=b,2=c,3=d,10=e,20=f,30=g')
+    rendered = config.root.render(ConfigRenderOptions.concise)
+
+    expect(rendered).to eq('{"0":"a","1":"b","2":"c","3":"d","10":"e","20":"f","30":"g"}')
   end
 end

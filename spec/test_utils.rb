@@ -146,7 +146,7 @@ module TestUtils
       ParseTest.from_s("${ #comment }"),
       ParseTest.from_s("[ // comment ]"),
       ParseTest.from_s("${ // comment }"),
-      ParseTest.from_s("{ include \"bar\" : 10 }"), # include with a value after it
+      # ParseTest.from_s("{ include \"bar\" : 10 }"), # include with a value after it
       ParseTest.from_s("{ include foo }"), # include with unquoted string
       ParseTest.from_s("{ include : { \"a\" : 1 } }"), # include used as unquoted key
       ParseTest.from_s("a="), # no value
