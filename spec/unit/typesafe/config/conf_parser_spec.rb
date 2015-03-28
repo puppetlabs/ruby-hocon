@@ -12,6 +12,7 @@ require 'hocon/impl/simple_config_origin'
 require 'hocon/config_list'
 require 'hocon/impl/config_reference'
 require 'hocon/impl/path_parser'
+require 'hocon/impl/parseable'
 
 def parse_without_resolving(s)
   options = Hocon::ConfigParseOptions.defaults.
@@ -374,5 +375,237 @@ describe "Config Parser" do
     line_number_test(6, "a : \"\"\"foo\nbar\nbaz\n\"\"\"\n\n}")
     #   end in the middle of triple-quoted string
     line_number_test(5, "a : \"\"\"foo\n\n\nbar\n")
+  end
+
+  context "to_string_for_parseables" do
+    # just to be sure the to_string don't throw, to get test coverage
+    options = Hocon::ConfigParseOptions.defaults
+    it "should allow to_s on File Parseable" do
+      Hocon::Impl::Parseable.new_file("foo", options).to_s
+    end
+
+    it "should allow to_s on Resources Parseable" do
+      Hocon::Impl::Parseable.new_resources("foo", options).to_s
+    end
+
+    it "should allow to_s on Resources Parseable" do
+      Hocon::Impl::Parseable.new_string("foo", options).to_s
+    end
+
+    # NOTE: Skipping 'newURL', 'newProperties', 'newReader' tests here
+    # because we don't implement them
+  end
+end
+
+def assert_comments(comments, conf)
+  it "should have comments #{comments} at root" do
+    expect(conf.root.origin.comments).to eq(comments)
+  end
+end
+
+def assert_comments_at_path(comments, conf, path)
+  it "should have comments #{comments} at path #{path}" do
+    expect(conf.get_value(path).origin.comments).to eq(comments)
+  end
+end
+
+def assert_comments_at_path_index(comments, conf, path, index)
+  it "should have comments #{comments} at path #{path} and index #{index}" do
+    expect(conf.get_list(path).get(index).origin.comments).to eq(comments)
+  end
+end
+
+describe "Config Parser" do
+  context "track_comments_for_single_field" do
+    # no comments
+    conf0 = TestUtils.parse_config('
+                {
+                foo=10 }
+                ')
+    assert_comments_at_path([], conf0, "foo")
+
+    # comment in front of a field is used
+    conf1 = TestUtils.parse_config('
+                { # Before
+                foo=10 }
+                ')
+    assert_comments_at_path([" Before"], conf1, "foo")
+
+    # comment with a blank line after is dropped
+    conf2 = TestUtils.parse_config('
+                { # BlankAfter
+
+                foo=10 }
+                ')
+    assert_comments_at_path([], conf2, "foo")
+
+    # comment in front of a field is used with no root {}
+    conf3 = TestUtils.parse_config('
+                # BeforeNoBraces
+                foo=10
+                ')
+    assert_comments_at_path([" BeforeNoBraces"], conf3, "foo")
+
+    # comment with a blank line after is dropped with no root {}
+    conf4 = TestUtils.parse_config('
+                # BlankAfterNoBraces
+
+                foo=10
+                ')
+    assert_comments_at_path([], conf4, "foo")
+
+    # comment same line after field is used
+    conf5 = TestUtils.parse_config('
+                {
+                foo=10 # SameLine
+                }
+                ')
+    assert_comments_at_path([" SameLine"], conf5, "foo")
+
+    # comment before field separator is used
+    conf6 = TestUtils.parse_config('
+                {
+                foo # BeforeSep
+                =10
+                }
+                ')
+    assert_comments_at_path([" BeforeSep"], conf6, "foo")
+
+    # comment after field separator is used
+    conf7 = TestUtils.parse_config('
+                {
+                foo= # AfterSep
+                10
+                }
+                ')
+    assert_comments_at_path([" AfterSep"], conf7, "foo")
+
+    # comment on next line is NOT used
+    conf8 = TestUtils.parse_config('
+                {
+                foo=10
+                # NextLine
+                }
+                ')
+    assert_comments_at_path([], conf8, "foo")
+
+    # comment before field separator on new line
+    conf9 = TestUtils.parse_config('
+                {
+                foo
+                # BeforeSepOwnLine
+                =10
+                }
+                ')
+    assert_comments_at_path([" BeforeSepOwnLine"], conf9, "foo")
+
+    # comment after field separator on its own line
+    conf10 = TestUtils.parse_config('
+                {
+                foo=
+                # AfterSepOwnLine
+                10
+                }
+                ')
+    assert_comments_at_path([" AfterSepOwnLine"], conf10, "foo")
+
+    # comments comments everywhere
+    conf11 = TestUtils.parse_config('
+                {# Before
+                foo
+                # BeforeSep
+                = # AfterSepSameLine
+                # AfterSepNextLine
+                10 # AfterValue
+                # AfterValueNewLine (should NOT be used)
+                }
+                ')
+    assert_comments_at_path([" Before", " BeforeSep", " AfterSepSameLine", " AfterSepNextLine", " AfterValue"], conf11, "foo")
+
+    # empty object
+    conf12 = TestUtils.parse_config('# BeforeEmpty
+                {} #AfterEmpty
+                # NewLine
+                ')
+    assert_comments([" BeforeEmpty", "AfterEmpty"], conf12)
+
+    # empty array
+    conf13 = TestUtils.parse_config('
+                foo=
+                # BeforeEmptyArray
+                  [] #AfterEmptyArray
+                # NewLine
+                ')
+    assert_comments_at_path([" BeforeEmptyArray", "AfterEmptyArray"], conf13, "foo")
+
+    # array element
+    conf14 = TestUtils.parse_config('
+                foo=[
+                # BeforeElement
+                10 # AfterElement
+                ]
+                ')
+    assert_comments_at_path_index(
+        [" BeforeElement", " AfterElement"], conf14, "foo", 0)
+
+    # field with comma after it
+    conf15 = TestUtils.parse_config('
+                foo=10, # AfterCommaField
+                ')
+    assert_comments_at_path([" AfterCommaField"], conf15, "foo")
+
+    # element with comma after it
+    conf16 = TestUtils.parse_config('
+                foo=[10, # AfterCommaElement
+                ]
+                ')
+    assert_comments_at_path_index([" AfterCommaElement"], conf16, "foo", 0)
+
+    # field with comma after it but comment isn't on the field's line, so not used
+    conf17 = TestUtils.parse_config('
+                foo=10
+                , # AfterCommaFieldNotUsed
+                ')
+    assert_comments_at_path([], conf17, "foo")
+
+    # element with comma after it but comment isn't on the field's line, so not used
+    conf18 = TestUtils.parse_config('
+                foo=[10
+                , # AfterCommaElementNotUsed
+                ]
+                ')
+    assert_comments_at_path_index([], conf18, "foo", 0)
+
+    # comment on new line, before comma, should not be used
+    conf19 = TestUtils.parse_config('
+                foo=10
+                # BeforeCommaFieldNotUsed
+                ,
+                ')
+    assert_comments_at_path([], conf19, "foo")
+
+    # comment on new line, before comma, should not be used
+    conf20 = TestUtils.parse_config('
+                foo=[10
+                # BeforeCommaElementNotUsed
+                ,
+                ]
+                ')
+    assert_comments_at_path_index([], conf20, "foo", 0)
+
+    # comment on same line before comma
+    conf21 = TestUtils.parse_config('
+                foo=10 # BeforeCommaFieldSameLine
+                ,
+                ')
+    assert_comments_at_path([" BeforeCommaFieldSameLine"], conf21, "foo")
+
+    # comment on same line before comma
+    conf22 = TestUtils.parse_config('
+                foo=[10 # BeforeCommaElementSameLine
+                ,
+                ]
+                ')
+    assert_comments_at_path_index([" BeforeCommaElementSameLine"], conf22, "foo", 0)
   end
 end
