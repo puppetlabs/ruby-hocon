@@ -608,4 +608,99 @@ describe "Config Parser" do
                 ')
     assert_comments_at_path_index([" BeforeCommaElementSameLine"], conf22, "foo", 0)
   end
+
+  context "track_comments_for_multiple_fields" do
+    # nested objects
+    conf5 = TestUtils.parse_config('
+             # Outside
+             bar {
+                # Ignore me
+
+                # Middle
+                # two lines
+                baz {
+                    # Inner
+                    foo=10 # AfterInner
+                    # This should be ignored
+                } # AfterMiddle
+                # ignored
+             } # AfterOutside
+             # ignored!
+             ')
+    assert_comments_at_path([" Inner", " AfterInner"], conf5, "bar.baz.foo")
+    assert_comments_at_path([" Middle", " two lines", " AfterMiddle"], conf5, "bar.baz")
+    assert_comments_at_path([" Outside", " AfterOutside"], conf5, "bar")
+
+    # multiple fields
+    conf6 = TestUtils.parse_config('{
+                # this is not with a field
+
+                # this is field A
+                a : 10,
+                # this is field B
+                b : 12 # goes with field B which has no comma
+                # this is field C
+                c : 14, # goes with field C after comma
+                # not used
+                # this is not used
+                # nor is this
+                # multi-line block
+
+                # this is with field D
+                # this is with field D also
+                d : 16
+
+                # this is after the fields
+    }')
+    assert_comments_at_path([" this is field A"], conf6, "a")
+    assert_comments_at_path([" this is field B", " goes with field B which has no comma"], conf6, "b")
+    assert_comments_at_path([" this is field C", " goes with field C after comma"], conf6, "c")
+    assert_comments_at_path([" this is with field D", " this is with field D also"], conf6, "d")
+
+    # array
+    conf7 = TestUtils.parse_config('
+                # before entire array
+                array = [
+                # goes with 0
+                0,
+                # goes with 1
+                1, # with 1 after comma
+                # goes with 2
+                2 # no comma after 2
+                # not with anything
+                ] # after entire array
+                ')
+    assert_comments_at_path_index([" goes with 0"], conf7, "array", 0)
+    assert_comments_at_path_index([" goes with 1", " with 1 after comma"], conf7, "array", 1)
+    assert_comments_at_path_index([" goes with 2", " no comma after 2"], conf7, "array", 2)
+    assert_comments_at_path([" before entire array", " after entire array"], conf7, "array")
+
+    # properties-like syntax
+    conf8 = TestUtils.parse_config('
+                # ignored comment
+                
+                # x.y comment
+                x.y = 10
+                # x.z comment
+                x.z = 11
+                # x.a comment
+                x.a = 12
+                # a.b comment
+                a.b = 14
+                a.c = 15
+                a.d = 16 # a.d comment
+                # ignored comment
+                ')
+
+    assert_comments_at_path([" x.y comment"], conf8, "x.y")
+    assert_comments_at_path([" x.z comment"], conf8, "x.z")
+    assert_comments_at_path([" x.a comment"], conf8, "x.a")
+    assert_comments_at_path([" a.b comment"], conf8, "a.b")
+    assert_comments_at_path([], conf8, "a.c")
+    assert_comments_at_path([" a.d comment"], conf8, "a.d")
+    # here we're concerned that comments apply only to leaf
+    # nodes, not to parent objects.
+    assert_comments_at_path([], conf8, "x")
+    assert_comments_at_path([], conf8, "a")
+  end
 end
