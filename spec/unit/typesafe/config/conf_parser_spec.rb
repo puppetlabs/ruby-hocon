@@ -13,7 +13,6 @@ require 'hocon/config_list'
 require 'hocon/impl/config_reference'
 require 'hocon/impl/path_parser'
 
-
 def parse_without_resolving(s)
   options = Hocon::ConfigParseOptions.defaults.
               set_origin_description("test conf string").
@@ -289,5 +288,91 @@ describe "Config Parser" do
     it "should have run one test per change per valid string" do
       expect(tested).to eq(changes.length * valids.length)
     end
+
+    context "should concatenate values when there is no newline or comma" do
+      it "with no newline in array" do
+        expect(TestUtils.parse_config(" { c : [ 1 2 3 ] } ").
+                   get_string_list("c")).to eq (["1 2 3"])
+      end
+
+      it "with no newline in array with quoted strings" do
+        expect(TestUtils.parse_config(' { c : [ "4" "5" "6" ] } ').
+                   get_string_list("c")).to eq (["4 5 6"])
+      end
+
+      it "with no newline in object" do
+        expect(TestUtils.parse_config(' { a : b c } ').
+                   get_string("a")).to eq ("b c")
+      end
+
+      it "with no newline at end" do
+        expect(TestUtils.parse_config('a: b').
+                   get_string("a")).to eq ("b")
+      end
+
+      it "errors when no newline between keys" do
+        TestUtils.intercept(Hocon::ConfigError) {
+          TestUtils.parse_config('{ a : y b : z }')
+        }
+      end
+
+      it "errors when no newline between quoted keys" do
+        TestUtils.intercept(Hocon::ConfigError) {
+          TestUtils.parse_config('{ "a" : "y" "b" : "z" }')
+        }
+      end
+    end
+  end
+
+  it "should support keys with slashes" do
+    obj = TestUtils.parse_config('/a/b/c=42, x/y/z : 32')
+    expect(obj.get_int("/a/b/c")).to eq(42)
+    expect(obj.get_int("x/y/z")).to eq(32)
+  end
+end
+
+def line_number_test(num, text)
+  it "should include the line number #{num} in the error message for invalid string '#{text}'" do
+    e = TestUtils.intercept(Hocon::ConfigError) {
+      TestUtils.parse_config(text)
+    }
+    if ! (e.message.include?("#{num}:"))
+      raise ScriptError, "error message did not contain line '#{num}' '#{text.gsub("\n", "\\n")}' (#{e})"
+    end
+  end
+end
+
+describe "Config Parser" do
+  context "line_numbers_in_errors" do
+    # error is at the last char
+    line_number_test(1, "}")
+    line_number_test(2, "\n}")
+    line_number_test(3, "\n\n}")
+
+    # error is before a final newline
+    line_number_test(1, "}\n")
+    line_number_test(2, "\n}\n")
+    line_number_test(3, "\n\n}\n")
+
+    # with unquoted string
+    line_number_test(1, "foo")
+    line_number_test(2, "\nfoo")
+    line_number_test(3, "\n\nfoo")
+
+    # with quoted string
+    line_number_test(1, "\"foo\"")
+    line_number_test(2, "\n\"foo\"")
+    line_number_test(3, "\n\n\"foo\"")
+
+    # newlines in triple-quoted string should not hose up the numbering
+    line_number_test(1, "a : \"\"\"foo\"\"\"}")
+    line_number_test(2, "a : \"\"\"foo\n\"\"\"}")
+    line_number_test(3, "a : \"\"\"foo\nbar\nbaz\"\"\"}")
+    #   newlines after the triple quoted string
+    line_number_test(5, "a : \"\"\"foo\nbar\nbaz\"\"\"\n\n}")
+    #   triple quoted string ends in a newline
+    line_number_test(6, "a : \"\"\"foo\nbar\nbaz\n\"\"\"\n\n}")
+    #   end in the middle of triple-quoted string
+    line_number_test(5, "a : \"\"\"foo\n\n\nbar\n")
   end
 end
