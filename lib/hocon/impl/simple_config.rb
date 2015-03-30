@@ -31,6 +31,10 @@ class Hocon::Impl::SimpleConfig
     @object
   end
 
+  def origin
+    @object.origin
+  end
+
   def resolve(options = Hocon::ConfigResolveOptions.defaults)
     resolve_with(self, options)
   end
@@ -232,6 +236,15 @@ class Hocon::Impl::SimpleConfig
       raise Hocon::Impl::ConfigImpl.improve_not_resolved(path, e)
     end
     (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
+  end
+
+  def at_key(key)
+    root.at_key(key)
+  end
+
+  # In java this is an overloaded version of atKey
+  def at_key_with_origin(origin, key)
+    root.at_key_with_origin(origin, key)
   end
 
   def with_only_path(path_expression)

@@ -17,4 +17,8 @@ class Hocon::ConfigFactory
   def self.parse_file_any_syntax(file_base_name, options)
     Hocon::Impl::ConfigImpl.parse_file_any_syntax(file_base_name, options).to_config
   end
+
+  def self.empty(origin_description = nil)
+    Hocon::Impl::ConfigImpl.empty_config(origin_description)
+  end
 end

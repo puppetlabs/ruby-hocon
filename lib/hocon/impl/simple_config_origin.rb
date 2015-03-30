@@ -72,7 +72,7 @@ class Hocon::Impl::SimpleConfigOrigin
 
   def add_url(url)
     SimpleConfigOrigin.new(@_description, line_number, end_line_number, origin_type,
-                           url.nil? ? nil : url.to_external_form, resource_or_nil,
+                           url.nil? ? nil : url.to_s, resource_or_nil,
                            comments_or_nil)
   end
 

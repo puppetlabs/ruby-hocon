@@ -21,12 +21,17 @@ class Hocon::Impl::Url
 
   def initialize(url)
     begin
-      @url = URI.parse(url)
+      # URI::parse wants a string
+      @url = URI.parse(url.to_s)
       if !(@url.kind_of?(URI::HTTP))
         raise MalformedUrlError, "Unrecognized URL: '#{url}'"
       end
     rescue URI::InvalidURIError => e
       raise MalformedUrlError.new("Unrecognized URL: '#{url}' (error: #{e})", e)
     end
+  end
+
+  def to_s
+    @url.to_s
   end
 end

@@ -17,6 +17,8 @@ class Hocon::Impl::ConfigImpl
   @default_false_value = Hocon::Impl::ConfigBoolean.new(@default_value_origin, false)
   @default_null_value = Hocon::Impl::ConfigNull.new(@default_value_origin)
   @default_empty_list = Hocon::Impl::SimpleConfigList.new(@default_value_origin, Array.new)
+  @default_empty_object = Hocon::Impl::SimpleConfigObject.empty(@default_value_origin)
+
 
   ConfigBugOrBrokenError = Hocon::ConfigError::ConfigBugOrBrokenError
   ConfigNotResolvedError = Hocon::ConfigError::ConfigNotResolvedError
@@ -152,9 +154,7 @@ class Hocon::Impl::ConfigImpl
 
 
   def self.env_variables_as_config_object
-    begin
-      # TODO
-    end
+    EnvVariablesHolder.get_env_variables
   end
 
   # This class is a lot simpler than the Java version ...
@@ -206,15 +206,44 @@ class Hocon::Impl::ConfigImpl
     $stderr.puts(message)
   end
 
+  def self.empty_object_from_origin(origin)
+    # we want null origin to go to SimpleConfigObject.empty() to get the
+    # origin "empty config" rather than "hardcoded value"
+    if origin == @default_value_origin
+      @default_empty_object
+    else
+      Hocon::Impl::SimpleConfigObject.empty(origin)
+    end
+  end
+
+  def empty_object(origin_description)
+    if !origin_description.nil?
+      origin = Hocon::Impl::SimpleConfigOrigin.new_simple(origin_description)
+    else
+      origin = nil
+    end
+
+    empty_object_from_origin(origin)
+  end
+
+  def self.empty_config(origin_description)
+    empty_object(origin_description).to_config
+  end
+
+  def empty(origin)
+    self.class.empty_object_from_origin(origin)
+  end
+
   private
 
   def self.load_env_variables
     env = ENV
     m = {}
-    env.each { |key, value|
+    env.each do |key, value|
       m[key] = Hocon::Impl::ConfigString::Quoted.new(
           Hocon::Impl::SimpleConfigOrigin.new_simple("env var #{key}"), value)
-    }
+    end
+
     Hocon::Impl::SimpleConfigObject.new(
         Hocon::Impl::SimpleConfigOrigin.new_simple("env variables"),
         m,
@@ -224,5 +253,9 @@ class Hocon::Impl::ConfigImpl
 
   class EnvVariablesHolder
     ENV_VARIABLES = Hocon::Impl::ConfigImpl.load_env_variables
+
+    def self.get_env_variables
+      ENV_VARIABLES
+    end
   end
 end

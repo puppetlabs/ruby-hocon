@@ -354,20 +354,31 @@ module Hocon::Impl::AbstractConfigValue
     nil
   end
 
-  def at_key(origin, key)
+  def at_key(key)
+    at_key_with_origin(Hocon::Impl::SimpleConfigOrigin.new_simple("at_key(#{key})"), key)
+  end
+
+  # Renamed this to be consistent with the other at_key* overloaded methods
+  def at_key_with_origin(origin, key)
     m = {key=>self}
     Hocon::Impl::SimpleConfigObject.new(origin, m).to_config
   end
 
-  def at_path(origin, path)
+  # In java this is an overloaded version of atPath
+  def at_path_with_origin(origin, path)
     parent = path.parent
-    result = at_key(origin, path.last)
+    result = at_key_with_origin(origin, path.last)
     while not parent.nil? do
       key = parent.last
-      result = result.at_key(origin, key)
+      result = result.at_key_with_origin(origin, key)
       parent = parent.parent
     end
     result
+  end
+
+  def at_path(path_expression)
+    origin = Hocon::Impl::SimpleConfigOrigin.new_simple("at_path(#{path_expression})")
+    at_path_with_origin(origin, Hocon::Impl::Path.new_path(path_expression))
   end
 
 end
