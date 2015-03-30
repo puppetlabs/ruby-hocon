@@ -230,8 +230,8 @@ class Hocon::Impl::ConfigImpl
     empty_object(origin_description).to_config
   end
 
-  def empty(origin_description)
-    empty_object(origin_description).to_config
+  def empty(origin)
+    self.class.empty_object_from_origin(origin)
   end
 
   private

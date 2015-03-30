@@ -920,6 +920,7 @@ describe "#render" do
     end
 
     specify "the rendered config should give back the original config" do
+      # TODO We should get this test working once the upstream changes have been ported back down
       skip "unknown bug related to comments that will be affected by upstream changes to comment parsing"
       parsed = ConfigFactory.parse_string(rendered)
 

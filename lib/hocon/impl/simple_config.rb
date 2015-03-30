@@ -238,6 +238,15 @@ class Hocon::Impl::SimpleConfig
     (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
   end
 
+  def at_key(key)
+    root.at_key(key)
+  end
+
+  # In java this is an overloaded version of atKey
+  def at_key_with_origin(origin, key)
+    root.at_key_with_origin(origin, key)
+  end
+
   def with_only_path(path_expression)
     path = Path.new_path(path_expression)
     self.class.new(root.with_only_path(path))
