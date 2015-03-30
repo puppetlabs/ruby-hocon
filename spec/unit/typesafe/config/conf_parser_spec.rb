@@ -86,25 +86,25 @@ def parse_path(s)
   begin
     should_be_same = Hocon::Impl::PathParser.parse_path(s)
     unless result == should_be_same
-      raise ScriptError, "expected '#{result}' to equal '#{should_be_same}'"
+      raise "expected '#{result}' to equal '#{should_be_same}'"
     end
   rescue Hocon::ConfigError => e
     second_exception = e
   end
 
   if first_excepton.nil? && (!second_exception.nil?)
-    raise ScriptError, "only the standalone path parser threw: #{second_exception}"
+    raise "only the standalone path parser threw: #{second_exception}"
   end
 
   if (!first_excepton.nil?) && second_exception.nil?
-    raise ScriptError, "only the whole-document parser threw: #{first_exception}"
+    raise "only the whole-document parser threw: #{first_exception}"
   end
 
   if !first_excepton.nil?
     raise first_excepton
   end
   if !second_exception.nil?
-    raise ScriptError, "wtf, should have thrown because not equal"
+    raise "wtf, should have thrown because not equal"
   end
 
   result
@@ -339,7 +339,7 @@ def line_number_test(num, text)
       TestUtils.parse_config(text)
     }
     if ! (e.message.include?("#{num}:"))
-      raise ScriptError, "error message did not contain line '#{num}' '#{text.gsub("\n", "\\n")}' (#{e})"
+      raise "error message did not contain line '#{num}' '#{text.gsub("\n", "\\n")}' (#{e})"
     end
   end
 end
@@ -782,7 +782,7 @@ describe "Config Parser" do
   # Skipping 'includeURLBasenameHeuristically' because we don't support URLs
 
   it "acceptBOMStartingFile" do
-    skip("BOM not parsing properly yet") do
+    skip("BOM not parsing properly yet; not fixing this now because it most likely only affects windows") do
       # BOM at start of file should be ignored
       conf = Hocon::ConfigFactory.parse_file(TestUtils.resource_file("bom.conf"))
       expect(conf.get_string("foo")).to eq("bar")
@@ -790,7 +790,7 @@ describe "Config Parser" do
   end
 
   it "acceptBOMStartOfStringConfig" do
-    skip("BOM not parsing properly yet") do
+    skip("BOM not parsing properly yet; not fixing this now because it most likely only affects windows") do
       # BOM at start of file is just whitespace, so ignored
       conf = Hocon::ConfigFactory.parse_string("\uFEFFfoo=bar")
       expect(conf.get_string("foo")).to eq("bar")
@@ -804,7 +804,7 @@ describe "Config Parser" do
   end
 
   it "acceptBOMWhitespace" do
-    skip("BOM not parsing properly yet") do
+    skip("BOM not parsing properly yet; not fixing this now because it most likely only affects windows") do
       # BOM here should be treated like other whitespace (ignored, since no quotes)
       conf = Hocon::ConfigFactory.parse_string("foo= \uFEFFbar\uFEFF")
       expect(conf.get_string("foo")).to eq("bar")
