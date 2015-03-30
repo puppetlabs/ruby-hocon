@@ -23,7 +23,7 @@ module Hocon::Impl::Container
   # Super-expensive full traversal to see if descendant is anywhere
   # underneath this container.
   #
-  def has_descendant(descendant)
-    raise Hocon::ConfigError::ConfigBugOrBrokenError, "subclasses of `Container` must implement `has_descendant` (#{self.class})"
+  def has_descendant?(descendant)
+    raise Hocon::ConfigError::ConfigBugOrBrokenError, "subclasses of `Container` must implement `has_descendant?` (#{self.class})"
   end
 end

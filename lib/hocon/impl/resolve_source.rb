@@ -105,7 +105,7 @@ class Hocon::Impl::ResolveSource
         if Hocon::Impl::ConfigImpl.trace_substitution_enabled
           # this hasDescendant check is super-expensive so it's a
           # trace message rather than an assertion
-          if @root.has_descendant(parent)
+          if @root.has_descendant?(parent)
             Hocon::Impl::ConfigImpl.trace(
                 "***** BUG ***** tried to push parent #{parent} without having a path to it in #{self}")
           end
@@ -119,7 +119,7 @@ class Hocon::Impl::ResolveSource
       if Hocon::Impl::ConfigImpl.trace_substitution_enabled
         # this hasDescendant check is super-expensive so it's a
         # trace message rather than an assertion
-        if parent_parent != nil && !parent_parent.has_descendant(parent)
+        if parent_parent != nil && !parent_parent.has_descendant?(parent)
           Hocon::Impl::ConfigImpl.trace(
               "***** BUG ***** trying to push non-child of #{parent_parent}, non-child was #{parent}")
         end

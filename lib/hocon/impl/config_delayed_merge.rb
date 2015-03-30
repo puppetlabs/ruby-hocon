@@ -152,7 +152,7 @@ class Hocon::Impl::ConfigDelayedMerge
   end
 
   def make_replacement(context, skipping)
-    self.class.make_replacement(context, stack, skipping)
+    self.class.make_replacement(context, @stack, skipping)
   end
 
   # static method also used by ConfigDelayedMergeObject; end may be null
@@ -162,21 +162,20 @@ class Hocon::Impl::ConfigDelayedMerge
     if sub_stack.empty?
       if ConfigImpl.trace_substitution_enabled
         ConfigImpl.trace("Nothing else in the merge stack, replacing with null", context.depth)
-        nil
-      else
-        # generate a new merge stack from only the remaining items
-        merged = nil
-        sub_stack.each do |v|
-          if merged.nil?
-            merged = v
-          else
-            merged = merged.with_fallback(v)
-          end
-        end
-        merged
+        return nil
       end
+    else
+      # generate a new merge stack from only the remaining items
+      merged = nil
+      sub_stack.each do |v|
+        if merged.nil?
+          merged = v
+        else
+          merged = merged.with_fallback(v)
+        end
+      end
+      merged
     end
-
   end
 
   def resolve_status
@@ -192,8 +191,8 @@ class Hocon::Impl::ConfigDelayedMerge
     end
   end
 
-  def has_descendant(descendant)
-    Hocon::Impl::AbstractConfigValue.has_descendant_in_list(stack, descendant)
+  def has_descendant?(descendant)
+    Hocon::Impl::AbstractConfigValue.has_descendant_in_list?(stack, descendant)
   end
 
   def relativized(prefix)

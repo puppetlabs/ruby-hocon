@@ -186,7 +186,7 @@ class Hocon::Impl::SimpleConfigObject
     raise ConfigBugOrBrokenError, "SimpleConfigObject.replaceChild did not find #{child} in #{self}"
   end
 
-  def has_descendant(descendant)
+  def has_descendant?(descendant)
     value.values.each do |child|
       if child.equal?(descendant)
         return true
@@ -194,7 +194,7 @@ class Hocon::Impl::SimpleConfigObject
     end
     # now do the expensive search
     value.values.each do |child|
-      if child.is_a?(Hocon::Impl::Container) && child.has_descendant(descendant)
+      if child.is_a?(Hocon::Impl::Container) && child.has_descendant?(descendant)
         return true
       end
     end
@@ -490,7 +490,7 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def self.map_equals(a, b)
-    if a == b
+    if a.equal?(b)
       return true
     end
 
@@ -523,16 +523,16 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def can_equal(other)
-    other.is_a? Hocon::Impl::AbstractConfigObject
+    other.is_a? Hocon::ConfigObject
   end
 
   def ==(other)
     # note that "origin" is deliberately NOT part of equality.
     # neither are other "extras" like ignoresFallbacks or resolve status.
-    if other.is_a? Hocon::Impl::AbstractConfigObject
+    if other.is_a? Hocon::ConfigObject
       # optimization to avoid unwrapped() for two ConfigObject,
       # which is what AbstractConfigValue does.
-      can_equal(other) && self.class.map_equals(@value, other.value)
+      can_equal(other) && self.class.map_equals(self, other)
     else
       false
     end
