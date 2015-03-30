@@ -65,7 +65,7 @@ describe "Config Parser" do
 end
 
 def parse_path(s)
-  first_excepton = nil
+  first_exception = nil
   second_exception = nil
   # parser first by wrapping into a whole document and using the regular parser
   result =
@@ -78,7 +78,7 @@ def parse_path(s)
           end
         end
       rescue Hocon::ConfigError => e
-        first_excepton = e
+        first_exception = e
         nil
       end
 
@@ -92,16 +92,16 @@ def parse_path(s)
     second_exception = e
   end
 
-  if first_excepton.nil? && (!second_exception.nil?)
+  if first_exception.nil? && (!second_exception.nil?)
     raise "only the standalone path parser threw: #{second_exception}"
   end
 
-  if (!first_excepton.nil?) && second_exception.nil?
+  if (!first_exception.nil?) && second_exception.nil?
     raise "only the whole-document parser threw: #{first_exception}"
   end
 
-  if !first_excepton.nil?
-    raise first_excepton
+  if !first_exception.nil?
+    raise first_exception
   end
   if !second_exception.nil?
     raise "wtf, should have thrown because not equal"
