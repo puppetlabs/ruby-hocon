@@ -677,21 +677,46 @@ describe "SimpleConfigOrigin" do
     expect(filename_with_line.line_number).to eq(3)
     expect(no_filename_with_line.line_number).to eq(4)
   end
+
+  # Note: skipping tests related to URLs since we aren't implementing that
 end
 
+
 describe "Config#with_only_key and with_only_path" do
-  specify "should keep the correct data" do
+  context "should keep the correct data" do
     object = TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }")
 
-    expect(object.with_only_key("a")).to eq(TestUtils.parse_object("{ a=1 }"))
-    expect(object.with_only_key("e")).to eq(TestUtils.parse_object("{ e.f.g=4 }"))
-    expect(object.to_config.with_only_path("c.d").root).to eq(TestUtils.parse_object("{ c.d.y=3, c.d.z=5 }"))
-    expect(object.to_config.with_only_path("c.d.z").root).to eq(TestUtils.parse_object("{ c.d.z=5 }"))
+    it "should keep only a" do
+      expect(object.with_only_key("a")).to eq(TestUtils.parse_object("{ a=1 }"))
+    end
 
-    expect(object.with_only_key("nope")).to eq(TestUtils.parse_object("{ }"))
-    expect(object.to_config.with_only_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ }"))
-    expect(object.to_config.with_only_path("a.nonextistent").root).to eq(TestUtils.parse_object("{ }"))
-    expect(object.to_config.with_only_path("c.d.z.nonexistent").root).to eq(TestUtils.parse_object("{ }"))
+    it "should keep only e" do
+      expect(object.with_only_key("e")).to eq(TestUtils.parse_object("{ e.f.g=4 }"))
+    end
+
+    it "should keep only c.d" do
+      expect(object.to_config.with_only_path("c.d").root).to eq(TestUtils.parse_object("{ c.d.y=3, c.d.z=5 }"))
+    end
+
+    it "should keep only c.d.z" do
+      expect(object.to_config.with_only_path("c.d.z").root).to eq(TestUtils.parse_object("{ c.d.z=5 }"))
+    end
+
+    it "should keep nonexistent key" do
+      expect(object.with_only_key("nope")).to eq(TestUtils.parse_object("{ }"))
+    end
+
+    it "should keep nonexistent path" do
+      expect(object.to_config.with_only_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ }"))
+    end
+
+    it "should keep only nonexistent underneath non-object" do
+      expect(object.to_config.with_only_path("a.nonextistent").root).to eq(TestUtils.parse_object("{ }"))
+    end
+
+    it "should keep only nonexistent underneath nested non-object" do
+      expect(object.to_config.with_only_path("c.d.z.nonexistent").root).to eq(TestUtils.parse_object("{ }"))
+    end
   end
 
   specify "should handle unresolved correctly" do
@@ -714,22 +739,36 @@ end
 
 describe "Config#without_key/path" do
 
-  specify "should remove keys correctly" do
+  context "should remove keys correctly" do
     object = TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }")
 
-    expect(object.without_key("a")).to eq(TestUtils.parse_object("{ b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
-    expect(object.without_key("c")).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4 }"))
-    expect(object.to_config.without_path("c.d").root).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4, c={} }"))
-    expect(object.to_config.without_path("c.d.z").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4 }"))
+    it "should not have a" do
+      expect(object.without_key("a")).to eq(TestUtils.parse_object("{ b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    end
 
-    # Nonexistant key
-    expect(object.without_key("nonexistent")).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    it "should not have c" do
+      expect(object.without_key("c")).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4 }"))
+    end
 
-    # Nonexistant path
-    expect(object.to_config.without_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    it "should not have c.d" do
+      expect(object.to_config.without_path("c.d").root).to eq(TestUtils.parse_object("{ a=1, b=2, e.f.g=4, c={} }"))
+    end
 
-    # Nonexistant path with existing prefix
-    expect(object.to_config.without_path("a.foo").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    it "should not have c.d.z" do
+      expect(object.to_config.without_path("c.d.z").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4 }"))
+    end
+
+    it "should not change without nonexistent key" do
+      expect(object.without_key("nonexistent")).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    end
+
+    it "should not change without nonexistent path" do
+      expect(object.to_config.without_path("q.w.e.r.t.y").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    end
+
+    it "should not change without nonexistent path with existing prefix" do
+      expect(object.to_config.without_path("a.foo").root).to eq(TestUtils.parse_object("{ a=1, b=2, c.d.y=3, e.f.g=4, c.d.z=5 }"))
+    end
   end
 end
 
@@ -861,7 +900,7 @@ describe "Config#at_key" do
 end
 
 describe "#render" do
-  specify "has newlines in description" do
+  context "has newlines in description" do
     v = ConfigValueFactory.from_any_ref(89, "this is a description\nwith some\nnewlines")
 
     list = SimpleConfigList.new(SimpleConfigOrigin.new_simple("\n5\n6\n7\n"), [v])
@@ -870,20 +909,22 @@ describe "#render" do
 
     rendered = conf.root.render
 
-    expect(rendered).to include("is a description\n")
-    expect(rendered).to include("with some\n")
-    expect(rendered).to include("newlines\n")
-    expect(rendered).to include("#\n")
-    expect(rendered).to include("5\n")
-    expect(rendered).to include("6\n")
-    expect(rendered).to include("7\n")
+    specify "rendered config should have all the lines that were added, with newlines" do
+      expect(rendered).to include("is a description\n")
+      expect(rendered).to include("with some\n")
+      expect(rendered).to include("newlines\n")
+      expect(rendered).to include("#\n")
+      expect(rendered).to include("5\n")
+      expect(rendered).to include("6\n")
+      expect(rendered).to include("7\n")
+    end
 
-    # parsing the rendered config should give back the original config
-    parsed = ConfigFactory.parse_string(rendered)
+    specify "the rendered config should give back the original config" do
+      skip "unknown bug related to comments that will be affected by upstream changes to comment parsing"
+      parsed = ConfigFactory.parse_string(rendered)
 
-    # TODO Commented out do to unknown bug related to comments that will probably be affected
-    # by the upstream changes involving how comments are parsed
-    # expect(parsed).to eq(conf)
+      expect(parsed).to eq(conf)
+    end
   end
 
   specify "should sort properly" do
