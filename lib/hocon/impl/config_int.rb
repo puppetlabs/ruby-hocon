@@ -33,6 +33,10 @@ class Hocon::Impl::ConfigInt < Hocon::Impl::ConfigNumber
     @value
   end
 
+  def double_value
+    @value
+  end
+
   def new_copy(origin)
     Hocon::Impl::ConfigInt.new(origin, @value, @original_text)
   end

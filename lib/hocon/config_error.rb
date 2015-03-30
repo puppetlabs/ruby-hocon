@@ -4,7 +4,13 @@ require 'hocon'
 
 class Hocon::ConfigError < StandardError
   def initialize(origin, message, cause)
-    super(message)
+    msg =
+      if origin.nil?
+        message
+      else
+        "#{origin.description}: #{message}"
+      end
+    super(msg)
     @origin = origin
     @cause = cause
   end
