@@ -366,7 +366,7 @@ class Hocon::Impl::Tokens
     end
   end
 
-  def self.ignore_whitespace?(token)
+  def self.ignored_whitespace?(token)
     token.is_a?(IgnoredWhitespace)
   end
 

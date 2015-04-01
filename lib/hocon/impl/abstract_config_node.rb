@@ -1,10 +1,10 @@
 # encoding: utf-8
 
 require 'hocon/impl'
-require 'hocon/config_node'
+require 'hocon/parser/config_node'
 require 'hocon/config_error'
 
-class Hocon::Impl::AbstractConfigNode < Hocon::ConfigNode
+class Hocon::Impl::AbstractConfigNode < Hocon::Parser::ConfigNode
   def tokens
     raise Hocon::ConfigError::ConfigBugOrBrokenError, "subclasses of AbstractConfigNode should override `tokens` (#{self.class})"
   end

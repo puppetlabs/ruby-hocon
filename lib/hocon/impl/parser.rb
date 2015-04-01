@@ -310,7 +310,7 @@ class Hocon::Impl::Parser
     # IgnoredWhitespace tokens
     def next_token_ignoring_whitespace
       t = @tokens.next
-      while Tokens.ignore_whitespace?(t)
+      while Tokens.ignored_whitespace?(t)
         t = @tokens.next
       end
       t

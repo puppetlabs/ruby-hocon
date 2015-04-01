@@ -37,7 +37,7 @@ class Hocon::Impl::PathParser
     SimpleConfigOrigin.new_simple("path parameter")
   end
 
-  def parse_path_node(path, flavor = ConfigSyntax::CONF)
+  def self.parse_path_node(path, flavor = ConfigSyntax::CONF)
     reader = StringIO.new(path)
 
     begin
@@ -95,7 +95,7 @@ class Hocon::Impl::PathParser
       end
 
       # Ignore all IgnoredWhitespace tokens
-      next if Tokens.ignore_whitespace?(t)
+      next if Tokens.ignored_whitespace?(t)
 
       if Tokens.value_with_type?(t, ConfigValueType::STRING)
         v = Tokens.value(t)
