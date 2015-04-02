@@ -26,7 +26,7 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
         elsif desired_path.starts_with(key)
           if field.value.is_a?(self.class)
             obj = field.value
-            remaining_path = desired_path.sub_path(key.length)
+            remaining_path = desired_path.sub_path_to_end(key.length)
             if obj.has_value(remaining_path)
               return true
             end
@@ -92,7 +92,7 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
       elsif desired_path.starts_with(key)
         seen_non_matching = true
         if node.value.is_a?(self.class)
-          remaining_path = desired_path.sub_path(key.length)
+          remaining_path = desired_path.sub_path_to_end(key.length)
           children_copy[i] = node.replace_value(node.value.change_value_on_path(remaining_path, value_copy, flavor))
           if !value_copy.nil? && !(node == @children[i])
             value_copy = nil
@@ -129,7 +129,7 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
       unless seen_new_line
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(@children[i].token)
           seen_new_line = true
-          indentation += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_line(nil))
+          indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_line(nil)))
         end
       else
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) &&
@@ -137,14 +137,14 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
             i + 1 < @children.size &&
             (@children[i + 1].is_a?(Hocon::Impl::ConfigNodeField || @children[i + 1].is_a?(Hocon::Impl::ConfigNodeInclude)))
           # Return the indentation of the first setting on its own line
-          indentation += @children[i]
+          indentation.push(@children[i])
           return indentation
         end
       end
       i += 1
     end
     if indentation.empty?
-      indentation += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(null, " "))
+      indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, " ")))
       return indentation
     else
       # Calculate the indentation of the ending curly-brace to get the indentation of the root object
@@ -155,7 +155,7 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
             Tokens.ignored_whitespace?(beforeLast.token)
           indent = beforeLast.token.token_text
           indent += "  "
-          indentation += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(null, indent))
+          indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(null, indent)))
           return indentation
         end
       end
@@ -203,21 +203,21 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
     starts_with_brace = @children[0].is_a?(Hocon::Impl::ConfigNodeSingleToken) && @children[0].token.equal?(Tokens::OPEN_CURLY)
     new_nodes = []
     new_nodes += indentation
-    new_nodes += desired_path.first
-    new_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' '))
-    new_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.COLON)
-    new_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' '))
+    new_nodes.push(desired_path.first)
+    new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
+    new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::COLON))
+    new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
 
     if path.length == 1
-      new_nodes += indented_value
+      new_nodes.push(indented_value)
     else
       # If the path is of length greater than one add the required new objects along the path
       new_object_nodes = []
-      new_object_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens::OPEN_CURLY)
-      new_object_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' '))
-      new_object_nodes += Hocon::Impl::ConfigNodeSingleToken.new(Tokens::CLOSE_CURLY)
+      new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::OPEN_CURLY))
+      new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
+      new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::CLOSE_CURLY))
       new_object = self.class.new(new_object_nodes)
-      new_nodes.add(new_object.add_value_on_path(desired_path.sub_path(1), indented_value, flavor))
+      new_nodes.push(new_object.add_value_on_path(desired_path.sub_path(1), indented_value, flavor))
     end
 
     # Combine these two cases so that we only have to iterate once
@@ -263,10 +263,10 @@ class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
       end
     end
     unless starts_with_brace
-      if children_copy[-1].is_a(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(children_copy[-1].token)
+      if children_copy[-1].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(children_copy[-1].token)
         children_copy.insert(-1, Hocon::Impl::ConfigNodeField.new(new_nodes))
       else
-        children_copy += Hocon::Impl::ConfigNodeField.new(new_nodes)
+        children_copy.push(Hocon::Impl::ConfigNodeField.new(new_nodes))
       end
     end
     self.class.new(children_copy)

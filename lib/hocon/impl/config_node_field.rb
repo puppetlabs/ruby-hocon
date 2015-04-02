@@ -29,9 +29,8 @@ class Hocon::Impl::ConfigNodeField < Hocon::Impl::AbstractConfigNode
 
   def replace_value(new_value)
     children_copy = @children.clone
-    i = 0
-    while i < children_copy.size
-      if children_copy[i].is_a?(Hocon::Impl::AbstractConfigNodeValue)
+    children_copy.each_with_index do |child, i|
+      if child.is_a?(Hocon::Impl::AbstractConfigNodeValue)
         children_copy[i] = new_value
         return self.class.new(children_copy)
       end

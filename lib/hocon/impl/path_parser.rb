@@ -41,10 +41,10 @@ class Hocon::Impl::PathParser
     reader = StringIO.new(path)
 
     begin
-      tokens = Tokenizer.tokenize(self.class.api_origin, reader,
+      tokens = Tokenizer.tokenize(api_origin, reader,
                                   flavor)
       tokens.next # drop START
-      parse_path_node_expression(tokens, self.class.api_origin, path, flavor)
+      parse_path_node_expression(tokens, api_origin, path, flavor)
     ensure
       reader.close
     end
@@ -164,12 +164,12 @@ class Hocon::Impl::PathParser
     pb.result
   end
 
-  def split_token_on_period(t, flavor)
+  def self.split_token_on_period(t, flavor)
     token_text = t.token_text
     if token_text == "."
       return [t]
     end
-    split_token = token_text.split('\.')
+    split_token = token_text.split('.')
     split_tokens = []
     split_token.each do |s|
       if flavor == ConfigSyntax::CONF
@@ -179,8 +179,8 @@ class Hocon::Impl::PathParser
       end
       split_tokens << Tokens.new_unquoted_text(t.origin, ".")
     end
-    if token_text[token_text - 1] != "."
-      split_tokens.remove(split_tokens.size - 1)
+    if token_text[-1] != "."
+      split_tokens.delete_at(split_tokens.size - 1)
     end
     split_tokens
   end
