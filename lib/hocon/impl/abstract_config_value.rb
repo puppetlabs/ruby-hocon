@@ -289,6 +289,10 @@ module Hocon::Impl::AbstractConfigValue
     "#{self.class.name.split('::').last}(#{sb.string})"
   end
 
+  def inspect
+    to_s
+  end
+
   def self.indent(sb, indent_size, options)
     if options.formatted?
       remaining = indent_size

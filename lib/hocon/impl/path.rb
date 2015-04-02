@@ -114,7 +114,7 @@ class Hocon::Impl::Path
 
   def last
     p = self
-    while not p.remainder.nil?
+    while p.remainder != nil
       p = p.remainder
     end
     p.first
@@ -132,17 +132,14 @@ class Hocon::Impl::Path
   def length
     count = 1
     p = remainder
-    while not p.nil? do
+    while p != nil do
       count += 1
       p = p.remainder
     end
-    return count
+    count
   end
 
-  def sub_path(first_index, last_index = nil)
-    if last_index.nil?
-      last_index = length - 1
-    end
+  def sub_path(first_index, last_index)
     if last_index < first_index
       raise ConfigBugOrBrokenError.new("bad call to sub_path")
     end
@@ -239,6 +236,10 @@ class Hocon::Impl::Path
     sb << ")"
 
     sb.string
+  end
+
+  def inspect
+    to_s
   end
 
   #

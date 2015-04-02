@@ -96,6 +96,10 @@ class Hocon::Impl::ConfigConcatenation
       joined = right.with_fallback(left)
     elsif (left.is_a?(SimpleConfigList)) && (right.is_a?(SimpleConfigList))
       joined = left.concatenate(right)
+    elsif (left.is_a?(SimpleConfigList) || left.is_a?(ConfigObject)) &&
+           is_ignored_whitespace(right)
+      joined = left
+      # it should be impossible that left is whitespace and right is a list or object
     elsif (left.is_a?(Hocon::Impl::ConfigConcatenation)) ||
         (right.is_a?(Hocon::Impl::ConfigConcatenation))
       raise ConfigBugOrBrokenError, "unflattened ConfigConcatenation"

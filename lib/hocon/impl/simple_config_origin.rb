@@ -337,12 +337,19 @@ class Hocon::Impl::SimpleConfigOrigin
     elsif stack.length == 2
       merge_two(stack[0], stack[1])
     else
-      remaining = stack.clone
-      while remaining.length > 2
-        merged = merge_three(remaining[-3], remaining[-2], remaining[-1])
-        remaining.pop
-        remaining.pop
-        remaining.pop
+      remaining = []
+      stack.each do |o|
+        remaining << o
+      end
+      while remaining.size > 2
+        c = remaining.last
+        remaining.delete_at(remaining.size - 1)
+        b = remaining.last
+        remaining.delete_at(remaining.size - 1)
+        a = remaining.last
+        remaining.delete_at(remaining.size - 1)
+
+        merged = merge_three(a, b, c)
 
         remaining << merged
       end

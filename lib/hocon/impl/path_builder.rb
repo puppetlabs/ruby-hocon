@@ -29,7 +29,7 @@ class Hocon::Impl::PathBuilder
     remainder = path.remainder
 
     loop do
-      @keys << first
+      @keys.push(first)
 
       if !remainder.nil?
         first = remainder.first

@@ -63,7 +63,7 @@ class Hocon::Impl::ConfigDelayedMergeObject
   end
 
   def has_descendant?(descendant)
-    has_descendant_in_list?(@stack, descendant)
+    Hocon::Impl::AbstractConfigValue.has_descendant_in_list?(@stack, descendant)
   end
 
   def relativized(prefix)

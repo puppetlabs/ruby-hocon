@@ -59,7 +59,7 @@ class Hocon::Impl::SimpleConfigList
   end
 
   def has_descendant?(descendant)
-    has_descendant_in_list?(@value, descendant)
+    Hocon::Impl::AbstractConfigValue.has_descendant_in_list?(@value, descendant)
   end
 
   def modify(modifier, new_resolve_status)
@@ -101,9 +101,9 @@ class Hocon::Impl::SimpleConfigList
 
     if changed != nil
       if new_resolve_status != nil
-        SimpleConfigList.new(origin, changed, new_resolve_status)
+        self.class.new(origin, changed, new_resolve_status)
       else
-        SimpleConfigList.new(origin, changed)
+        self.class.new(origin, changed)
       end
     else
       self
@@ -142,8 +142,6 @@ class Hocon::Impl::SimpleConfigList
         raise e
       rescue RuntimeError => e
         raise e
-      rescue Exception => e
-        raise ConfigBugOrBrokenError("unexpected exception", e)
       end
     end
   end
