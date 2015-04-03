@@ -359,12 +359,12 @@ describe "concatenation" do
 
   it "concat two undefined substitutions" do
     conf = TestUtils.parse_config("a = ${?foo}${?bar}").resolve
-    expect(conf.has_path?("a")).to be_false
+    expect(conf.has_path?("a")).to be_falsey
   end
 
   it "concat several undefined substitutions" do
     conf = TestUtils.parse_config("a = ${?foo}${?bar}${?baz}${?woooo}").resolve
-    expect(conf.has_path?("a")).to be_false
+    expect(conf.has_path?("a")).to be_falsey
   end
 
   it "concat two undefined substitutions with a space" do
