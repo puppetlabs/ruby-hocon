@@ -683,7 +683,7 @@ class Hocon::Impl::Parser
       # we really should make this work, but for now throwing an
       # exception is better than producing an incorrect result.
       # See https://github.com/typesafehub/config/issues/160
-      if @array_count > 0 && (obj.resolve_status != ResolveStatus::RESOLVED)
+      if @array_count > 0 && (obj.resolve_status != Hocon::Impl::ResolveStatus::RESOLVED)
         raise parse_error("Due to current limitations of the config parser, when an include statement is nested inside a list value, " +
                               "${} substitutions inside the included file cannot be resolved correctly. Either move the include outside of the list value or " +
                               "remove the ${} statements from the included file.")
@@ -698,7 +698,7 @@ class Hocon::Impl::Parser
         v = obj.get(key)
         existing = values[key]
         if !(existing.nil?)
-          values.put(key, v.with_fallback(existing))
+          values[key] = v.with_fallback(existing)
         else
           values[key] = v
         end

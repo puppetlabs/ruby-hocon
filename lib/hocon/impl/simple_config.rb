@@ -48,7 +48,7 @@ class Hocon::Impl::SimpleConfig
     end
   end
 
-  def find_key(me, key, expected, original_path)
+  def self.find_key(me, key, expected, original_path)
     v = me.peek_assuming_resolved(key, original_path)
     if v.nil?
       raise ConfigMissingError.new(nil, "No configuration setting found for key '#{original_path.render}'", nil)
@@ -77,9 +77,9 @@ class Hocon::Impl::SimpleConfig
     key = path.first
     rest = path.remainder
     if rest.nil?
-      find_key(me, key, expected, original_path)
+      self.class.find_key(me, key, expected, original_path)
     else
-      o = find_key(me, key, ConfigValueType::OBJECT,
+      o = self.class.find_key(me, key, ConfigValueType::OBJECT,
                    original_path.sub_path(0, original_path.length - rest.length))
       raise "Error: object o is nil" unless not o.nil?
       find(o, rest, expected, original_path)
@@ -105,6 +105,57 @@ class Hocon::Impl::SimpleConfig
 
   def hash
     41 * @object.hash
+  end
+
+  def self.find_key_or_null(me, key, expected, original_path)
+    v = me.peek_assuming_resolved(key, original_path)
+
+    if v.nil?
+      raise Hocon::ConfigError::ConfigMissingError.new(nil, original_path.render, nil)
+    end
+
+    if not expected.nil?
+      v = Hocon::Impl::DefaultTransformer.transform(v, expected)
+    end
+
+    if (not expected.nil?) && (v.value_type != expected && v.value_type != Hocon::ConfigValueType::NULL)
+      raise Hocon::ConfigError::ConfigWrongTypeError.with_expected_actual(v.origin,
+                                                                          original_path.render,
+                                                                          expected.name,
+                                                                          Hocon::ConfigValueType.name(v.value_type))
+    else
+      return v
+    end
+  end
+
+  def self.find_or_null(me, path, expected, original_path)
+    begin
+      key = path.first
+      remainder = path.remainder
+
+      if remainder.nil?
+        return self.find_key_or_null(me, key, expected, original_path)
+      else
+        o = find_key(me,
+                     key,
+                     Hocon::ConfigValueType::OBJECT,
+                     original_path.sub_path(0, original_path.length - remainder.length))
+
+        if o.nil?
+          raise "Missing key: #{key} on path: #{path}"
+        end
+
+        find_or_null(o, remainder, expected, original_path)
+      end
+    rescue Hocon::ConfigError::ConfigNotResolvedError
+      raise Hocon::Impl::ConfigImpl::improved_not_resolved(path, e)
+    end
+  end
+
+  def is_null?(path_expression)
+    path = Path.new_path(path_expression)
+    v = self.class.find_or_null(@object, path, nil, path)
+    v.value_type == Hocon::ConfigValueType::NULL
   end
 
   def get_value(path)
@@ -228,14 +279,32 @@ class Hocon::Impl::SimpleConfig
     l
   end
 
-  def has_path?(path_expression)
+  def has_path_peek(path_expression)
     path = Path.new_path(path_expression)
+
     begin
       peeked = @object.peek_path(path)
-    rescue ConfigNotResolvedError => e
-      raise Hocon::Impl::ConfigImpl.improve_not_resolved(path, e)
+    rescue Hocon::ConfigError::ConfigNotResolvedError
+      raise Hocon::Impl::ConfigImpl.improved_not_resolved(path, e)
     end
+
+    peeked
+  end
+
+  def has_path?(path_expression)
+    peeked = has_path_peek(path_expression)
+
     (not peeked.nil?) && peeked.value_type != ConfigValueType::NULL
+  end
+
+  def has_path_or_null?(path)
+    peeked = has_path_peek(path)
+
+    not peeked.nil?
+  end
+
+  def empty?
+    @object.empty?
   end
 
   def at_key(key)
@@ -260,5 +329,13 @@ class Hocon::Impl::SimpleConfig
   def with_value(path_expression, v)
     path = Path.new_path(path_expression)
     self.class.new(root.with_value(path, v))
+  end
+
+  def to_fallback_value
+    @object
+  end
+
+  def with_fallback(other)
+    @object.with_fallback(other).to_config
   end
 end

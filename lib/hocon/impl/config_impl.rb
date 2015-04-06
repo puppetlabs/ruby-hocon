@@ -59,16 +59,6 @@ class Hocon::Impl::ConfigImpl
                                               base_options)
   end
 
-  def self.empty_object(origin)
-    # we want null origin to go to SimpleConfigObject.empty() to get the
-    # origin "empty config" rather than "hardcoded value"
-    if origin == @default_value_origin
-      return default_empty_object
-    else
-      return Hocon::Impl::SimpleConfigObject.empty(origin)
-    end
-  end
-
   def self.empty_list(origin)
     if origin.nil? || origin == @default_value_origin
       return @default_empty_list
@@ -92,6 +82,10 @@ class Hocon::Impl::ConfigImpl
       else
         return @default_null_value
       end
+    # Since AbstractConfigValue is a mixed in module and not a class, we have to check the
+    # object's list of ancestors for AbstractConfigValue instead of using object.is_a?
+    elsif object.class.ancestors.any? { |ancestor| ancestor == Hocon::Impl::AbstractConfigValue }
+      return object
     elsif object.is_a?(TrueClass) || object.is_a?(FalseClass)
       if origin != @default_value_origin
         return Hocon::Impl::ConfigBoolean.new(origin, object)
@@ -117,7 +111,7 @@ class Hocon::Impl::ConfigImpl
       end
     elsif object.is_a?(Hash)
       if object.empty?
-        return self.empty_object(origin)
+        return self.empty_object_from_origin(origin)
       end
 
       if map_mode == FromMapMode::KEYS_ARE_KEYS
@@ -216,7 +210,7 @@ class Hocon::Impl::ConfigImpl
     end
   end
 
-  def empty_object(origin_description)
+  def self.empty_object(origin_description)
     if !origin_description.nil?
       origin = Hocon::Impl::SimpleConfigOrigin.new_simple(origin_description)
     else
@@ -232,6 +226,12 @@ class Hocon::Impl::ConfigImpl
 
   def empty(origin)
     self.class.empty_object_from_origin(origin)
+  end
+
+  def self.default_reference
+    resource = Hocon::Impl::Parseable.new_resources("reference.conf",
+                                                    Hocon::ConfigParseOptions.defaults)
+    resource.parse.to_config
   end
 
   private

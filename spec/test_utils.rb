@@ -755,3 +755,26 @@ shared_examples_for "path_render_test" do
     expect(Hocon::Impl::PathParser.parse_path(path.render)).to eq(path)
   end
 end
+
+# For public_api_spec
+shared_examples_for "test_from_value" do
+  default_value_description = "hardcoded value"
+
+  specify "create_from made into a config value should equal the expected value" do
+    expect(Hocon::ConfigValueFactory.from_any_ref(create_from)).to eq(expected_value)
+  end
+
+  specify "create_from made into a config value with origin description should equal the expected value" do
+    expect(Hocon::ConfigValueFactory.from_any_ref(create_from, "foo")).to eq(expected_value)
+  end
+
+  specify "descriptions match" do
+    if create_from.is_a?(Hocon::ConfigValue)
+      # description is ignored for createFrom that is already a ConfigValue
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from).origin.description).to eq(create_from.origin.description)
+    else
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from).origin.description).to eq(default_value_description)
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from, "foo").origin.description).to eq("foo")
+    end
+  end
+end

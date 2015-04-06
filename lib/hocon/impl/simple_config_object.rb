@@ -267,8 +267,6 @@ class Hocon::Impl::SimpleConfigObject
       modify_may_throw(modifier)
     rescue Hocon::ConfigError => e
       raise e
-    rescue => e
-      raise ConfigBugOrBrokenError.new("unexpected exception", e)
     end
   end
 
@@ -329,7 +327,7 @@ class Hocon::Impl::SimpleConfigObject
     end
 
     def modify_child_may_throw(key, v)
-      if @context.is_restricted_to_child
+       if @context.is_restricted_to_child
         if key == @context.restrict_to_child.first
           remainder = @context.restrict_to_child.remainder
           if remainder != nil
@@ -374,10 +372,14 @@ class Hocon::Impl::SimpleConfigObject
   end
 
   def relativized(prefix)
-    modifier = Class.new do
-      extend Hocon::Impl::AbstractConfigValue::NoExceptionsModifier
 
-      def modify_child(key, v)
+    modifier = Class.new do
+      include Hocon::Impl::AbstractConfigValue::NoExceptionsModifier
+
+      # prefix isn't in scope inside of a def, but it is in scope inside of Class.new
+      # so manually define a method that has access to prefix
+      # I feel dirty
+      define_method(:modify_child) do |key, v|
         v.relativized(prefix)
       end
     end

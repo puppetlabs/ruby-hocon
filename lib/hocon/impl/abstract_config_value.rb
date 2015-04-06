@@ -115,14 +115,12 @@ module Hocon::Impl::AbstractConfigValue
     self
   end
 
-  class NoExceptionsModifier
+  module NoExceptionsModifier
     def modify_child_may_throw(key_or_nil, v)
       begin
         modify_child(key_or_nil, v)
       rescue Hocon::ConfigError => e
         raise e
-      rescue => e
-        raise ConfigBugOrBrokenError("Unexpected exception", e)
       end
     end
   end
