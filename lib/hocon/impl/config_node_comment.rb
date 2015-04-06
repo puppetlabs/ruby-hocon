@@ -8,12 +8,12 @@ require 'hocon/impl/tokens'
 class Hocon::Impl::ConfigNodeComment < Hocon::Impl::ConfigNodeSingleToken
   def initialize(comment)
     super(comment)
-    if !Hocon::Impl::Tokens.comment?(@token)
+    unless Hocon::Impl::Tokens.comment?(@token)
       raise Hocon::ConfigError::ConfigBugOrBrokenError, 'Tried to create a ConfigNodeComment from a non-comment token'
     end
   end
 
-  def commentText
+  def comment_text
     Hocon::Impl::Tokens.comment_text(@token)
   end
 end
