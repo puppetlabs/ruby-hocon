@@ -10,7 +10,8 @@ require 'hocon/impl/path_parser'
 require 'hocon/impl/substitution_expression'
 require 'hocon/impl/tokens'
 
-class Hocon::Impl::ConfigNodeSimpleValue < Hocon::Impl::AbstractConfigNodeValue
+class Hocon::Impl::ConfigNodeSimpleValue
+  include Hocon::Impl::AbstractConfigNodeValue
 
   Tokens = Hocon::Impl::Tokens
 

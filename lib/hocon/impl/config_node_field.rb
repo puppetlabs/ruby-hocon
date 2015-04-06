@@ -9,7 +9,8 @@ require 'hocon/impl/config_node_path'
 require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/tokens'
 
-class Hocon::Impl::ConfigNodeField < Hocon::Impl::AbstractConfigNode
+class Hocon::Impl::ConfigNodeField
+  include Hocon::Impl::AbstractConfigNode
 
   Tokens = Hocon::Impl::Tokens
 

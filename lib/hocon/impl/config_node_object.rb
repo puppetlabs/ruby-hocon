@@ -7,7 +7,8 @@ require 'hocon/impl/config_node_field'
 require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/tokens'
 
-class Hocon::Impl::ConfigNodeObject < Hocon::Impl::ConfigNodeComplexValue
+class Hocon::Impl::ConfigNodeObject
+  include Hocon::Impl::ConfigNodeComplexValue
 
   ConfigSyntax = Hocon::ConfigSyntax
   Tokens = Hocon::Impl::Tokens

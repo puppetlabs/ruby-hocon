@@ -5,7 +5,8 @@ require 'hocon/config_error'
 require 'hocon/impl/abstract_config_node'
 require 'hocon/impl/config_node_simple_value'
 
-class Hocon::Impl::ConfigNodeInclude < Hocon::Impl::AbstractConfigNodeValue
+class Hocon::Impl::ConfigNodeInclude
+  include Hocon::Impl::AbstractConfigNode
   def initialize(children, kind)
     @children = children
     @kind = kind

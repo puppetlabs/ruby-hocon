@@ -5,7 +5,8 @@ require 'hocon/impl/config_node_array'
 require 'hocon/impl/config_node_complex_value'
 require 'hocon/impl/config_node_object'
 
-class Hocon::Impl::ConfigNodeRoot < Hocon::Impl::ConfigNodeComplexValue
+class Hocon::Impl::ConfigNodeRoot
+  include Hocon::Impl::ConfigNodeComplexValue
   def initialize(children, origin)
     super(children)
     @origin = origin

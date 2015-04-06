@@ -3,7 +3,8 @@
 require 'hocon/impl'
 require 'hocon/impl/abstract_config_node'
 
-class Hocon::Impl::ConfigNodeSingleToken < Hocon::Impl::AbstractConfigNode
+class Hocon::Impl::ConfigNodeSingleToken
+  include Hocon::Impl::AbstractConfigNode
   def initialize(t)
     @token = t
   end

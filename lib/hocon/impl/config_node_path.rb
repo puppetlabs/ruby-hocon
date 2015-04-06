@@ -4,7 +4,8 @@ require 'hocon/impl'
 require 'hocon/impl/tokens'
 require 'hocon/impl/abstract_config_node'
 
-class Hocon::Impl::ConfigNodePath < Hocon::Impl::AbstractConfigNode
+class Hocon::Impl::ConfigNodePath
+  include Hocon::Impl::AbstractConfigNode
   Tokens = Hocon::Impl::Tokens
 
   def initialize(path, tokens)

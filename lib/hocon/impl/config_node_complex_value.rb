@@ -8,7 +8,8 @@ require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/tokens'
 require 'hocon/config_error'
 
-class Hocon::Impl::ConfigNodeComplexValue < Hocon::Impl::AbstractConfigNodeValue
+module Hocon::Impl::ConfigNodeComplexValue
+  include Hocon::Impl::AbstractConfigNodeValue
   def initialize(children)
     @children = children
   end
