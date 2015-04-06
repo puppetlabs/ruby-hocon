@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 require 'stringio'
-require 'hocon/config_error'
 require 'hocon/impl'
+require 'hocon/config_error'
 require 'hocon/impl/tokens'
 require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/config_node_comment'
@@ -33,13 +33,14 @@ class Hocon::Impl::ConfigDocumentParser
   ConfigNodeRoot = Hocon::Impl::ConfigNodeRoot
 
   def self.parse(tokens, origin, options)
-    syntax = options.get_syntax.nil? ? ConfigSyntax::CONF : options.get_syntax
-    context = Hocon::Impl::ConfigDocumentParser::ParseContext.new(options.get_syntax, origin, tokens)
+    syntax = options.syntax.nil? ? ConfigSyntax::CONF : options.syntax
+    context = Hocon::Impl::ConfigDocumentParser::ParseContext.new(syntax, origin, tokens)
     context.parse
   end
 
   def self.parse_value(tokens, origin, options)
-    context = Hocon::Impl::ConfigDocumentParser::ParseContext.new(options.get_syntax, origin, tokens)
+    syntax = options.syntax.nil? ? ConfigSyntax::CONF : options.syntax
+    context = Hocon::Impl::ConfigDocumentParser::ParseContext.new(syntax, origin, tokens)
     context.parse_single_value
   end
 
@@ -62,9 +63,9 @@ class Hocon::Impl::ConfigDocumentParser
 
     def next_token
       t = pop_token
-      if flavor.equal?(ConfigSyntax::JSON)
+      if @flavor.equal?(ConfigSyntax::JSON)
         if Tokens.unquoted_text?(t) && !unquoted_whitespace?(t)
-          raise parse_error("Token not allowed in valid JSON: '#{Tokens.get_unquoted_text(t)}'")
+          raise parse_error("Token not allowed in valid JSON: '#{Tokens.unquoted_text(t)}'")
         elsif Tokens.substitution?(t)
           raise parse_error("Substitutions (${} syntax) not allowed in JSON")
         end
@@ -194,7 +195,7 @@ class Hocon::Impl::ConfigDocumentParser
 
       # Put back any trailing whitespace, as the parent object is responsible for tracking
       # any leading/trailing whitespace
-      for i in (0..value.size-1).reverse_each
+      for i in (0..values.size - 1).reverse_each
         if values[i].is_a?(ConfigNodeSingleToken)
           put_back(values[i].token)
           values.delete_at(i)
@@ -266,7 +267,7 @@ class Hocon::Impl::ConfigDocumentParser
     def parse_key(token)
       if @flavor.equal?(ConfigSyntax::JSON)
         if Tokens.value_with_type?(token, ConfigValueType::STRING)
-          return PathParser.new(ArrayIterator.new([token]), nil)
+          return PathParser.parse_path_node_expression(Hocon::Impl::ArrayIterator.new([token]), nil)
         else
           raise ConfigParseError, "Expecting close brace } or a field name here, got #{token}"
         end
@@ -365,7 +366,6 @@ class Hocon::Impl::ConfigDocumentParser
       last_path = nil
       last_inside_equals = false
       object_nodes = []
-      key_value_nodes = nil
       keys = Hash.new
       if had_open_curly
         object_nodes.push(ConfigNodeSingleToken.new(Tokens::OPEN_CURLY))
@@ -399,7 +399,6 @@ class Hocon::Impl::ConfigDocumentParser
           after_key = next_token_collecting_whitespace(key_value_nodes)
           inside_equals = false
 
-          next_value = nil
           if @flavor.equal?(ConfigSyntax::CONF) && after_key.equal?(Tokens::OPEN_CURLY)
             # can omit the ':' or '=' before an object value
             next_value = parse_value(after_key)
@@ -409,7 +408,7 @@ class Hocon::Impl::ConfigDocumentParser
                                                      "Key '#{path.render()}' may not be followed by token: #{after_key}"))
             end
 
-            key_value_nodes.push(ConfigNodeSingleToken(after_key))
+            key_value_nodes.push(ConfigNodeSingleToken.new(after_key))
 
             if after_key.equal?(Tokens::EQUALS)
               inside_equals = true
@@ -462,27 +461,27 @@ class Hocon::Impl::ConfigDocumentParser
           t = next_token_collecting_whitespace(object_nodes)
           if t.equal?(Tokens::CLOSE_CURLY)
             unless had_open_curly
-              raise parse_error(add_quote_suggestion(last_path,
-                                                     last_inside_equals,
-                                                     t.to_s,
-                                                     "unbalanced close brace '}' with no open brace"))
+              raise parse_error(add_quote_suggestion(t.to_s,
+                                                     "unbalanced close brace '}' with no open brace",
+                                                     last_path,
+                                                     last_inside_equals,))
             end
             object_nodes.push(ConfigNodeSingleToken.new(t))
             break
           elsif had_open_curly
-            raise parse_error(add_quote_suggestion(last_path,
-                                                   last_inside_equals,
-                                                   t.to_s,
-                                                   "Expecting close brace } or a comma, got #{t}"))
+            raise parse_error(add_quote_suggestion(t.to_s,
+                                                   "Expecting close brace } or a comma, got #{t}",
+                                                   last_path,
+                                                   last_inside_equals,))
           else
             if t.equal?(Tokens::EOF)
               put_back(t)
               break
             else
-              raise parse_error(add_quote_suggestion(last_path,
-                                                     last_inside_equals,
-                                                     t.to_s,
-                                                     "Expecting close brace } or a comma, got #{t}"))
+              raise parse_error(add_quote_suggestion(t.to_s,
+                                                     "Expecting close brace } or a comma, got #{t}",
+                                                     last_path,
+                                                     last_inside_equals,))
             end
           end
         end
@@ -618,7 +617,7 @@ class Hocon::Impl::ConfigDocumentParser
       end
 
       t = next_token
-      if Tokens.ignored_whitespace?(t) || Tokens.newline?(t) || Tokens.unquoted_text?(t) || Tokens.comment?(t)
+      if Tokens.ignored_whitespace?(t) || Tokens.newline?(t) || unquoted_whitespace?(t) || Tokens.comment?(t)
         raise parse_error("The value from setValue cannot have leading or trailing newlines, whitespace, or comments")
       end
       if t.equal?(Tokens::EOF)
