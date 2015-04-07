@@ -73,7 +73,7 @@ class Hocon::Impl::ConfigNodeField
     comments = []
     @children.each do |child|
       if child.is_a?(Hocon::Impl::ConfigNodeComment)
-        comments += child.comment_text
+        comments << child.comment_text
       end
     end
     comments

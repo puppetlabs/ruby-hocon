@@ -79,14 +79,14 @@ class Hocon::Impl::ConfigDocumentParser
         if Tokens.ignored_whitespace?(t) || Tokens.newline?(t) || unquoted_whitespace?(t)
           nodes.push(ConfigNodeSingleToken.new(t))
           if Tokens.newline?(t)
-            line_number = t.line_number + 1
+            @line_number = t.line_number + 1
           end
         elsif Tokens.comment?(t)
           nodes.push(Hocon::Impl::ConfigNodeComment.new(t))
         else
           new_number = t.line_number
           if new_number >= 0
-            line_number = new_number
+            @line_number = new_number
           end
           return t
         end
@@ -327,13 +327,13 @@ class Hocon::Impl::ConfigDocumentParser
           kind = ConfigIncludeKind::URL
         elsif kind_text == "file("
           kind = ConfigIncludeKind::FILE
-        elsif kind_text.equals("classpath(")
+        elsif kind_text == "classpath("
           kind = ConfigIncludeKind::CLASSPATH
         else
           raise parse_error("expecting include parameter to be quoted filename, file(), classpath(), or url(). No spaces are allowed before the open paren. Not expecting: #{t}")
         end
 
-        children.add(ConfigNodeSingleToken.new(t))
+        children.push(ConfigNodeSingleToken.new(t))
 
         # skip space inside parens
         t = next_token_collecting_whitespace(children)
@@ -342,7 +342,7 @@ class Hocon::Impl::ConfigDocumentParser
         unless Tokens.value_with_type?(t, ConfigValueType::STRING)
           raise parse_error("expecting a quoted string inside file(), classpath(), or url(), rather than: #{t}")
         end
-        children.add(ConfigNodeSimpleValue.new(t))
+        children.push(ConfigNodeSimpleValue.new(t))
         # skip space after string, inside parens
         t = next_token_collecting_whitespace(children)
 
@@ -544,7 +544,7 @@ class Hocon::Impl::ConfigDocumentParser
               Tokens.substitution?(t)
             next_value = parse_value(t)
             children.push(next_value)
-          elsif !@flavor.equal?(ConfigSyntax::JSON && t.equal?(Tokens::CLOSE_SQUARE))
+          elsif !@flavor.equal?(ConfigSyntax::JSON) && t.equal?(Tokens::CLOSE_SQUARE)
             # we allow one trailing comma
             put_back(t)
           else

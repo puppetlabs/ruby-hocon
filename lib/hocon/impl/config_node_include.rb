@@ -25,7 +25,7 @@ class Hocon::Impl::ConfigNodeInclude
   def name
     @children.each do |child|
       if child.is_a?(Hocon::Impl::ConfigNodeSimpleValue)
-        return Hocon::Impl::Tokens.value(n.token).unwrapped
+        return Hocon::Impl::Tokens.value(child.token).unwrapped
       end
     end
     nil
