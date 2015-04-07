@@ -262,10 +262,14 @@ class Hocon::Impl::Parseable
   end
 
   def raw_parse_document_from_io(reader, origin, final_options)
-    tokens = Hocon::Impl::Tokenizer.tokenize(origin, io, final_options.syntax)
-    Hocon::Impl::SimpleConfigDocument(
-                   Hocon::Impl::ConfigDocumentParser.parse(tokens, final_options),
+    tokens = Hocon::Impl::Tokenizer.tokenize(origin, reader, final_options.syntax)
+    Hocon::Impl::SimpleConfigDocument.new(
+                   Hocon::Impl::ConfigDocumentParser.parse(tokens, origin, final_options),
                    final_options)
+  end
+
+  def parse_config_document
+    parse_document(options)
   end
 
   def origin

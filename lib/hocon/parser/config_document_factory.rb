@@ -19,8 +19,8 @@ class Hocon::Parser::ConfigDocumentFactory
   # @return the parsed configuration
   # @throws com.typesafe.config.ConfigException on IO or parse errors
   #
-  def parse_file(file, options = Hocon::ConfigParseOptions.defaults)
-    Parseable.new_file(file, options).parse_config_document
+  def self.parse_file(file, options = Hocon::ConfigParseOptions.defaults)
+    Hocon::Impl::Parseable.new_file(file, options).parse_config_document
   end
 
   #
@@ -30,7 +30,7 @@ class Hocon::Parser::ConfigDocumentFactory
   # @param options parse options
   # @return the parsed configuration
   #
-  def parse_string(s, options = Hocon::ConfigParseOptions.defaults)
-    Parseable.new_string(s, options).parse_config_document
+  def self.parse_string(s, options = Hocon::ConfigParseOptions.defaults)
+    Hocon::Impl::Parseable.new_string(s, options).parse_config_document
   end
 end

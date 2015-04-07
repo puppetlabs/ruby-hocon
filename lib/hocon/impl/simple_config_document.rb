@@ -5,7 +5,7 @@ require 'hocon/parser/config_document'
 require 'hocon/impl/config_document_parser'
 
 class Hocon::Impl::SimpleConfigDocument
-  require Hocon::Parser::ConfigDocument
+  include Hocon::Parser::ConfigDocument
 
   def initialize(parsed_node, parse_options)
     @config_node_tree = parsed_node
