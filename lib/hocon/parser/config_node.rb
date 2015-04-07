@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon'
+require 'hocon/parser'
 require 'hocon/config_error'
 
 #
@@ -19,7 +19,7 @@ require 'hocon/config_error'
 # implementations will break.
 #
 
-class Hocon::ConfigNode
+module Hocon::Parser::ConfigNode
   #
   # The original text of the input which was used to form this particular node.
   # @return the original text used to form this node as a String

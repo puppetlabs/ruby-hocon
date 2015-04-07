@@ -179,7 +179,7 @@ class Hocon::Impl::Path
         my_remainder = my_remainder.remainder
         other_remainder = other_remainder.remainder
       end
-      true
+      return true
     end
     false
   end

@@ -7,6 +7,11 @@ require 'hocon/impl/config_reference'
 require 'hocon/impl/substitution_expression'
 require 'hocon/impl/path_parser'
 require 'hocon/impl/config_impl_util'
+require 'hocon/impl/config_node_simple_value'
+require 'hocon/impl/config_node_single_token'
+require 'hocon/impl/config_node_object'
+require 'hocon/impl/config_node_array'
+require 'hocon/impl/config_node_concatenation'
 
 module TestUtils
   Tokens = Hocon::Impl::Tokens
@@ -361,6 +366,119 @@ module TestUtils
     Hocon::Impl::Tokenizer.render(tokenize_from_s(input_string))
   end
 
+  def self.config_node_simple_value(value)
+    Hocon::Impl::ConfigNodeSimpleValue.new(value)
+  end
+
+  def self.config_node_key(path)
+    Hocon::Impl::PathParser.parse_path_node(path)
+  end
+
+  def self.config_node_single_token(value)
+    Hocon::Impl::ConfigNodeSingleToken.new(value)
+  end
+
+  def self.config_node_object(nodes)
+    Hocon::Impl::ConfigNodeObject.new(nodes)
+  end
+
+  def self.config_node_array(nodes)
+    Hocon::Impl::ConfigNodeArray.new(nodes)
+  end
+
+  def self.config_node_concatenation(nodes)
+    Hocon::Impl::ConfigNodeConcatenation.new(nodes)
+  end
+
+  def self.node_colon
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::COLON)
+  end
+
+  def self.node_space
+    Hocon::Impl::ConfigNodeSingleToken.new(token_unquoted(" "))
+  end
+
+  def self.node_open_brace
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::OPEN_CURLY)
+  end
+
+  def self.node_close_brace
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::CLOSE_CURLY)
+  end
+
+  def self.node_open_bracket
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::OPEN_SQUARE)
+  end
+
+  def self.node_close_bracket
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::CLOSE_SQUARE)
+  end
+
+  def self.node_comma
+    Hocon::Impl::ConfigNodeSingleToken.new(Tokens::COMMA)
+  end
+
+  def self.node_line(line)
+    Hocon::Impl::ConfigNodeSingleToken.new(token_line(line))
+  end
+
+  def self.node_whitespace(whitespace)
+    Hocon::Impl::ConfigNodeSingleToken.new(token_whitespace(whitespace))
+  end
+
+  def self.node_key_value_pair(key, value)
+    nodes = [key, node_space, node_colon, node_space, value]
+    Hocon::Impl::ConfigNodeField.new(nodes)
+  end
+
+  def self.node_int(value)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_int(value))
+  end
+
+  def self.node_string(value)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_string(value))
+  end
+
+  def self.node_double(value)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_double(value))
+  end
+
+  def self.node_true
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_true)
+  end
+
+  def self.node_false
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_false)
+  end
+
+  def self.node_comment_hash(text)
+    Hocon::Impl::ConfigNodeComment.new(token_comment_hash(text))
+  end
+
+  def self.node_comment_double_slash(text)
+    Hocon::Impl::ConfigNodeComment.new(token_comment_double_slash(text))
+  end
+
+  def self.node_unquoted_text(text)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_unquoted(text))
+  end
+
+  def self.node_null
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_null)
+  end
+
+  def self.node_key_substitution(s)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_key_substitution(s))
+  end
+
+  def self.node_optional_substitution(*expression)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_optional_substitution(*expression))
+  end
+
+  def self.node_substitution(*expression)
+    Hocon::Impl::ConfigNodeSimpleValue.new(token_substitution(*expression))
+  end
+
   def self.fake_origin
     Hocon::Impl::SimpleConfigOrigin.new_simple("fake origin")
   end
@@ -398,15 +516,15 @@ module TestUtils
   end
 
   def self.token_string(value)
-    Tokens.new_string(fake_origin, value, value)
+    Tokens.new_string(fake_origin, value, "\"#{value}\"")
   end
 
   def self.token_double(value)
-    Tokens.new_double(fake_origin, value, nil)
+    Tokens.new_double(fake_origin, value, "#{value}")
   end
 
   def self.token_int(value)
-    Tokens.new_int(fake_origin, value, nil)
+    Tokens.new_int(fake_origin, value, "#{value}")
   end
 
   def self.token_maybe_optional_substitution(optional, token_list)
