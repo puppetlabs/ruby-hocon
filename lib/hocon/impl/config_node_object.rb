@@ -125,8 +125,8 @@ class Hocon::Impl::ConfigNodeObject
   def indentation
     seen_new_line = false
     indentation = []
-    i = 0
-    while i < @children.size
+
+    @children.each_index do |i|
       unless seen_new_line
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(@children[i].token)
           seen_new_line = true
@@ -142,7 +142,6 @@ class Hocon::Impl::ConfigNodeObject
           return indentation
         end
       end
-      i += 1
     end
     if indentation.empty?
       indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, " ")))
