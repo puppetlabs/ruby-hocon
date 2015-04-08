@@ -191,10 +191,13 @@ class Hocon::Impl::SimpleConfigList
       end
       @value.each do |v|
         if options.origin_comments?
-          Hocon::Impl::AbstractConfigValue.indent(sb, indent_size + 1, options)
-          sb << "# "
-          sb << v.origin.description
-          sb << "\n"
+          lines = v.origin.description.split("\n")
+          lines.each do |l|
+            Hocon::Impl::AbstractConfigValue.indent(sb, indent_size + 1, options)
+            sb << "# "
+            sb << l
+            sb << "\n"
+          end
         end
         if options.comments?
           v.origin.comments.each do |comment|
