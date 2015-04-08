@@ -34,10 +34,10 @@ module Hocon::Impl::ConfigNodeComplexValue
         i += 1
       elsif child.is_a?(Hocon::Impl::ConfigNodeField)
         value = child.value
-        if value.is_a?(self.class)
+        if value.is_a?(Hocon::Impl::ConfigNodeComplexValue)
           children_copy[i] = child.replace_value(value.indent_text(indentation))
         end
-      elsif child.is_a?(self.class)
+      elsif child.is_a?(Hocon::Impl::ConfigNodeComplexValue)
         children_copy[i] = child.indent_text(indentation)
       end
       i += 1

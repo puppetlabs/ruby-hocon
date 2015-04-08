@@ -69,7 +69,7 @@ class Hocon::Impl::ConfigNodeObject
           if children_copy[j].is_a?(Hocon::Impl::ConfigNodeSingleToken)
             t = children_copy[j].token
             if Tokens.ignored_whitespace?(t) || t.equal?(Tokens::COMMA)
-              children_copy.delete_at[j]
+              children_copy.delete_at(j)
               j -= 1
             else
               break
@@ -125,8 +125,8 @@ class Hocon::Impl::ConfigNodeObject
   def indentation
     seen_new_line = false
     indentation = []
-    i = 0
-    while i < @children.size
+
+    @children.each_index do |i|
       unless seen_new_line
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(@children[i].token)
           seen_new_line = true
@@ -136,13 +136,12 @@ class Hocon::Impl::ConfigNodeObject
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) &&
             Tokens.ignored_whitespace?(@children[i].token) &&
             i + 1 < @children.size &&
-            (@children[i + 1].is_a?(Hocon::Impl::ConfigNodeField || @children[i + 1].is_a?(Hocon::Impl::ConfigNodeInclude)))
+            (@children[i + 1].is_a?(Hocon::Impl::ConfigNodeField) || @children[i + 1].is_a?(Hocon::Impl::ConfigNodeInclude))
           # Return the indentation of the first setting on its own line
           indentation.push(@children[i])
           return indentation
         end
       end
-      i += 1
     end
     if indentation.empty?
       indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, " ")))
@@ -156,7 +155,7 @@ class Hocon::Impl::ConfigNodeObject
             Tokens.ignored_whitespace?(beforeLast.token)
           indent = beforeLast.token.token_text
           indent += "  "
-          indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(null, indent)))
+          indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, indent)))
           return indentation
         end
       end
@@ -182,10 +181,8 @@ class Hocon::Impl::ConfigNodeObject
 
     # If the path is of length greater than one, see if the value needs to be added further down
     if path.length > 1
-      i = @children.size
-      while i >= 0
+       (0..@children.size - 1).reverse_each do |i|
         unless @children[i].is_a?(Hocon::Impl::ConfigNodeField)
-          i -= 1
           next
         end
         node = @children[i]
@@ -196,7 +193,6 @@ class Hocon::Impl::ConfigNodeObject
           children_copy[i] = node.replace_value(new_value.add_value_on_path(remaining_path, value, flavor))
           return self.class.new(children_copy)
         end
-        i -= 1
       end
     end
 
@@ -256,7 +252,7 @@ class Hocon::Impl::ConfigNodeObject
               children_copy.insert(i, Hocon::Impl::ConfigNodeField.new(new_nodes))
             end
           else
-            children_copy.add(i, Hocon::Impl::ConfigNodeField.new(new_nodes))
+            children_copy.insert(i, Hocon::Impl::ConfigNodeField.new(new_nodes))
           end
         end
 
@@ -265,7 +261,7 @@ class Hocon::Impl::ConfigNodeObject
     end
     unless starts_with_brace
       if children_copy[-1].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(children_copy[-1].token)
-        children_copy.insert(-1, Hocon::Impl::ConfigNodeField.new(new_nodes))
+        children_copy.insert(-2, Hocon::Impl::ConfigNodeField.new(new_nodes))
       else
         children_copy.push(Hocon::Impl::ConfigNodeField.new(new_nodes))
       end
