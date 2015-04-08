@@ -187,7 +187,7 @@ describe "ConfigDocumentParser" do
       include_examples "parse test"
     end
 
-    context "empty array" do
+    context "single-element array" do
       let (:orig_text) { "[foo]" }
       include_examples "parse test"
     end

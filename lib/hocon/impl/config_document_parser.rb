@@ -238,7 +238,7 @@ class Hocon::Impl::ConfigDocumentParser
         end
       end
 
-      # Don't special case to throw a message about changing the file to .properties, since
+      # Don't have a special case to throw a message about changing the file to .properties, since
       # we don't support that format
       part
     end
