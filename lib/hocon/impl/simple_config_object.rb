@@ -256,7 +256,7 @@ class Hocon::Impl::SimpleConfigObject
                                           merged, new_resolve_status,
                                           new_ignores_fallbacks)
     elsif (new_resolve_status != resolve_status) || (new_ignores_fallbacks != ignores_fallbacks?)
-      newCopy(new_resolve_status, origin, new_ignores_fallbacks)
+      new_copy_with_status(new_resolve_status, origin, new_ignores_fallbacks)
     else
       self
     end

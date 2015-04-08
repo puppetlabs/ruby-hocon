@@ -10,9 +10,9 @@ require 'hocon/impl/simple_include_context'
 require 'hocon/impl/simple_config_object'
 require 'hocon/impl/simple_config_origin'
 require 'hocon/impl/tokenizer'
-require 'hocon/impl/parser'
+require 'hocon/impl/config_parser'
 require 'hocon/config_parseable'
-
+require 'hocon/impl/config_document_parser'
 
 #
 # Internal implementation detail, not ABI stable, do not touch.
@@ -244,7 +244,8 @@ class Hocon::Impl::Parseable
 
   def raw_parse_value_from_io(io, origin, final_options)
     tokens = Hocon::Impl::Tokenizer.tokenize(origin, io, final_options.syntax)
-    Hocon::Impl::Parser.parse(tokens, origin, final_options, include_context)
+    document = Hocon::Impl::ConfigDocumentParser.parse(tokens, origin, final_options)
+    Hocon::Impl::ConfigParser.parse(document, origin, final_options, include_context)
   end
 
   def raw_parse_document(origin, final_options)
