@@ -86,6 +86,15 @@ describe "loading CONF only" do
   end
 end
 
+describe "ConfigFactory#load_file_with_resolve_options" do
+  options = Hocon::ConfigResolveOptions.defaults
+  conf = ConfigFactory.load_file_with_resolve_options(TestUtils.resource_file("test01"), options)
+
+  specify "sanity check to make sure load_file_with_resolve_options act strange" do
+    expect(conf.get_int("ints.fortyTwo")).to eq(42)
+  end
+end
+
 describe "empty configs" do
   empty = ConfigFactory.empty
   empty_foo = ConfigFactory.empty("foo")
