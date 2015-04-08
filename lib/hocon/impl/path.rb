@@ -26,7 +26,7 @@ class Hocon::Impl::Path
     # It figures out what @first and @remainder should be, then
     # pass those to the ruby constructor
     if elements.length == 0
-      raise Hocon::ConfigError::ConfigBugOrBrokenError("empty path")
+      raise Hocon::ConfigError::ConfigBugOrBrokenError.new("empty path")
     end
 
     new_first = elements.first

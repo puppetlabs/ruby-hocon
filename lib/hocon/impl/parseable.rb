@@ -33,13 +33,15 @@ class Hocon::Impl::Parseable
     end
   end
 
+  # Changed this to a class variable because the upstream library seems to use it
+  # as a global way of keeping track of how many files have been included, to
+  # avoid cycles
+  @@parse_stack= []
+
   MAX_INCLUDE_DEPTH = 50
 
   def initialize
-    # note: in the upstream library, this is a class variable instead of an
-    # instance variable, but I didn't really see any great reason why it needed
-    # to be like that so I'm putting it here for now.
-    @parse_stack = []
+
   end
 
   def fixup_options(base_options)
@@ -130,18 +132,21 @@ class Hocon::Impl::Parseable
     if (base_options.nil?)
       base_options = options
     end
-    stack = @parse_stack
+    stack = @@parse_stack
     if stack.length >= MAX_INCLUDE_DEPTH
-      raise Hocon::ConfigError::ConfigParseError(@initial_origin,
+      raise Hocon::ConfigError::ConfigParseError.new(@initial_origin,
             "include statements nested more than #{MAX_INCLUDE_DEPTH} times, " +
-            "you probably have a cycle in your includes.  Trace: #{stack}")
+            "you probably have a cycle in your includes.  Trace: #{stack}",
+            nil)
     end
 
-    stack.push(self)
+    # Push into beginning of stack
+    stack.unshift(self)
     begin
       self.class.force_parsed_to_object(parse_value(base_options))
     ensure
-      stack.pop
+      # Pop from beginning of stack
+      stack.shift
     end
   end
 
@@ -310,12 +315,12 @@ class Hocon::Impl::Parseable
       nil
     end
 
-    parent = file.parent_file
+    parent = file.parent
 
     if parent.nil?
       nil
     else
-      File.new(parent, filename)
+      File.join(parent, filename)
     end
   end
 
@@ -402,12 +407,20 @@ class Hocon::Impl::Parseable
     end
 
     def open
-      if block_given?
-        File.open(@input) do |f|
-          yield f
+      begin
+        if block_given?
+          File.open(@input) do |f|
+            yield f
+          end
+        else
+          File.open(@input)
         end
-      else
-        File.open(@input)
+      rescue Errno::ENOENT
+        if @initial_options.allow_missing?
+          return Hocon::Impl::SimpleConfigObject.empty
+        end
+
+        raise Hocon::ConfigError::ConfigIOError.new(nil, "File not found. No file called #{@input}")
       end
     end
 
@@ -421,13 +434,13 @@ class Hocon::Impl::Parseable
         sibling = File.new(filename)
       else
         # this may return nil
-        sibling = Parseable.relative_to(@input, filename)
+        sibling = Hocon::Impl::Parseable.relative_to(@input, filename)
       end
       if sibling.nil?
         nil
-      elsif sibling.exists?
-        self.class.trace("#{sibling" exists, so loading it as a file"}")
-        Parseable.new_file(sibling, options.set_origin_description(nil))
+      elsif File.exists?(sibling)
+        self.class.trace("#{sibling} exists, so loading it as a file")
+        Hocon::Impl::Parseable.new_file(sibling, options.set_origin_description(nil))
       else
         self.class.trace("#{sibling} does not exist, so trying it as a resource")
         super(filename)

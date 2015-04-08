@@ -70,6 +70,22 @@ class Hocon::Impl::ConfigImplUtil
     s
   end
 
+  def self.join_path(*elements)
+    Hocon::Impl::Path.from_string_list(elements).render
+  end
+
+  def self.split_path(path)
+    p = Hocon::Impl::Path.new_path(path)
+    elements = []
+
+    until p.nil?
+      elements << p.first
+      p = p.remainder
+    end
+
+    elements
+  end
+
   def self.whitespace?(c)
     # this implementation is *not* a port of the java code, because it relied on
     # the method java.lang.Character#isWhitespace.  This is probably

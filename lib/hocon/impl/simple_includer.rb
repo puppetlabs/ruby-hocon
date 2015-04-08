@@ -89,7 +89,7 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
   def with_fallback(fallback)
     if self.equal?(fallback)
       raise ConfigBugOrBrokenError, "trying to create includer cycle"
-    elsif @fallback.equal(fallback)
+    elsif @fallback.equal?(fallback)
       self
     elsif @fallback.nil?
       self.class.new(@fallback.with_fallback(fallback))
@@ -183,7 +183,7 @@ class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
             sb << t
             sb << ", "
           end
-          raise ConfigIOError.new(SimpleConfigOrigin.new_simple(name), sb.to_s, fails[0])
+          raise ConfigIOError.new(SimpleConfigOrigin.new_simple(name), sb.string, fails[0])
         end
       elsif !got_something
         if Hocon::Impl::ConfigImpl.trace_loads_enabled
