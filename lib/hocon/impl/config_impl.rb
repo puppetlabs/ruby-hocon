@@ -82,9 +82,7 @@ class Hocon::Impl::ConfigImpl
       else
         return @default_null_value
       end
-    # Since AbstractConfigValue is a mixed in module and not a class, we have to check the
-    # object's list of ancestors for AbstractConfigValue instead of using object.is_a?
-    elsif object.class.ancestors.any? { |ancestor| ancestor == Hocon::Impl::AbstractConfigValue }
+    elsif object.is_a?(Hocon::Impl::AbstractConfigValue)
       return object
     elsif object.is_a?(TrueClass) || object.is_a?(FalseClass)
       if origin != @default_value_origin

@@ -19,6 +19,28 @@ SimpleConfigObject = Hocon::Impl::SimpleConfigObject
 SimpleConfigList = Hocon::Impl::SimpleConfigList
 ConfigUtil = Hocon::ConfigUtil
 
+shared_examples_for "test_from_value" do
+  default_value_description = "hardcoded value"
+
+  specify "create_from made into a config value should equal the expected value" do
+    expect(Hocon::ConfigValueFactory.from_any_ref(create_from)).to eq(expected_value)
+  end
+
+  specify "create_from made into a config value with origin description should equal the expected value" do
+    expect(Hocon::ConfigValueFactory.from_any_ref(create_from, "foo")).to eq(expected_value)
+  end
+
+  specify "descriptions match" do
+    if create_from.is_a?(Hocon::ConfigValue)
+      # description is ignored for createFrom that is already a ConfigValue
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from).origin.description).to eq(create_from.origin.description)
+    else
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from).origin.description).to eq(default_value_description)
+      expect(Hocon::ConfigValueFactory.from_any_ref(create_from, "foo").origin.description).to eq("foo")
+    end
+  end
+end
+
 describe "basic load and get" do
   conf = ConfigFactory.load_file(TestUtils.resource_file("test01"))
 
@@ -32,7 +54,7 @@ end
 
 describe "loading JSON only" do
   options = Hocon::ConfigParseOptions.defaults.set_syntax(Hocon::ConfigSyntax::JSON)
-  conf = ConfigFactory.load_file(TestUtils.resource_file("test01"), parse_options: options)
+  conf = ConfigFactory.load_file_with_parse_options(TestUtils.resource_file("test01"), options)
 
   specify "should be missing value specific to CONF files" do
     TestUtils.intercept(Hocon::ConfigError::ConfigMissingError) do
@@ -47,7 +69,7 @@ end
 
 describe "loading CONF only" do
   options = Hocon::ConfigParseOptions.defaults.set_syntax(Hocon::ConfigSyntax::CONF)
-  conf = ConfigFactory.load_file(TestUtils.resource_file("test01"), parse_options: options)
+  conf = ConfigFactory.load_file_with_parse_options(TestUtils.resource_file("test01"), options)
 
   specify "should be missing value specific to JSON files" do
     TestUtils.intercept(Hocon::ConfigError::ConfigMissingError) do
@@ -326,13 +348,6 @@ describe "string parsing" do
   end
 end
 
-describe "string parsing" do
-  specify "should parse correctly" do
-    conf = ConfigFactory.parse_string("{ a : b }", Hocon::ConfigParseOptions.defaults)
-
-    expect(conf.get_string("a")).to eq("b")
-  end
-end
 
 # Omitting tests for parse_file_any_syntax in the interests of time since this has already
 # been tested above
@@ -344,6 +359,7 @@ describe "config_utils" do
 
   specify "can join and split paths" do
     expect(ConfigUtil.join_path("", "a", "b", "$")).to eq("\"\".a.b.\"$\"")
+    expect(ConfigUtil.join_path_from_list(["", "a", "b", "$"])).to eq("\"\".a.b.\"$\"")
     expect(ConfigUtil.split_path("\"\".a.b.\"$\"")).to eq(["", "a", "b", "$"])
   end
 
@@ -355,6 +371,11 @@ describe "config_utils" do
     TestUtils.intercept(Hocon::ConfigError) do
       # no args
       ConfigUtil.join_path
+    end
+
+    TestUtils.intercept(Hocon::ConfigError) do
+      # empty list
+      ConfigUtil.join_path_from_list([])
     end
   end
 
@@ -415,7 +436,6 @@ describe "include file statements" do
   specify "should find values from each included file" do
     expect(conf.get_int("base")).to eq(41)
     expect(conf.get_int("foo")).to eq(42)
-    expect(conf.get_int("bar")).to eq(43)
     expect(conf.get_int("bar")).to eq(43)
     # these two do not work right now, because we do not
     # treat the filename as relative to the including file
