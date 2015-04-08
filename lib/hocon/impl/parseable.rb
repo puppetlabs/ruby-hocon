@@ -13,6 +13,7 @@ require 'hocon/impl/tokenizer'
 require 'hocon/impl/config_parser'
 require 'hocon/config_parseable'
 require 'hocon/impl/config_document_parser'
+require 'hocon/impl/simple_config_document'
 
 #
 # Internal implementation detail, not ABI stable, do not touch.
