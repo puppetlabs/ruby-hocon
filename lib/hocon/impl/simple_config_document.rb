@@ -23,7 +23,7 @@ class Hocon::Impl::SimpleConfigDocument
   end
 
   def set_config_value(path, new_value)
-    set_value(path, new_value.render)
+    set_value(path, new_value.render.strip)
   end
 
   def remove_value(path)
