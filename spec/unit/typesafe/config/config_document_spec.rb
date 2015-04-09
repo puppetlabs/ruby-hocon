@@ -533,4 +533,12 @@ describe "ConfigDocument" do
       expect(config_document.set_value("c", "d").render).to eq("a : b\n      include \"foo\"\n      c : d\n")
     end
   end
+
+  context "insertion into an empty document" do
+    it "should successfully insert a value into an empty document" do
+      orig_text = ""
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+      expect(config_document.set_value("a", "1").render).to eq(" a : 1")
+    end
+  end
 end
