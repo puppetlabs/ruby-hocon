@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'hocon'
-  s.version     = '0.1.0'
-  s.date        = '2015-04-09'
+  s.version     = '0.9.0'
+  s.date        = '2015-04-10'
   s.summary     = "HOCON Config Library"
   s.description = "== A port of the Java {Typesafe Config}[https://github.com/typesafehub/config] library to Ruby"
   s.authors     = ["Chris Price", "Wayne Warren", "Preben Ingvaldsen", "Joe Pinsonault", "Kevin Corcoran"]
@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.homepage      = 'https://github.com/puppetlabs/ruby-hocon'
   s.license       = 'Apache License, v2'
+  s.required_ruby_version = '>=1.9.0'
 
   # Testing dependencies
   s.add_development_dependency 'bundler', '~> 1.5'
