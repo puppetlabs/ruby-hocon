@@ -533,4 +533,22 @@ describe "ConfigDocument" do
       expect(config_document.set_value("c", "d").render).to eq("a : b\n      include \"foo\"\n      c : d\n")
     end
   end
+
+  context "insertion into an empty document" do
+    it "should successfully insert a value into an empty document" do
+      orig_text = ""
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+      expect(config_document.set_value("a", "1").render).to eq(" a : 1")
+    end
+  end
+
+  context "can insert a map parsed with ConfigValueFactory" do
+    it "should successfully insert a map into a document" do
+      orig_text = "{ a : b }"
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+
+      map = ConfigValueFactory.from_any_ref({"a" => 1, "b" => 2})
+      expect(config_document.set_config_value("a", map).render).to eq("{ a : {\n     # hardcoded value\n     \"a\" : 1,\n     # hardcoded value\n     \"b\" : 2\n } }")
+    end
+  end
 end
