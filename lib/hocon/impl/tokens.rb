@@ -166,7 +166,7 @@ class Hocon::Impl::Tokens
       sb << " ("
       sb << message
       sb << ")"
-      sb.to_s
+      sb.string
     end
 
     def can_equal(other)
