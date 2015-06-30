@@ -532,7 +532,7 @@ describe Hocon::Parser::ConfigNode do
 
     it "should properly replae values in the original node" do
       final_text = "foo : bar\nbaz : {\n\t\"abc.def\" : true\n\t//This is a comment about the below setting\n\n\tabc : {\n\t\t" +
-          "def : false\n\t\t\n\t\t\"this.does.not.exist@@@+$#\" : { end : doesnotexist }\n\t}\n}\n\nbaz.abc.ghi : randomunquotedString\n}"
+          "def : false\n\t\t\n\t\t\"this.does.not.exist@@@+$#\" : {\n\t\t  end : doesnotexist\n\t\t}\n\t}\n}\n\nbaz.abc.ghi : randomunquotedString\n}"
 
       # Paths with quotes in the name are treated as a single Path, rather than multiple sub-paths
       new_node = orig_node.set_value_on_path('baz."abc.def"', TestUtils.config_node_simple_value(TestUtils.token_true))

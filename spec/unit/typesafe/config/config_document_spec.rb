@@ -219,7 +219,7 @@ describe "ConfigDocument" do
 
   context "config document set new value multi level CONF" do
     let (:orig_text) { "a:b\nc:d" }
-    let (:final_text) { "a:b\nc:d\ne : { f : { g : 12 } }" }
+    let (:final_text) { "a:b\nc:d\ne : {\n  f : {\n    g : 12\n  }\n}" }
     let (:new_value) { "12" }
     let (:replace_path) { "e.f.g" }
 
@@ -228,7 +228,7 @@ describe "ConfigDocument" do
 
   context "config document set new value multi level JSON" do
     let (:orig_text) { "{\"a\":\"b\",\n\"c\":\"d\"}" }
-    let (:final_text) { "{\"a\":\"b\",\n\"c\":\"d\",\n\"e\" : { \"f\" : { \"g\" : 12 } }}" }
+    let (:final_text) { "{\"a\":\"b\",\n\"c\":\"d\",\n  \"e\" : {\n    \"f\" : {\n      \"g\" : 12\n    }\n  }}" }
     let (:new_value) { "12" }
     let (:replace_path) { "e.f.g" }
 
@@ -426,7 +426,7 @@ describe "ConfigDocument" do
       end
 
       it "should properly add/indent any necessary objects along the way to the value" do
-        expect(config_document.set_value("a.d.e.f", "g").render).to eq("a {\n  b: c\n  d : { e : { f : g } }\n}")
+        expect(config_document.set_value("a.d.e.f", "g").render).to eq("a {\n  b: c\n  d : {\n    e : {\n      f : g\n    }\n  }\n}")
       end
     end
 
@@ -439,7 +439,7 @@ describe "ConfigDocument" do
       end
 
       it "should properly add/indent any necessary objects along the way to the value" do
-        expect(config_document.set_value("d.e.f", "g").render).to eq("a {\n b: c\n}\nd : { e : { f : g } }\n")
+        expect(config_document.set_value("d.e.f", "g").render).to eq("a {\n b: c\n}\nd : {\n  e : {\n    f : g\n  }\n}\n")
       end
     end
   end
@@ -538,7 +538,13 @@ describe "ConfigDocument" do
     it "should successfully insert a value into an empty document" do
       orig_text = ""
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a", "1").render).to eq(" a : 1")
+      expect(config_document.set_value("a", "1").render).to eq("a : 1")
+    end
+
+    it "should successfully insert a multi-line object into an empty document" do
+      orig_text = ""
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+      expect(config_document.set_value("a.b", "1").render).to eq("a : {\n  b : 1\n}")
     end
   end
 
