@@ -546,6 +546,22 @@ describe "ConfigDocument" do
       config_document = ConfigDocumentFactory.parse_string(orig_text)
       expect(config_document.set_value("a.b", "1").render).to eq("a : {\n  b : 1\n}")
     end
+
+    it "should successfully insert a hash into an empty document" do
+      orig_text = ""
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+      map_val = ConfigValueFactory.from_any_ref({"a" => 1, "b" => 2})
+
+      expect(config_document.set_config_value("a", map_val).render).to eq("a : {\n    # hardcoded value\n    \"a\" : 1,\n    # hardcoded value\n    \"b\" : 2\n}")
+    end
+
+    it "should successfully insert an array into an empty document" do
+      orig_text = ""
+      config_document = ConfigDocumentFactory.parse_string(orig_text)
+      array_val = ConfigValueFactory.from_any_ref([1,2])
+
+      expect(config_document.set_config_value("a", array_val).render).to eq("a : [\n    # hardcoded value\n    1,\n    # hardcoded value\n    2\n]")
+    end
   end
 
   context "can insert a map parsed with ConfigValueFactory" do

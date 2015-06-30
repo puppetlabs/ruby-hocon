@@ -176,7 +176,7 @@ class Hocon::Impl::ConfigNodeObject
     indentation = indentation().clone
 
     # If the value we're inserting is a complex value, we'll need to indent it for insertion
-    if value.is_a?(Hocon::Impl::ConfigNodeComplexValue)
+    if value.is_a?(Hocon::Impl::ConfigNodeComplexValue) && indentation.length > 0
       indented_value = value.indent_text(indentation[-1])
     else
       indented_value = value
