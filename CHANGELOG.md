@@ -1,3 +1,11 @@
+## 0.9.1
+
+This is a bugfix release.
+* Fixed a bug wherein ugly configurations were being generated due to the addition of new objects when a setting
+  is set at a path that does not currently exist in the configuration. Previously, these new objects were being
+  added as single-line objects. They will now be added as multi-line objects if the parent object is a multi-line
+  object or is an empty root object.
+
 ## 0.9.0
 
 This is a promotion of the 0.1.0 release with one small bug fix:
