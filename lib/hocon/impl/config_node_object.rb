@@ -126,6 +126,10 @@ class Hocon::Impl::ConfigNodeObject
     seen_new_line = false
     indentation = []
 
+    if @children.empty?
+      return indentation
+    end
+
     @children.each_index do |i|
       unless seen_new_line
         if @children[i].is_a?(Hocon::Impl::ConfigNodeSingleToken) && Tokens.newline?(@children[i].token)
@@ -151,13 +155,14 @@ class Hocon::Impl::ConfigNodeObject
       last = @children[-1]
       if last.is_a?(Hocon::Impl::ConfigNodeSingleToken) && last.token.equal?(Tokens::CLOSE_CURLY)
         beforeLast = @children[-2]
+        indent = ""
         if beforeLast.is_a?(Hocon::Impl::ConfigNodeSingleToken) &&
             Tokens.ignored_whitespace?(beforeLast.token)
           indent = beforeLast.token.token_text
-          indent += "  "
-          indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, indent)))
-          return indentation
         end
+        indent += "  "
+        indentation.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, indent)))
+        return indentation
       end
     end
 
@@ -176,7 +181,7 @@ class Hocon::Impl::ConfigNodeObject
     else
       indented_value = value
     end
-    same_line = !(indentation[0].is_a?(Hocon::Impl::ConfigNodeSingleToken) &&
+    same_line = !(indentation.length > 0 && indentation[0].is_a?(Hocon::Impl::ConfigNodeSingleToken) &&
                     Tokens.newline?(indentation[0].token))
 
     # If the path is of length greater than one, see if the value needs to be added further down
@@ -211,7 +216,10 @@ class Hocon::Impl::ConfigNodeObject
       # If the path is of length greater than one add the required new objects along the path
       new_object_nodes = []
       new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::OPEN_CURLY))
-      new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
+      if indentation.empty?
+        new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_line(nil)))
+      end
+      new_object_nodes += indentation
       new_object_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::CLOSE_CURLY))
       new_object = self.class.new(new_object_nodes)
       new_nodes.push(new_object.add_value_on_path(desired_path.sub_path(1), indented_value, flavor))
