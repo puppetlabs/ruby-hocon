@@ -1,3 +1,10 @@
+## 0.9.2
+
+This is a bugfix release
+
+* Fixed a bug wherein attempting to insert a complex value (such as an array or a hash) into an empty
+  ConfigDocument would cause an undefined method error.
+
 ## 0.9.1
 
 This is a bugfix release.
