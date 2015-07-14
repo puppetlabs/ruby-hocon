@@ -3,6 +3,7 @@
 require 'hocon/impl'
 require 'hocon/parser/config_document'
 require 'hocon/impl/config_document_parser'
+require 'hocon/config_render_options'
 
 class Hocon::Impl::SimpleConfigDocument
   include Hocon::Parser::ConfigDocument
@@ -23,7 +24,9 @@ class Hocon::Impl::SimpleConfigDocument
   end
 
   def set_config_value(path, new_value)
-    set_value(path, new_value.render.strip)
+    options = Hocon::ConfigRenderOptions.defaults
+    options.origin_comments = false
+    set_value(path, new_value.render(options).strip)
   end
 
   def remove_value(path)
