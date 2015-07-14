@@ -1,3 +1,10 @@
+## 0.9.3
+
+This is a bugfix release.
+
+* Fixed a bug wherein inserting an array or a hash into a ConfigDocument would cause
+  "# hardcoded value" comments to be generated before every entry in the hash/array.
+
 ## 0.9.2
 
 This is a bugfix release
