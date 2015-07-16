@@ -3,6 +3,7 @@
 require 'spec_helper'
 require 'hocon/config_value_factory'
 require 'hocon/config_render_options'
+require 'hocon/config_error'
 
 describe Hocon::ConfigValueFactory do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -54,6 +55,23 @@ describe Hocon::ConfigValueFactory do
       value = Hocon::ConfigValueFactory.from_any_ref(map, nil)
       expect(value).to be_instance_of(Hocon::Impl::SimpleConfigObject)
       expect(value.unwrapped).to eq(map)
+    end
+
+    it "should convert symbol keys in a map to string keys" do
+      orig_map = {a: 1, b: 2, c: {a: 1, b: 2, c: {a: 1}}}
+      map = {"a" => 1, "b" => 2, "c"=>{"a"=>1, "b"=>2, "c"=>{"a"=>1}}}
+      value = Hocon::ConfigValueFactory.from_any_ref(orig_map, nil)
+      expect(value).to be_instance_of(Hocon::Impl::SimpleConfigObject)
+      expect(value.unwrapped).to eq(map)
+
+      value = Hocon::ConfigValueFactory.from_map(orig_map, nil)
+      expect(value).to be_instance_of(Hocon::Impl::SimpleConfigObject)
+      expect(value.unwrapped).to eq(map)
+    end
+
+    it "should not parse maps with non-string and non-symbol keys" do
+      map = {1 => "a", 2 => "b"}
+      expect{ Hocon::ConfigValueFactory.from_any_ref(map, nil) }.to raise_error(Hocon::ConfigError::ConfigBugOrBrokenError)
     end
 
     it "should convert an Enumerable into a SimpleConfigList" do

@@ -55,7 +55,11 @@ class Hocon::ConfigValueFactory
   # @return a new value
   #
   def self.from_any_ref(object, origin_description = nil)
-    ConfigImpl.from_any_ref(object, origin_description)
+    if object.is_a?(Hash)
+      from_map(object, origin_description)
+    else
+      ConfigImpl.from_any_ref(object, origin_description)
+    end
   end
 
   #
@@ -69,6 +73,13 @@ class Hocon::ConfigValueFactory
   # @return a new {@link ConfigObject}
   #
   def self.from_map(values, origin_description = nil)
-    ConfigImpl.from_any_ref(values, origin_description)
+    ConfigImpl.from_any_ref(process_hash(values), origin_description)
   end
+
+  private
+
+  def self.process_hash(hash)
+    Hash[hash.map {|k, v| [k.is_a?(Symbol) ? k.to_s : k, v.is_a?(Hash) ? process_hash(v) : v]}]
+  end
+
 end
