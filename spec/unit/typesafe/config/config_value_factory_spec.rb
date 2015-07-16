@@ -58,8 +58,8 @@ describe Hocon::ConfigValueFactory do
     end
 
     it "should convert symbol keys in a map to string keys" do
-      orig_map = {a: 1, b: 2}
-      map = {"a" => 1, "b" => 2}
+      orig_map = {a: 1, b: 2, c: {a: 1, b: 2, c: {a: 1}}}
+      map = {"a" => 1, "b" => 2, "c"=>{"a"=>1, "b"=>2, "c"=>{"a"=>1}}}
       value = Hocon::ConfigValueFactory.from_any_ref(orig_map, nil)
       expect(value).to be_instance_of(Hocon::Impl::SimpleConfigObject)
       expect(value.unwrapped).to eq(map)
