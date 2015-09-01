@@ -33,6 +33,7 @@ conf_map = conf.root.unwrapped
 To use the ConfigDocument API
 
 ```rb
+require 'hocon'
 require 'hocon/parser/config_document_factory'
 require 'hocon/config_value_factory'
 
