@@ -3,12 +3,15 @@
 require 'hocon'
 require 'hocon/impl'
 require 'hocon/impl/abstract_config_value'
-require 'hocon/impl/resolve_source'
-require 'hocon/impl/resolve_result'
 
 class Hocon::Impl::ConfigReference
   include Hocon::Impl::Unmergeable
   include Hocon::Impl::AbstractConfigValue
+
+  # Require these lazily, to avoid circular dependencies
+  require 'hocon/impl/resolve_source'
+  require 'hocon/impl/resolve_result'
+
 
   NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve
   UnresolvedSubstitutionError = Hocon::ConfigError::UnresolvedSubstitutionError

@@ -22,15 +22,18 @@ Basic Usage
 gem install hocon
 ```
 
+To use the simple API, for reading config values:
 
 ```rb
-require 'hocon/config_factory'
+require 'hocon'
 
-conf = Hocon::ConfigFactory.parse_file("myapp.conf")
-conf_map = conf.root.unwrapped
+conf = Hocon.load("myapp.conf")
+puts "Here's a setting: #{conf["foo"]["bar"]["baz"]}"
 ```
 
-To use the ConfigDocument API
+To use the ConfigDocument API, if you need both read/write capability for
+modifying settings in a config file, or if you want to retain access to
+things like comments and line numbers:
 
 ```rb
 require 'hocon/parser/config_document_factory'
