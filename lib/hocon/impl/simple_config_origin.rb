@@ -212,7 +212,7 @@ class Hocon::Impl::SimpleConfigOrigin
         if a.origin_type == b.origin_type
           a.origin_type
         else
-          Hocon::Impl::OriginType.GENERIC
+          Hocon::Impl::OriginType::GENERIC
         end
 
     # first use the "description" field which has no line numbers
