@@ -93,7 +93,17 @@ describe Hocon::ConfigFactory do
   end
 
   context "example3" do
-    let(:example) { EXAMPLE3 }
+    let (:example) { EXAMPLE3 }
+    let (:extension) { ".conf" }
+
+    context "loading a HOCON file with substitutions" do
+      let(:conf) { Hocon::ConfigFactory.load_file(input_file) }
+      include_examples "config_factory_parsing"
+    end
+  end
+
+  context "example4" do
+    let(:example) { EXAMPLE4 }
     let (:extension) { ".json" }
 
     context "parsing a .json file" do
@@ -102,7 +112,7 @@ describe Hocon::ConfigFactory do
     end
   end
 
-  context "example4" do
+  context "example5" do
     it "should raise a ConfigParseError when given an invalid .conf file" do
       expect{Hocon::ConfigFactory.parse_string("abcdefg")}.to raise_error(Hocon::ConfigError::ConfigParseError)
     end

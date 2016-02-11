@@ -28,10 +28,16 @@ EXAMPLE2 = { :hash =>
   }
 
 EXAMPLE3 = { :hash =>
+                 {"a" => true,
+                  "b" => true},
+             :name => "example3",
+}
+
+EXAMPLE4 = { :hash =>
                  {"kermit" => "frog",
                   "miss" => "piggy",
                   "bert" => "ernie",
                   "janice" => "guitar"},
-             :name => "example3",
+             :name => "example4",
 }
 

@@ -49,6 +49,10 @@ doc_has_value = doc.has_value?("a") # returns boolean
 orig_doc_text = doc.render # returns string
 ```
 
+Note that a `ConfigDocument` is used primarily for simple configuration manipulation while preserving
+whitespace and comments. As such, it is not powerful as the regular `Config` API, and will not resolve
+substitutions.
+
 Testing
 =======
 
