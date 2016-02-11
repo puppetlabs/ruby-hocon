@@ -6,6 +6,10 @@ require 'hocon/config_parse_options'
 require 'hocon/impl/config_impl'
 require 'hocon/config_factory'
 
+## Please note that the `parse` operations will simply create a ConfigValue
+## and do nothing else, whereas the `load` operations will perform a higher-level
+## operation and will resolve substitutions. If you have substitutions in your
+## configuration, use a `load` function
 class Hocon::ConfigFactory
   def self.parse_file(file_path, options = Hocon::ConfigParseOptions.defaults)
     Hocon::Impl::Parseable.new_file(file_path, options).parse.to_config

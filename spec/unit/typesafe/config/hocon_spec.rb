@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'hocon'
+require 'hocon/config_render_options'
 
 describe Hocon do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -29,9 +30,8 @@ describe Hocon do
     # TODO 'reparsed' appears to be unused
     let(:reparsed) { Hocon::ConfigFactory.parse_file("#{FIXTURE_DIR}/parse_render/#{example[:name]}/output.conf") }
 
-    context "parsing a HOCON file" do
-      let(:string) { File.open(input_file).read }
-      let(:conf) { Hocon.parse(string) }
+    context "loading a HOCON file" do
+      let(:conf) { Hocon.load(input_file) }
       include_examples "hocon_parsing"
     end
 
@@ -41,6 +41,14 @@ describe Hocon do
       include_examples "hocon_parsing"
     end
 
+  end
+
+  context "loading a HOCON file with a substitution" do
+    conf = Hocon.load("#{FIXTURE_DIR}/parse_render/#{EXAMPLE3[:name]}/input.conf")
+    expected = EXAMPLE3[:hash]
+    it "should successfully resolve the substitution" do
+      expect(conf).to eq(expected)
+    end
   end
 end
 

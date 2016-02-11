@@ -6,7 +6,7 @@ module Hocon
     # `require 'hocon'` to get the module into scope will end up recursing
     # through this require and probably ending up with circular dependencies.
     require 'hocon/config_factory'
-    config = Hocon::ConfigFactory.parse_file(file)
+    config = Hocon::ConfigFactory.load_file(file)
     return config.root.unwrapped
   end
 
