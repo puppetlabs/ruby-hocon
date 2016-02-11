@@ -1,3 +1,10 @@
+## 0.9.4
+
+This is a bugfix release.
+
+* Fixed a bug wherein calling "Hocon.load" would not
+  resolve substitutions.
+
 ## 0.9.3
 
 This is a bugfix release.
