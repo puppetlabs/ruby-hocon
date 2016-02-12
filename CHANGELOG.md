@@ -4,6 +4,10 @@ This is a bugfix release.
 
 * Fixed a bug wherein calling "Hocon.load" would not
   resolve substitutions.
+* Fixed a circular dependency between the Hocon and Hocon::ConfigFactory
+  namespaces. Using the Hocon::ConfigFactory class now requires you to
+  use a `require 'hocon/config_factory'` instead of `require hocon`
+* Add support for hashes with keyword keys
 
 ## 0.9.3
 
