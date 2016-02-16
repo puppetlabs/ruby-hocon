@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hocon (0.9.4)
+    hocon (1.0.0)
 
 GEM
   remote: https://rubygems.org/
@@ -24,6 +24,3 @@ DEPENDENCIES
   bundler (~> 1.5)
   hocon!
   rspec (~> 2.14)
-
-BUNDLED WITH
-   1.10.6
