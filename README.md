@@ -9,8 +9,9 @@ The library provides Ruby support for the [HOCON](https://github.com/typesafehub
 
 
 At present, it supports supports parsing and modification of existing HOCON/JSON files via the `ConfigFactory`
-class and the `ConfigValueFactory` class,and rendering parsed config objects back to a String.
-It also supports the parsing and modification of HOCON/JSON files via `ConfigDocumentFactory`.
+class and the `ConfigValueFactory` class, and rendering parsed config objects back to a String
+([see examples below](#basic-usage)). It also supports the parsing and modification of HOCON/JSON files via
+`ConfigDocumentFactory`.
 
 **Note:** While the project is production ready, since not all features in the Typesafe library are supported,
 you may still run into some issues. If you find a problem, feel free to open a github issue.
