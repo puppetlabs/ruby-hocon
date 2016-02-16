@@ -8,10 +8,11 @@ This is a port of the [Typesafe Config](https://github.com/typesafehub/config) l
 The library provides Ruby support for the [HOCON](https://github.com/typesafehub/config/blob/master/HOCON.md) configuration file format.
 
 
-At present, it supports supports parsing and modification of existing HOCON/JSON files via the `ConfigFactory` class and the `ConfigValueFactory` class, and rendering parsed config objects back to a String.
+At present, it supports supports parsing and modification of existing HOCON/JSON files via the `ConfigFactory` class and the `ConfigValueFactory` class,and rendering parsed config objects back to a String.
 It also supports the parsing and modification of HOCON/JSON files via `ConfigDocumentFactory`.
-PLEASE NOTE this project is in an experimental state, and in some cases may not work properly, so
-please be wary when using it. If you find a problem, feel free to open a github issue.
+
+**Note:** While the project is production ready, since not all features in the Typesafe library are supported, you may still run into some issues.
+If you find a problem, feel free to open a github issue.
 
 The implementation is intended to be as close to a line-for-line port as the two languages allow, in hopes of making it fairly easy to port over new changesets from the Java code base over time.
 

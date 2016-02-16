@@ -1,6 +1,7 @@
-## 0.9.4
+## 1.0.0
 
 This is a bugfix release.
+The API is stable enough and the code is being used in production, so the version is also being bumped to 1.0.0
 
 * Fixed a bug wherein calling "Hocon.load" would not
   resolve substitutions.
