@@ -1,3 +1,7 @@
+## 0.9.5
+
+This is a re-release of 0.9.3 to revert changes made in 0.9.4
+
 ## 0.9.3
 
 This is a bugfix release.

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'hocon'
-  s.version     = '0.9.3'
+  s.version     = '0.9.5'
   s.date        = '2015-07-14'
   s.summary     = "HOCON Config Library"
   s.description = "== A port of the Java {Typesafe Config}[https://github.com/typesafehub/config] library to Ruby"
