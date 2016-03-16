@@ -1,4 +1,4 @@
-## 1.0.0
+## 1.0.1
 
 This is a bugfix release.
 The API is stable enough and the code is being used in production, so the version is also being bumped to 1.0.0
@@ -9,6 +9,10 @@ The API is stable enough and the code is being used in production, so the versio
   namespaces. Using the Hocon::ConfigFactory class now requires you to
   use a `require 'hocon/config_factory'` instead of `require hocon`
 * Add support for hashes with keyword keys
+
+## 1.0.0
+
+This version number was burned.
 
 ## 0.9.3
 
