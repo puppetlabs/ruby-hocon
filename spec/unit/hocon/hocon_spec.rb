@@ -3,6 +3,10 @@
 require 'spec_helper'
 require 'hocon'
 require 'hocon/config_render_options'
+require 'hocon/config_error'
+require 'hocon/config_syntax'
+
+ConfigParseError = Hocon::ConfigError::ConfigParseError
 
 describe Hocon do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -50,5 +54,39 @@ describe Hocon do
       expect(conf).to eq(expected)
     end
   end
+
+  context "loading a file with an unknown extension" do
+    context "without specifying the config format" do
+      it "should raise an error" do
+        expect {
+          Hocon.load("#{FIXTURE_DIR}/hocon/by_extension/cat.test")
+        }.to raise_error(ConfigParseError, /Unrecognized file extension '.test'/)
+      end
+    end
+
+    context "while specifying the config format" do
+      it "should parse properly if the config format is correct" do
+        expect(Hocon.load("#{FIXTURE_DIR}/hocon/by_extension/cat.test",
+                          {:syntax => Hocon::ConfigSyntax::HOCON})).
+            to eq({"meow" => "cats"})
+        expect(Hocon.load("#{FIXTURE_DIR}/hocon/by_extension/cat.test-json",
+                          {:syntax => Hocon::ConfigSyntax::HOCON})).
+            to eq({"meow" => "cats"})
+      end
+      it "should parse properly if the config format is compatible" do
+        expect(Hocon.load("#{FIXTURE_DIR}/hocon/by_extension/cat.test-json",
+                          {:syntax => Hocon::ConfigSyntax::JSON})).
+            to eq({"meow" => "cats"})
+      end
+      it "should raise an error if the config format is incompatible" do
+        expect {
+          Hocon.load("#{FIXTURE_DIR}/hocon/by_extension/cat.test",
+                     {:syntax => Hocon::ConfigSyntax::JSON})
+        }.to raise_error(ConfigParseError, /Document must have an object or array at root/)
+      end
+    end
+  end
+
+
 end
 
