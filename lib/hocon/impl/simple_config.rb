@@ -61,12 +61,12 @@ class Hocon::Impl::SimpleConfig
     if v.value_type == ConfigValueType::NULL
       raise ConfigNullError.new(v.origin,
                                 (ConfigNullError.make_message(original_path.render,
-                                                              (not expected.nil?) ? ConfigValueType.name(expected) : nil)),
+                                                              (not expected.nil?) ? ConfigValueType.value_type_name(expected) : nil)),
                                 nil)
     elsif (not expected.nil?) && v.value_type != expected
       raise ConfigWrongTypeError.new(v.origin,
-                                     "#{original_path.render} has type #{ConfigValueType.name(v.value_type)} " +
-                                         "rather than #{ConfigValueType.name(expected)}",
+                                     "#{original_path.render} has type #{ConfigValueType.value_type_name(v.value_type)} " +
+                                         "rather than #{ConfigValueType.value_type_name(expected)}",
                                      nil)
     else
       return v
@@ -121,8 +121,8 @@ class Hocon::Impl::SimpleConfig
     if (not expected.nil?) && (v.value_type != expected && v.value_type != Hocon::ConfigValueType::NULL)
       raise Hocon::ConfigError::ConfigWrongTypeError.with_expected_actual(v.origin,
                                                                           original_path.render,
-                                                                          expected.name,
-                                                                          Hocon::ConfigValueType.name(v.value_type))
+                                                                          expected.value_type_name,
+                                                                          Hocon::ConfigValueType.value_type_name(v.value_type))
     else
       return v
     end
@@ -220,8 +220,8 @@ class Hocon::Impl::SimpleConfig
       end
       if v.value_type != expected
         raise ConfigWrongTypeError.with_expected_actual(origin, path,
-              "list of #{expected.name}",
-              "list of #{v.value_type.name}")
+              "list of #{expected.value_type_name}",
+              "list of #{v.value_type.value_type_name}")
       end
       l << v.unwrapped
     end
@@ -271,8 +271,8 @@ class Hocon::Impl::SimpleConfig
       end
       if v.value_type != expected
         raise ConfigWrongTypeError.with_expected_actual(origin, path,
-                                                        "list of #{expected.name}",
-                                                        "list of #{v.value_type.name}")
+                                                        "list of #{expected.value_type_name}",
+                                                        "list of #{v.value_type.value_type_name}")
       end
       l << v
     end

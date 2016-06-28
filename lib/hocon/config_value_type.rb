@@ -15,7 +15,7 @@ module Hocon::ConfigValueType
   NULL = 4
   STRING = 5
 
-  def self.name(config_value_type)
+  def self.value_type_name(config_value_type)
     case config_value_type
       when OBJECT then "OBJECT"
       when LIST then "LIST"

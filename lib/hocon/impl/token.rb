@@ -30,7 +30,7 @@ class Hocon::Impl::Token
     if !@debug_string.nil?
       @debug_string
     else
-      Hocon::Impl::TokenType.name(@token_type)
+      Hocon::Impl::TokenType.token_type_name(@token_type)
     end
   end
 
