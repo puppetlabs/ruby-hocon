@@ -35,6 +35,22 @@ conf = Hocon.load("myapp.conf")
 puts "Here's a setting: #{conf["foo"]["bar"]["baz"]}"
 ```
 
+By default, the simple API will determine the configuration file syntax/format
+based on the filename extension of the file; `.conf` will be interpreted as HOCON,
+`.json` will be interpreted as strict JSON, and any other extension will cause an
+error to be raised since the syntax is unknown.  If you'd like to use a different
+file extension, you manually specify the syntax, like this:
+
+```rb
+require 'hocon'
+require 'hocon/config_syntax'
+
+conf = Hocon.load("myapp.blah", {:syntax => Hocon::ConfigSyntax::HOCON})
+```
+
+Supported values for `:syntax` are: JSON, CONF, and HOCON.  (CONF and HOCON are
+aliases, and both map to the underlying HOCON syntax.)
+
 To use the ConfigDocument API, if you need both read/write capability for
 modifying settings in a config file, or if you want to retain access to
 things like comments and line numbers:
