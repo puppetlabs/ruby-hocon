@@ -30,10 +30,10 @@ module Hocon
           file, Hocon::ConfigParseOptions.defaults.set_syntax(syntax))
     end
 
-    config = Hocon::ConfigFactory.load_from_config(
+    resolved_config = Hocon::ConfigFactory.load_from_config(
         config, Hocon::ConfigResolveOptions.defaults)
 
-    return config.root.unwrapped
+    return resolved_config.root.unwrapped
   end
 
   def self.parse(string)
