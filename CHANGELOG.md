@@ -1,4 +1,4 @@
-## 1.0.2
+## 1.1.0
 This is a bugfix/feature release
 
 * Fixed a bug where unrecognized config file extensions caused `Hocon.load` to return an empty
