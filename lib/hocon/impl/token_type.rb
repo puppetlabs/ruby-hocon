@@ -21,7 +21,7 @@ class Hocon::Impl::TokenType
   PLUS_EQUALS = 15
   IGNORED_WHITESPACE = 16
 
-  def self.name(token_type)
+  def self.token_type_name(token_type)
     case token_type
       when START then "START"
       when EOF then "EOF"

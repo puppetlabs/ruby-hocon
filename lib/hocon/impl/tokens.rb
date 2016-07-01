@@ -35,9 +35,9 @@ class Hocon::Impl::Tokens
 
     def to_s
       if value.resolve_status == ResolveStatus::RESOLVED
-        "'#{value.unwrapped}' (#{Hocon::ConfigValueType.name(value.value_type)})"
+        "'#{value.unwrapped}' (#{Hocon::ConfigValueType.value_type_name(value.value_type)})"
       else
-        "'<unresolved value>' (#{@value.value_type.name})"
+        "'<unresolved value>' (#{@value.value_type.value_type_name})"
       end
 
     end

@@ -125,7 +125,7 @@ class Hocon::Impl::Parseable
       raise Hocon::ConfigError::ConfigWrongTypeError.with_expected_actual(value.origin,
                                                          "",
                                                          "object at file root",
-                                                         value.value_type.name)
+                                                         value.value_type.value_type_name)
     end
   end
 
