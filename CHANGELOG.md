@@ -1,3 +1,11 @@
+## 1.1.0
+This is a bugfix/feature release
+
+* Fixed a bug where unrecognized config file extensions caused `Hocon.load` to return an empty
+  hash instead of an error.
+* Added an optional `:syntax` key to the `Hocon.load` method to explicitly specify the file format
+* Renamed internal usage of `name` methods to avoid overriding built in `Object#name` method
+
 ## 1.0.1
 
 This is a bugfix release.
