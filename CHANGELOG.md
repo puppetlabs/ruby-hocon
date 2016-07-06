@@ -1,3 +1,9 @@
+## 1.1.1
+This is a bugfix release.
+
+* Fixed a bug where an undefined method `value_type_name` error was being thrown due to
+  improper calls to the class method. 
+
 ## 1.1.0
 This is a bugfix/feature release
 
