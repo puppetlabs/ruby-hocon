@@ -7,6 +7,7 @@ require 'hocon/config_error'
 require 'hocon/config_syntax'
 
 ConfigParseError = Hocon::ConfigError::ConfigParseError
+ConfigWrongTypeError = Hocon::ConfigError::ConfigWrongTypeError
 
 describe Hocon do
   let(:render_options) { Hocon::ConfigRenderOptions.defaults }
@@ -44,7 +45,17 @@ describe Hocon do
       let(:conf) { Hocon.parse(string) }
       include_examples "hocon_parsing"
     end
+  end
 
+  it "should fail to parse an array" do
+    puts 
+    expect{(Hocon.parse('[1,2,3]'))}.
+      to raise_error(ConfigWrongTypeError)
+  end
+
+  it "should fail to parse an array" do
+    expect{(Hocon.parse('["one", "two" "three"]'))}.
+      to raise_error(ConfigWrongTypeError)
   end
 
   context "loading a HOCON file with a substitution" do

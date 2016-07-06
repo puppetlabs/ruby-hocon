@@ -118,11 +118,11 @@ class Hocon::Impl::SimpleConfig
       v = Hocon::Impl::DefaultTransformer.transform(v, expected)
     end
 
-    if (not expected.nil?) && (v.value_type != expected && v.value_type != Hocon::ConfigValueType::NULL)
+    if (not expected.nil?) && (v.value_type != expected && v.value_type != ConfigValueType::NULL)
       raise Hocon::ConfigError::ConfigWrongTypeError.with_expected_actual(v.origin,
                                                                           original_path.render,
-                                                                          expected.value_type_name,
-                                                                          Hocon::ConfigValueType.value_type_name(v.value_type))
+                                                                          ConfigValueType.value_type_name(expected),         
+                                                                          ConfigValueType.value_type_name(v.value_type))
     else
       return v
     end
@@ -138,7 +138,7 @@ class Hocon::Impl::SimpleConfig
       else
         o = find_key(me,
                      key,
-                     Hocon::ConfigValueType::OBJECT,
+                     ConfigValueType::OBJECT,
                      original_path.sub_path(0, original_path.length - remainder.length))
 
         if o.nil?
@@ -155,7 +155,7 @@ class Hocon::Impl::SimpleConfig
   def is_null?(path_expression)
     path = Path.new_path(path_expression)
     v = self.class.find_or_null(@object, path, nil, path)
-    v.value_type == Hocon::ConfigValueType::NULL
+    v.value_type == ConfigValueType::NULL
   end
 
   def get_value(path)
@@ -178,7 +178,7 @@ class Hocon::Impl::SimpleConfig
     get_config_number(path)
   end
 
-  def get_string(path)                                                                                                                                                                                                                                                                 
+  def get_string(path)                                                                                                                                                                                                                                                
     v = find2(path, ConfigValueType::STRING)
     v.unwrapped
   end
@@ -220,8 +220,8 @@ class Hocon::Impl::SimpleConfig
       end
       if v.value_type != expected
         raise ConfigWrongTypeError.with_expected_actual(origin, path,
-              "list of #{expected.value_type_name}",
-              "list of #{v.value_type.value_type_name}")
+              "list of #{ConfigValueType.value_type_name(expected)}",
+              "list of #{ConfigValueType.value_type_name(v.value_type)}")
       end
       l << v.unwrapped
     end
@@ -271,8 +271,8 @@ class Hocon::Impl::SimpleConfig
       end
       if v.value_type != expected
         raise ConfigWrongTypeError.with_expected_actual(origin, path,
-                                                        "list of #{expected.value_type_name}",
-                                                        "list of #{v.value_type.value_type_name}")
+                                                        "list of #{ConfigValueType.value_type_name(expected)}",
+                                                        "list of #{ConfigValueType.value_type_name(v.value_type)}")
       end
       l << v
     end
