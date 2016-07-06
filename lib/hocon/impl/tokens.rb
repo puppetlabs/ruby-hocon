@@ -10,6 +10,7 @@ require 'hocon/impl/config_null'
 require 'hocon/impl/config_boolean'
 require 'hocon/config_error'
 require 'hocon/impl/resolve_status'
+require 'hocon/config_value_type'
 
 # FIXME the way the subclasses of Token are private with static isFoo and accessors is kind of ridiculous.
 class Hocon::Impl::Tokens
@@ -37,7 +38,7 @@ class Hocon::Impl::Tokens
       if value.resolve_status == ResolveStatus::RESOLVED
         "'#{value.unwrapped}' (#{Hocon::ConfigValueType.value_type_name(value.value_type)})"
       else
-        "'<unresolved value>' (#{@value.value_type.value_type_name})"
+        "'<unresolved value>' ((#{Hocon::ConfigValueType.value_type_name(value.value_type)})"
       end
 
     end

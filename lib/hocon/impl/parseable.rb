@@ -5,6 +5,7 @@ require 'pathname'
 require 'hocon/impl'
 require 'hocon/config_error'
 require 'hocon/config_syntax'
+require 'hocon/config_value_type'
 require 'hocon/impl/config_impl'
 require 'hocon/impl/simple_include_context'
 require 'hocon/impl/simple_config_object'
@@ -125,7 +126,7 @@ class Hocon::Impl::Parseable
       raise Hocon::ConfigError::ConfigWrongTypeError.with_expected_actual(value.origin,
                                                          "",
                                                          "object at file root",
-                                                         value.value_type.value_type_name)
+                                                         Hocon::ConfigValueType.value_type_name(value.value_type))
     end
   end
 
