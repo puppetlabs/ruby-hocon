@@ -781,6 +781,18 @@ describe "Config Parser" do
   # Skipping 'includeURLHeuristically' because we don't support URLs
   # Skipping 'includeURLBasenameHeuristically' because we don't support URLs
 
+  it "acceptsUTF8FileContents" do
+    # utf8.conf is UTF-8 with no BOM
+    rune_utf8 = "\u16EB\u16D2\u16E6\u16A6\u16EB\u16A0\u16B1\u16A9\u16A0\u16A2"
+    conf = Hocon::ConfigFactory.parse_file(TestUtils.resource_file("utf8.conf"))
+    expect(conf.get_string("\u16A0\u16C7\u16BB")).to eq(rune_utf8)
+  end
+
+  it "doesnotacceptUTF16FileContents" do
+    # utf16.conf is UTF-16LE with a BOM
+    expect { Hocon::ConfigFactory.parse_file(TestUtils.resource_file("utf16.conf")) }.to raise_error
+  end
+
   it "acceptBOMStartingFile" do
     # BOM at start of file should be ignored
     conf = Hocon::ConfigFactory.parse_file(TestUtils.resource_file("bom.conf"))
