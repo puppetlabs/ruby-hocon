@@ -782,11 +782,9 @@ describe "Config Parser" do
   # Skipping 'includeURLBasenameHeuristically' because we don't support URLs
 
   it "acceptBOMStartingFile" do
-    skip("BOM not parsing properly yet; not fixing this now because it most likely only affects windows") do
-      # BOM at start of file should be ignored
-      conf = Hocon::ConfigFactory.parse_file(TestUtils.resource_file("bom.conf"))
-      expect(conf.get_string("foo")).to eq("bar")
-    end
+    # BOM at start of file should be ignored
+    conf = Hocon::ConfigFactory.parse_file(TestUtils.resource_file("bom.conf"))
+    expect(conf.get_string("foo")).to eq("bar")
   end
 
   it "acceptBOMStartOfStringConfig" do
