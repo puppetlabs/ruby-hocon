@@ -799,14 +799,6 @@ describe "Config Parser" do
     expect(conf.get_string("foo")).to eq("bar")
   end
 
-  it "acceptBOMStartOfStringConfig" do
-    skip("BOM not parsing properly yet; not fixing this now because it most likely only affects windows") do
-      # BOM at start of file is just whitespace, so ignored
-      conf = Hocon::ConfigFactory.parse_string("\uFEFFfoo=bar")
-      expect(conf.get_string("foo")).to eq("bar")
-    end
-  end
-
   it "acceptBOMInStringValue" do
     # BOM inside quotes should be preserved, just as other whitespace would be
     conf = Hocon::ConfigFactory.parse_string("foo=\"\uFEFF\uFEFF\"")
