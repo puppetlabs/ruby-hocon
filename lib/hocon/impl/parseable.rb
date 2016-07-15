@@ -412,11 +412,11 @@ class Hocon::Impl::Parseable
     def open
       begin
         if block_given?
-          File.open(@input) do |f|
+          File.open(@input, :encoding => 'bom|utf-8') do |f|
             yield f
           end
         else
-          File.open(@input)
+          File.open(@input, :encoding => 'bom|utf-8')
         end
       rescue Errno::ENOENT
         if @initial_options.allow_missing?
