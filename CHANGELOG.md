@@ -1,3 +1,9 @@
+## 1.1.2
+This is a bugfix release.
+
+* Fixed bug where Hocon::ConfigFactory.parse_file was not handling files with BOMs on Windows,
+  causing UTF-8 files to not load properly.
+
 ## 1.1.1
 This is a bugfix release.
 
