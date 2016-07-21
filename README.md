@@ -1,7 +1,6 @@
-[![Build Status](https://travis-ci.org/puppetlabs/ruby-hocon.png?branch=master)](https://travis-ci.org/puppetlabs/ruby-hocon)
-
 ruby-hocon
 ==========
+[![Gem Version](https://badge.fury.io/rb/hocon.svg)](https://badge.fury.io/rb/hocon) [![Build Status](https://travis-ci.org/puppetlabs/ruby-hocon.png?branch=master)](https://travis-ci.org/puppetlabs/ruby-hocon)
 
 This is a port of the [Typesafe Config](https://github.com/typesafehub/config) library to Ruby.
 
