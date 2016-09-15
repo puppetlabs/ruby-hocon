@@ -93,8 +93,3 @@ Unsupported features include:
 * Duration and size settings
 * Java system properties
 
-## Maintainence
-
-Maintainers: Joe Pinsonault <joe.pinsonault@puppet.com>, Chris Price <chris@puppet.com>, Kevin Corcoran <kevin.corcoran@puppet.com>
-
-Tickets: https://tickets.puppetlabs.com/browse/HC

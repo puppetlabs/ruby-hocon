@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "file_format": "This MAINTAINERS file format is described at http://pup.pt/maintainers",
+  "issues": "https://tickets.puppetlabs.com/browse/HC",
+  "people": [
+    {
+      "github": "cprice404",
+      "email": "chris@puppet.com",
+      "name": "Chris Price"
+    },
+    {
+      "github": "jpinsonault",
+      "email": "joe.pinsonault@puppet.com",
+      "name": "Joe Pinsonault"
+    },
+    {
+      "github": "waynr",
+      "email": "wayne.warren@puppet.com",
+      "name": "Wayne Warren"
+    }
+  ]
+}
