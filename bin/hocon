@@ -1,0 +1,111 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'hocon'
+require 'hocon/parser/config_document_factory'
+
+SUBCOMMANDS = ['get', 'set', 'unset']
+
+def main(opts)
+  case opts[:subcommand]
+    when 'get'
+      get_main(opts)
+    when 'set'
+      set_main(opts)
+    when 'unset'
+      unset_main(opts)
+  end
+
+  exit(0)
+end
+
+def get_main(opts)
+  doc = Hocon.load(File.expand_path(opts[:file]))
+
+  path = opts[:path].split('.')
+
+  value = doc
+  loop do
+    value = value[path.shift]
+    break if path.empty? or value.nil?
+  end
+
+  if value.nil?
+    p 'null'
+  else
+    p value
+  end
+end
+
+def set_main(opts)
+  file_path = File.expand_path(opts[:file])
+  doc = Hocon::Parser::ConfigDocumentFactory.parse_file(file_path)
+  modified_doc = doc.set_value(opts[:path], opts[:new_value])
+
+  puts modified_doc.render
+end
+
+def unset_main(opts)
+  file_path = File.expand_path(opts[:file])
+  doc = Hocon::Parser::ConfigDocumentFactory.parse_file(file_path)
+  modified_doc = doc.remove_value(opts[:path])
+
+  puts modified_doc.render
+end
+
+def too_few_arguments_error(subcommand)
+  error_message = "Too few arguments for '#{subcommand}' subcommand"
+  puts opt_parser
+  raise OptionParser::MissingArgument.new(error_message)
+end
+
+def invalid_subcommand_error(subcommand)
+  error_message = "Invalid argument #{subcommand}, must be one of [#{SUBCOMMANDS.join(', ')}]"
+  puts opt_parser
+  raise OptionParser::InvalidArgument.new(error_message)
+end
+
+def parse_args(args)
+  options = {}
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = 'Usage: hocon [--file HOCON_FILE] {get,set,unset} PATH [VALUE]'
+
+    opts.on('-f', '--file HOCON_FILE', 'HOCON file to read/modify') do |file|
+      options[:file] = file
+    end
+
+    opts.on_tail('-h', '--help', 'Show this message') do
+      puts opts
+      exit
+    end
+  end
+
+  remaining_args = opt_parser.parse!(args)
+
+  if remaining_args.size == 0
+    puts opt_parser
+    raise OptionParser::MissingArgument.new('Too few arguments')
+  end
+
+  subcommand = remaining_args.shift
+  options[:subcommand] = subcommand
+
+  case subcommand
+    when 'set'
+      too_few_arguments_error(subcommand) unless remaining_args.size >= 2
+      options[:path] = remaining_args.shift
+      options[:new_value] = remaining_args.shift
+
+    when 'get', 'unset'
+      too_few_arguments_error(subcommand) unless remaining_args.size >= 1
+      options[:path] = remaining_args.shift
+
+    else
+      invalid_subcommand_error(subcommand)
+  end
+
+  options
+end
+
+main(parse_args(ARGV))
+

@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email       = 'chris@puppetlabs.com'
   s.files       = Dir["{lib}/**/*.rb", "spec/**/*" , "bin/*", "LICENSE", "*.md"]
   s.require_paths = ["lib"]
+  s.executables   = ['hocon']
   s.homepage      = 'https://github.com/puppetlabs/ruby-hocon'
   s.license       = 'Apache License, v2'
   s.required_ruby_version = '>=1.9.0'
