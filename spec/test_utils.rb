@@ -12,6 +12,7 @@ require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/config_node_object'
 require 'hocon/impl/config_node_array'
 require 'hocon/impl/config_node_concatenation'
+require 'hocon/cli'
 
 module TestUtils
   Tokens = Hocon::Impl::Tokens
