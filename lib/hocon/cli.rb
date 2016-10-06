@@ -5,6 +5,10 @@ require 'hocon/parser/config_document_factory'
 require 'hocon/config_error'
 
 module Hocon::CLI
+  # Aliases
+  ConfigMissingError = Hocon::ConfigError::ConfigMissingError
+  ConfigWrongTypeError = Hocon::ConfigError::ConfigWrongTypeError
+
   # List of valid subcommands
   SUBCOMMANDS = ['get', 'set', 'unset']
 
@@ -59,13 +63,20 @@ module Hocon::CLI
   # Main entry point into the script
   # Calls the appropriate subcommand
   def self.main(opts)
-    case opts[:subcommand]
-      when 'get'
-        puts do_get(opts)
-      when 'set'
-        print_or_write(do_set(opts), opts[:out_file])
-      when 'unset'
-        print_or_write(do_unset(opts), opts[:out_file])
+    begin
+      case opts[:subcommand]
+        when 'get'
+          puts do_get(opts)
+        when 'set'
+          print_or_write(do_set(opts), opts[:out_file])
+        when 'unset'
+          print_or_write(do_unset(opts), opts[:out_file])
+      end
+
+    rescue ConfigMissingError, ConfigWrongTypeError
+      # These exceptions occur when the path doesn't exist, or when the path
+      # leads into something other than a dictionary, such as an array or string
+      exit_with_error("Can't find value at path '#{opts[:path]}'")
     end
 
     exit(0)
@@ -76,7 +87,6 @@ module Hocon::CLI
   # command line
   def self.do_get(opts)
     config = get_hocon_config(opts)
-
     config.get_any_ref(opts[:path])
   end
 
@@ -126,35 +136,39 @@ module Hocon::CLI
     config_doc
   end
 
-  # Print an error message and usage, then exit the program
-  def self.exit_with_error(opt_parser, message)
-    STDERR.puts opt_parser
-    STDERR.puts message
+  # Print an error message and exit the program
+  def self.exit_with_error(message)
+    STDERR.puts "Error: #{message}"
     exit(1)
+  end
+
+  # Print an error message and usage, then exit the program
+  def self.exit_with_usage_and_error(opt_parser, message)
+    STDERR.puts opt_parser
+    exit_with_error(message)
   end
 
   # Exits with an error saying there aren't enough arguments found for a given
   # subcommand. Prints the usage
   def self.subcommand_arguments_error(subcommand, opt_parser)
     error_message = "Too few arguments for '#{subcommand}' subcommand"
-    exit_with_error(opt_parser, error_message)
+    exit_with_usage_and_error(opt_parser, error_message)
   end
 
   # Exits with an error for when no subcommand is supplied on the command line.
   # Prints the usage
   def self.no_subcommand_error(opt_parser)
     error_message = "Must specify subcommand from [#{SUBCOMMANDS.join(', ')}]"
-    exit_with_error(opt_parser, error_message)
+    exit_with_usage_and_error(opt_parser, error_message)
   end
 
   # Exits with an error for when a subcommand doesn't exist. Prints the usage
   def self.invalid_subcommand_error(subcommand, opt_parser)
     error_message = "Invalid subcommand '#{subcommand}', must be one of [#{SUBCOMMANDS.join(', ')}]"
-    exit_with_error(opt_parser, error_message)
+    exit_with_usage_and_error(opt_parser, error_message)
   end
 
-  # Depending on the value in out_file, either print the string to
-  # STDOUT or write it to out_file
+  # If out_file is not nil, write to that file. Otherwise print to STDOUT
   def self.print_or_write(string, out_file)
     if out_file
       File.open(out_file, 'w') { |file| file.write(string) }
