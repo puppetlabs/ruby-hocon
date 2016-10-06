@@ -2,6 +2,7 @@ require 'optparse'
 require 'hocon'
 require 'hocon/config_factory'
 require 'hocon/parser/config_document_factory'
+require 'hocon/config_error'
 
 module Hocon::CLI
   # List of valid subcommands
@@ -14,11 +15,13 @@ module Hocon::CLI
     opt_parser = OptionParser.new do |opts|
       opts.banner = 'Usage: hocon [--file HOCON_FILE] {get,set,unset} PATH [VALUE]'
 
-      opts.on('-i', '--in-file HOCON_FILE', 'HOCON file to read/modify. If omitted, STDIN assumed') do |in_file|
+      in_file_description = 'HOCON file to read/modify. If omitted, STDIN assumed'
+      opts.on('-i', '--in-file HOCON_FILE', in_file_description) do |in_file|
         options[:in_file] = in_file
       end
 
-      opts.on('-o', '--out-file HOCON_FILE', 'File to be written to. If omitted, STDOUT assumed') do |out_file|
+      out_file_description = 'File to be written to. If omitted, STDOUT assumed'
+      opts.on('-o', '--out-file HOCON_FILE', out_file_description) do |out_file|
         options[:out_file] = out_file
       end
 
@@ -58,28 +61,29 @@ module Hocon::CLI
   def self.main(opts)
     case opts[:subcommand]
       when 'get'
-        puts get_main(opts)
+        puts do_get(opts)
       when 'set'
-        puts set_main(opts)
+        print_or_write(do_set(opts), opts[:out_file])
       when 'unset'
-        puts unset_main(opts)
+        print_or_write(do_unset(opts), opts[:out_file])
     end
 
     exit(0)
   end
 
   # Entry point for the 'get' subcommand
-  # Prints the value at the path given on the command line
-  def self.get_main(opts)
+  # Returns a string representation of the the value at the path given on the
+  # command line
+  def self.do_get(opts)
     config = get_hocon_config(opts)
 
     config.get_any_ref(opts[:path])
   end
 
   # Entry point for the 'set' subcommand
-  # Prints the HOCON config after adding/replacing the value at the given path
-  # with the given value
-  def self.set_main(opts)
+  # Returns a string representation of the HOCON config after adding/replacing
+  # the value at the given path with the given value
+  def self.do_set(opts)
     config_doc = get_hocon_doc(opts)
     modified_config_doc = config_doc.set_value(opts[:path], opts[:new_value])
 
@@ -87,8 +91,9 @@ module Hocon::CLI
   end
 
   # Entry point for the 'unset' subcommand
-  # Prints the HOCON config after removing the value at the given path
-  def self.unset_main(opts)
+  # Returns a string representation of the HOCON config after removing the
+  # value at the given path
+  def self.do_unset(opts)
     config_doc = get_hocon_doc(opts)
     modified_config_doc = config_doc.remove_value(opts[:path])
 
@@ -146,5 +151,15 @@ module Hocon::CLI
   def self.invalid_subcommand_error(subcommand, opt_parser)
     error_message = "Invalid subcommand '#{subcommand}', must be one of [#{SUBCOMMANDS.join(', ')}]"
     exit_with_error(opt_parser, error_message)
+  end
+
+  # Depending on the value in out_file, either print the string to
+  # STDOUT or write it to out_file
+  def self.print_or_write(string, out_file)
+    if out_file
+      File.open(out_file, 'w') { |file| file.write(string) }
+    else
+      puts string
+    end
   end
 end
