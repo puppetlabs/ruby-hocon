@@ -1,6 +1,8 @@
 require 'optparse'
 require 'hocon'
+require 'hocon/config_render_options'
 require 'hocon/config_factory'
+require 'hocon/config_value_factory'
 require 'hocon/parser/config_document_factory'
 require 'hocon/config_error'
 
@@ -17,7 +19,8 @@ module Hocon::CLI
   def self.parse_args(args)
     options = {}
     opt_parser = OptionParser.new do |opts|
-      opts.banner = 'Usage: hocon [--file HOCON_FILE] {get,set,unset} PATH [VALUE]'
+      subcommands = SUBCOMMANDS.join(',')
+      opts.banner = "Usage: hocon [--file HOCON_FILE] {#{subcommands}} PATH [VALUE]"
 
       in_file_description = 'HOCON file to read/modify. If omitted, STDIN assumed'
       opts.on('-i', '--in-file HOCON_FILE', in_file_description) do |in_file|
@@ -29,8 +32,18 @@ module Hocon::CLI
         options[:out_file] = out_file
       end
 
+      json_description = "Output values from the 'get' subcommand in json format"
+      opts.on('-j', '--json', json_description) do |json|
+        options[:json] = json
+      end
+
       opts.on_tail('-h', '--help', 'Show this message') do
         puts opts
+        exit
+      end
+
+      opts.on_tail('-v', '--version', 'Show version') do
+        puts Gem.loaded_specs['hocon'].version
         exit
       end
     end
@@ -79,7 +92,7 @@ module Hocon::CLI
       exit_with_error("Can't find value at path '#{opts[:path]}'")
     end
 
-    exit(0)
+    exit
   end
 
   # Entry point for the 'get' subcommand
@@ -87,7 +100,15 @@ module Hocon::CLI
   # command line
   def self.do_get(opts)
     config = get_hocon_config(opts)
-    config.get_any_ref(opts[:path])
+    value = config.get_any_ref(opts[:path])
+
+    render_options = Hocon::ConfigRenderOptions.defaults
+    # Otherwise weird comments show up in the output
+    render_options.origin_comments = false
+    # If json is false, the hocon format is used
+    render_options.json = opts[:json]
+
+    Hocon::ConfigValueFactory.from_any_ref(value).render(render_options)
   end
 
   # Entry point for the 'set' subcommand
