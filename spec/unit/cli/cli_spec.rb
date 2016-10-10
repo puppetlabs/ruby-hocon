@@ -53,7 +53,7 @@ describe Hocon::CLI do
         options = {path: 'foo.bar.hash', json: true}
 
         # Note that this is valid json, while the test above is not
-        expected = "{\n    \"key\" : \"value\"\n}\n"
+        expected = "{\n    \"key\": \"value\"\n}\n"
         expect(Hocon::CLI.do_get(options, hocon_text)).to eq(expected)
       end
     end
@@ -67,7 +67,7 @@ describe Hocon::CLI do
 
       it 'should create new nested values' do
         options = {path: 'new.nested.path', new_value: 'hello'}
-        expected = "new : {\n  nested : {\n    path : hello\n  }\n}"
+        expected = "new: {\n  nested: {\n    path: hello\n  }\n}"
         # No config is supplied, so it will need to add new nested hashes
         expect(Hocon::CLI.do_set(options, '')).to eq(expected)
       end

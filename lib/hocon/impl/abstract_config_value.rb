@@ -314,7 +314,7 @@ module Hocon::Impl::AbstractConfigValue
 
       if options.json?
         if options.formatted?
-          sb << " : "
+          sb << ": "
         else
           sb << ":"
         end

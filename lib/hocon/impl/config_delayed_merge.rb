@@ -296,7 +296,7 @@ class Hocon::Impl::ConfigDelayedMerge
       if !at_key.nil?
         sb << Hocon::Impl::ConfigImplUtil.render_json_string(at_key)
         if options.formatted
-          sb << " : "
+          sb << ": "
         else
           sb << ":"
         end

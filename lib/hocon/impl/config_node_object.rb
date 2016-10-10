@@ -206,7 +206,6 @@ class Hocon::Impl::ConfigNodeObject
     new_nodes = []
     new_nodes += indentation
     new_nodes.push(desired_path.first)
-    new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
     new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens::COLON))
     new_nodes.push(Hocon::Impl::ConfigNodeSingleToken.new(Tokens.new_ignored_whitespace(nil, ' ')))
 

@@ -428,7 +428,7 @@ module TestUtils
   end
 
   def self.node_key_value_pair(key, value)
-    nodes = [key, node_space, node_colon, node_space, value]
+    nodes = [key, node_colon, node_space, value]
     Hocon::Impl::ConfigNodeField.new(nodes)
   end
 
