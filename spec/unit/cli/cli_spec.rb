@@ -45,7 +45,7 @@ describe Hocon::CLI do
 
       it 'should work with hashes' do
         options = {path: 'foo.bar.hash'}
-        expected = "key=value\n"
+        expected = "key: value\n"
         expect(Hocon::CLI.do_get(options, hocon_text)).to eq(expected)
       end
 

@@ -319,15 +319,12 @@ module Hocon::Impl::AbstractConfigValue
           sb << ":"
         end
       else
-        # in non-JSON we can omit the colon or equals before an object
-        if self.is_a?(Hocon::ConfigObject)
-          if options.formatted?
-            sb << ' '
-          end
-        else
-          sb << "="
-        end
-      end
+        case options.key_value_separator
+          when :colon
+            sb << ": "
+          else
+            sb << "="
+        end      end
     end
     render_value_to_sb(sb, indent, at_root, options)
   end

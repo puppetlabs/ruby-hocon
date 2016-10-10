@@ -25,7 +25,7 @@ describe Hocon::Impl::SimpleConfig do
     it "should allow you to get a value for a setting whose value is a data structure" do
       expect(conf.get_value(setting).
                  render_value_to_sb(StringIO.new, 2, nil,
-                                    Hocon::ConfigRenderOptions.new(false, false, false, false)).
+                                    Hocon::ConfigRenderOptions.new(false, false, false, false, :equals)).
                  string).to eq(expected_setting)
     end
   end

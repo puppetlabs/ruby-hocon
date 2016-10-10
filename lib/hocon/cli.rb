@@ -109,6 +109,8 @@ module Hocon::CLI
     render_options.origin_comments = false
     # If json is false, the hocon format is used
     render_options.json = opts[:json]
+    # Output colons between keys and values
+    render_options.key_value_separator = :colon
 
     Hocon::ConfigValueFactory.from_any_ref(value).render(render_options)
   end
