@@ -71,6 +71,42 @@ describe Hocon::CLI do
         # No config is supplied, so it will need to add new nested hashes
         expect(Hocon::CLI.do_set(options, '')).to eq(expected)
       end
+
+      it 'should allow arrays to be set' do
+        options = {path: 'my_array', new_value: '[1, 2, 3]'}
+        expected = 'my_array: [1, 2, 3]'
+        expect(Hocon::CLI.do_set(options, '')).to eq(expected)
+      end
+
+      it 'should allow arrays in strings to be set as strings' do
+        options = {path: 'my_array', new_value: '"[1, 2, 3]"'}
+        expected = 'my_array: "[1, 2, 3]"'
+        expect(Hocon::CLI.do_set(options, '')).to eq(expected)
+      end
+
+      it 'should allow hashes to be set' do
+        do_set_options = {path: 'my_hash', new_value: '{key: value}'}
+        do_set_expected = 'my_hash: {key: value}'
+        do_set_result = Hocon::CLI.do_set(do_set_options, '')
+        expect(do_set_result).to eq(do_set_expected)
+
+        # Make sure it can be parsed again and be seen as a real hash
+        do_get_options = {path: 'my_hash.key'}
+        do_get_expected = 'value'
+        expect(Hocon::CLI.do_get(do_get_options, do_set_result)).to eq(do_get_expected)
+      end
+
+      it 'should allow hashes to be set as strings' do
+        do_set_options = {path: 'my_hash', new_value: '"{key: value}"'}
+        do_set_expected = 'my_hash: "{key: value}"'
+        do_set_result = Hocon::CLI.do_set(do_set_options, '')
+        expect(do_set_result).to eq(do_set_expected)
+
+        # Make sure it can't be parsed again and be seen as a real hash
+        do_get_options = {path: 'my_hash.key'}
+        expect{Hocon::CLI.do_get(do_get_options, do_set_result)}
+            .to raise_error(Hocon::ConfigError::ConfigWrongTypeError)
+      end
     end
 
     context 'do_unset()' do
