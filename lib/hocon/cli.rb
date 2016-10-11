@@ -20,7 +20,17 @@ module Hocon::CLI
     options = {}
     opt_parser = OptionParser.new do |opts|
       subcommands = SUBCOMMANDS.join(',')
-      opts.banner = "Usage: hocon [--file HOCON_FILE] {#{subcommands}} PATH [VALUE]"
+      opts.banner = "Usage: hocon [options] {#{subcommands}} PATH [VALUE]\n\n" +
+          "Example usages:\n" +
+          "  hocon -i settings.conf -o new_settings.conf set some.nested.value 42\n" +
+          "  cat settings.conf | hocon get some.nested.value\n\n" +
+          "Subcommands:\n" +
+          "  get PATH - Returns the value at the given path\n" +
+          "  set PATH VALUE - Sets or adds the given value at the given path\n" +
+          "  unset PATH - Removes the value at the given path"
+
+      opts.separator('')
+      opts.separator('Options:')
 
       in_file_description = 'HOCON file to read/modify. If omitted, STDIN assumed'
       opts.on('-i', '--in-file HOCON_FILE', in_file_description) do |in_file|
