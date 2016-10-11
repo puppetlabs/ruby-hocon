@@ -3,7 +3,7 @@
 require 'hocon'
 
 class Hocon::ConfigRenderOptions
-  def initialize(origin_comments, comments, formatted, json, key_value_separator)
+  def initialize(origin_comments, comments, formatted, json, key_value_separator=:equals)
     @origin_comments = origin_comments
     @comments = comments
     @formatted = formatted
@@ -34,7 +34,7 @@ class Hocon::ConfigRenderOptions
   # @return the default render options
   #
   def self.defaults
-    Hocon::ConfigRenderOptions.new(true, true, true, true, :equals)
+    Hocon::ConfigRenderOptions.new(true, true, true, true)
   end
 
   #
@@ -44,6 +44,6 @@ class Hocon::ConfigRenderOptions
   # @return the concise render options
   #
   def self.concise
-    Hocon::ConfigRenderOptions.new(false, false, false, true, :equals)
+    Hocon::ConfigRenderOptions.new(false, false, false, true)
   end
 end
