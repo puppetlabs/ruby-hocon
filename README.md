@@ -72,6 +72,107 @@ Note that a `ConfigDocument` is used primarily for simple configuration manipula
 whitespace and comments. As such, it is not powerful as the regular `Config` API, and will not resolve
 substitutions.
 
+CLI Tool
+========
+The `hocon` gem comes bundles with a `hocon` command line tool which can be used to get and set values from hocon files
+
+```
+Usage: hocon [options] {get,set,unset} PATH [VALUE]
+
+Example usages:
+  hocon -i settings.conf -o new_settings.conf set some.nested.value 42
+  cat settings.conf | hocon get some.nested.value
+
+Subcommands:
+  get PATH - Returns the value at the given path
+  set PATH VALUE - Sets or adds the given value at the given path
+  unset PATH - Removes the value at the given path
+
+Options:
+    -i, --in-file HOCON_FILE         HOCON file to read/modify. If omitted, STDIN assumed
+    -o, --out-file HOCON_FILE        File to be written to. If omitted, STDOUT assumed
+    -j, --json                       Output values from the 'get' subcommand in json format
+    -h, --help                       Show this message
+    -v, --version                    Show version
+```
+
+Examples
+--------
+### Basic Usage
+```
+$ cat settings.conf
+{
+  foo: bar
+}
+
+$ hocon -i settings.conf get foo
+bar
+
+$ hocon -i settings.conf set foo.baz
+{
+  foo: baz
+}
+
+$ hocon -i settings.conf -o new_settings.conf set some.nested.value 42
+$ cat new_settings.conf
+{
+  foo: bar
+  some: {
+    nested: {
+      value: 42
+
+    }
+  }
+}
+```
+
+### Complex Values
+If you give `set` a properly formatted hocon dictionary or array, it will try to accept it
+
+```
+$ hocon -i settings.conf set foo "{one: [1, 2, 3], two: {hello: world}}"
+{
+  foo: {one: [1, 2, 3], two: {hello: world}}
+}
+```
+
+### Chaining
+If `--in-file` or `--out-file` aren't specified, STDIN and STDOUT are used for the missing options. Therefore it's possible to chain `hocon` calls
+
+```
+$ cat settings.conf
+{
+  foo: bar
+}
+
+$ cat settings.conf | hocon set foo 42 | hocon set one.two three
+{
+  foo: 42
+  one: {
+    two: three
+  }
+}
+```
+
+### JSON Output
+Calls to the `get` subcommand will return the data in HOCON format by default, but setting the `-j/--json` flag will cause it to return a valid JSON object
+
+```
+$ cat settings.conf
+foo: {
+  bar: {
+    baz: 42
+  }
+}
+
+$ hocon -i settings.conf get foo --json
+{
+    "bar": {
+        "baz": 42
+    }
+}
+```
+
 Testing
 =======
 
