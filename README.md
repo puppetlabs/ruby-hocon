@@ -81,6 +81,7 @@ Usage: hocon [options] {get,set,unset} PATH [VALUE]
 
 Example usages:
   hocon -i settings.conf -o new_settings.conf set some.nested.value 42
+  hocon -f settings.conf set some.nested.value 42
   cat settings.conf | hocon get some.nested.value
 
 Subcommands:
@@ -91,12 +92,13 @@ Subcommands:
 Options:
     -i, --in-file HOCON_FILE         HOCON file to read/modify. If omitted, STDIN assumed
     -o, --out-file HOCON_FILE        File to be written to. If omitted, STDOUT assumed
+    -f, --file HOCON_FILE            File to read/write to. Equivalent to setting -i/-o to the same file
     -j, --json                       Output values from the 'get' subcommand in json format
     -h, --help                       Show this message
     -v, --version                    Show version
 ```
 
-Examples
+CLI Examples
 --------
 ### Basic Usage
 ```
@@ -113,8 +115,22 @@ $ hocon -i settings.conf set foo.baz
   foo: baz
 }
 
+# Write to a different file
 $ hocon -i settings.conf -o new_settings.conf set some.nested.value 42
 $ cat new_settings.conf
+{
+  foo: bar
+  some: {
+    nested: {
+      value: 42
+
+    }
+  }
+}
+
+# Write back to the same file
+$ hocon -f settings.conf set some.nested.value 42
+$ cat settings.conf
 {
   foo: bar
   some: {

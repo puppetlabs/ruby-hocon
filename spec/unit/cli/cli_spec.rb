@@ -21,6 +21,19 @@ describe Hocon::CLI do
       }
       expect(Hocon::CLI.parse_args(args)).to eq(expected_options)
     end
+
+    it 'should set -i and -o to -f if given' do
+      args = %w(-f foo set some.path some_value)
+      expected_options = {
+        file: 'foo',
+        in_file: 'foo',
+        out_file: 'foo',
+        subcommand: 'set',
+        path: 'some.path',
+        new_value: 'some_value'
+      }
+      expect(Hocon::CLI.parse_args(args)).to eq(expected_options)
+    end
   end
 
   context 'subcommands' do

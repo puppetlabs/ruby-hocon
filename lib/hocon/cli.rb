@@ -23,6 +23,7 @@ module Hocon::CLI
       opts.banner = "Usage: hocon [options] {#{subcommands}} PATH [VALUE]\n\n" +
           "Example usages:\n" +
           "  hocon -i settings.conf -o new_settings.conf set some.nested.value 42\n" +
+          "  hocon -f settings.conf set some.nested.value 42\n" +
           "  cat settings.conf | hocon get some.nested.value\n\n" +
           "Subcommands:\n" +
           "  get PATH - Returns the value at the given path\n" +
@@ -42,6 +43,11 @@ module Hocon::CLI
         options[:out_file] = out_file
       end
 
+      file_description = 'File to read/write to. Equivalent to setting -i/-o to the same file'
+      opts.on('-f', '--file HOCON_FILE', file_description) do |file|
+        options[:file] = file
+      end
+
       json_description = "Output values from the 'get' subcommand in json format"
       opts.on('-j', '--json', json_description) do |json|
         options[:json] = json
@@ -59,6 +65,17 @@ module Hocon::CLI
     end
     # parse! returns the argument list minus all the flags it found
     remaining_args = opt_parser.parse!(args)
+
+    # Ensure -i and -o aren't used at the same time as -f
+    if (options[:in_file] || options[:out_file]) && options[:file]
+      exit_with_usage_and_error(opt_parser, "--file can't be used with --in-file or --out-file")
+    end
+
+    # If --file is used, set --in/out-file to the same file
+    if options[:file]
+      options[:in_file] = options[:file]
+      options[:out_file] = options[:file]
+    end
 
     no_subcommand_error(opt_parser) unless remaining_args.size > 0
 
