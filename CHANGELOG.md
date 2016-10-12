@@ -1,3 +1,9 @@
+## 1.1.3
+This is a bugfix release.
+
+* Fixed bug where Hocon.parse would throw a ConfigNotResolved error if you passed it a String
+  that contained values with substitutions.
+
 ## 1.1.2
 This is a bugfix release.
 
