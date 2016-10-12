@@ -1,4 +1,5 @@
-require_relative 'lib/hocon/version'
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require 'hocon/version'
 
 Gem::Specification.new do |s|
   s.name        = 'hocon'
