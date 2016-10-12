@@ -98,6 +98,17 @@ describe Hocon do
     end
   end
 
+  context "loading config that includes substitutions" do
+    it "should be able to `load` from a file" do
+      expect(Hocon.load("#{FIXTURE_DIR}/hocon/with_substitution/subst.conf")).
+          to eq({"a" => true, "b" => true})
+    end
+    it "should be able to `parse` from a string" do
+      expect(Hocon.parse(File.read("#{FIXTURE_DIR}/hocon/with_substitution/subst.conf"))).
+          to eq({"a" => true, "b" => true})
+    end
+  end
+
 
 end
 

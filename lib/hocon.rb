@@ -33,15 +33,19 @@ module Hocon
     resolved_config = Hocon::ConfigFactory.load_from_config(
         config, Hocon::ConfigResolveOptions.defaults)
 
-    return resolved_config.root.unwrapped
+    resolved_config.root.unwrapped
   end
 
   def self.parse(string)
-    # doing this require lazily, because otherwise, classes that need to
+    # doing these requires lazily, because otherwise, classes that need to
     # `require 'hocon'` to get the module into scope will end up recursing
     # through this require and probably ending up with circular dependencies.
     require 'hocon/config_factory'
+    require 'hocon/config_resolve_options'
     config = Hocon::ConfigFactory.parse_string(string)
-    return config.root.unwrapped
+    resolved_config = Hocon::ConfigFactory.load_from_config(
+        config, Hocon::ConfigResolveOptions.defaults)
+
+    resolved_config.root.unwrapped
   end
 end
