@@ -1,5 +1,6 @@
 require 'optparse'
 require 'hocon'
+require 'hocon/version'
 require 'hocon/config_render_options'
 require 'hocon/config_factory'
 require 'hocon/config_value_factory'
@@ -59,7 +60,7 @@ module Hocon::CLI
       end
 
       opts.on_tail('-v', '--version', 'Show version') do
-        puts Gem.loaded_specs['hocon'].version
+        puts Hocon::Version::STRING
         exit
       end
     end
