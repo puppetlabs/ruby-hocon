@@ -165,14 +165,9 @@ module Hocon::CLI
 
   def self.get_hocon_file(in_file)
     if in_file
-      File.open(in_file, 'r') do |f|
-        f.flock(File::LOCK_SH)
-        file_contents = f.read
-        f.flock(File::LOCK_UN)
-        return file_contents
-      end
+      File.read(in_file)
     else
-      return STDIN.read
+      STDIN.read
     end
   end
 
@@ -211,11 +206,7 @@ module Hocon::CLI
   # If out_file is not nil, write to that file. Otherwise print to STDOUT
   def self.print_or_write(string, out_file)
     if out_file
-      File.open(out_file, 'w') do |f|
-        f.flock(File::LOCK_EX)
-        f.write(string)
-        f.flock(File::LOCK_UN)
-      end
+      File.open(out_file, 'w') { |file| file.write(string) }
     else
       puts string
     end
