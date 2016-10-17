@@ -15,6 +15,10 @@ module Hocon::CLI
   # List of valid subcommands
   SUBCOMMANDS = ['get', 'set', 'unset']
 
+  # For when a path can't be found in a hocon config
+  class MissingPathError < StandardError
+  end
+
   # Parses the command line flags and argument
   # Returns a options hash with values for each option and argument
   def self.parse_args(args)
@@ -102,7 +106,7 @@ module Hocon::CLI
   end
 
   # Main entry point into the script
-  # Calls the appropriate subcommand
+  # Calls the appropriate subcommand and handles errors raised from the subcommands
   def self.main(opts)
     hocon_text = get_hocon_file(opts[:in_file])
 
@@ -116,10 +120,8 @@ module Hocon::CLI
           print_or_write(do_unset(opts, hocon_text), opts[:out_file])
       end
 
-    rescue ConfigMissingError, ConfigWrongTypeError
-      # These exceptions occur when the path doesn't exist, or when the path
-      # leads into something other than a dictionary, such as an array or string
-      exit_with_error("Can't find value at path '#{opts[:path]}'")
+    rescue MissingPathError
+      exit_with_error("Can't find the given path: '#{opts[:path]}'")
     end
 
     exit
@@ -130,6 +132,10 @@ module Hocon::CLI
   # command line
   def self.do_get(opts, hocon_text)
     config = Hocon::ConfigFactory.parse_string(hocon_text)
+    unless config.has_path?(opts[:path])
+      raise MissingPathError.new
+    end
+
     value = config.get_any_ref(opts[:path])
 
     render_options = Hocon::ConfigRenderOptions.defaults
@@ -158,11 +164,16 @@ module Hocon::CLI
   # value at the given path
   def self.do_unset(opts, hocon_text)
     config_doc = Hocon::Parser::ConfigDocumentFactory.parse_string(hocon_text)
+    unless config_doc.has_value?(opts[:path])
+      raise MissingPathError.new
+    end
+
     modified_config_doc = config_doc.remove_value(opts[:path])
 
     modified_config_doc.render
   end
 
+  # If a file is provided, return it's contents. Otherwise read from STDIN
   def self.get_hocon_file(in_file)
     if in_file
       File.read(in_file)

@@ -69,6 +69,24 @@ describe Hocon::CLI do
         expected = "{\n    \"key\": \"value\"\n}\n"
         expect(Hocon::CLI.do_get(options, hocon_text)).to eq(expected)
       end
+
+      it 'should throw a MissingPathError if the path does not exist' do
+        options = {path: 'not.a.path'}
+        expect {Hocon::CLI.do_get(options, hocon_text)}
+            .to raise_error(Hocon::CLI::MissingPathError)
+      end
+
+      it 'should throw a MissingPathError if the path leads into an array' do
+        options = {path: 'foo.array.1'}
+        expect {Hocon::CLI.do_get(options, hocon_text)}
+            .to raise_error(Hocon::CLI::MissingPathError)
+      end
+
+      it 'should throw a MissingPathError if the path leads into a string' do
+        options = {path: 'foo.hash.key.value'}
+        expect {Hocon::CLI.do_get(options, hocon_text)}
+            .to raise_error(Hocon::CLI::MissingPathError)
+      end
     end
 
     context 'do_set()' do
@@ -118,15 +136,21 @@ describe Hocon::CLI do
         # Make sure it can't be parsed again and be seen as a real hash
         do_get_options = {path: 'my_hash.key'}
         expect{Hocon::CLI.do_get(do_get_options, do_set_result)}
-            .to raise_error(Hocon::ConfigError::ConfigWrongTypeError)
+            .to raise_error(Hocon::CLI::MissingPathError)
       end
     end
 
     context 'do_unset()' do
       it 'should remove values' do
-        options = {path: 'foo.bar.baz', new_value: 'pi'}
+        options = {path: 'foo.bar.baz'}
         expected = hocon_text.sub(/baz = 42/, '')
         expect(Hocon::CLI.do_unset(options, hocon_text)).to eq(expected)
+      end
+
+      it 'should throw a MissingPathError if the path does not exist' do
+        options = {path: 'fake.path'}
+        expect{Hocon::CLI.do_unset(options, hocon_text)}
+            .to raise_error(Hocon::CLI::MissingPathError)
       end
     end
   end
