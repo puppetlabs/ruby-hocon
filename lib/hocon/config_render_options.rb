@@ -3,14 +3,15 @@
 require 'hocon'
 
 class Hocon::ConfigRenderOptions
-  def initialize(origin_comments, comments, formatted, json)
+  def initialize(origin_comments, comments, formatted, json, key_value_separator=:equals)
     @origin_comments = origin_comments
     @comments = comments
     @formatted = formatted
     @json = json
+    @key_value_separator = key_value_separator
   end
 
-  attr_accessor :origin_comments, :comments, :formatted, :json
+  attr_accessor :origin_comments, :comments, :formatted, :json, :key_value_separator
 
   def origin_comments?
     @origin_comments

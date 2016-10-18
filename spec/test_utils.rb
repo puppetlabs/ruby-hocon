@@ -12,6 +12,7 @@ require 'hocon/impl/config_node_single_token'
 require 'hocon/impl/config_node_object'
 require 'hocon/impl/config_node_array'
 require 'hocon/impl/config_node_concatenation'
+require 'hocon/cli'
 
 module TestUtils
   Tokens = Hocon::Impl::Tokens
@@ -427,7 +428,7 @@ module TestUtils
   end
 
   def self.node_key_value_pair(key, value)
-    nodes = [key, node_space, node_colon, node_space, value]
+    nodes = [key, node_colon, node_space, value]
     Hocon::Impl::ConfigNodeField.new(nodes)
   end
 

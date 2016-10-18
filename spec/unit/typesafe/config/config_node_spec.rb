@@ -31,12 +31,12 @@ describe Hocon::Parser::ConfigNode do
   shared_examples_for "field node test" do
     it "should properly replace the value of a field node" do
       key_val_node = TestUtils.node_key_value_pair(key, value)
-      expect(key_val_node.render).to eq("#{key.render} : #{value.render}")
+      expect(key_val_node.render).to eq("#{key.render}: #{value.render}")
       expect(key_val_node.path.render).to eq(key.render)
       expect(key_val_node.value.render).to eq(value.render)
 
       new_key_val_node = key_val_node.replace_value(new_value)
-      expect(new_key_val_node.render).to eq("#{key.render} : #{new_value.render}")
+      expect(new_key_val_node.render).to eq("#{key.render}: #{new_value.render}")
       expect(new_key_val_node.value.render).to eq(new_value.render)
     end
   end
@@ -48,8 +48,8 @@ describe Hocon::Parser::ConfigNode do
                                TestUtils.node_close_brace]
       complex_node = TestUtils.config_node_object(complex_node_children)
       new_node = complex_node.set_value_on_path(key, new_value)
-      orig_text = "{#{key} : #{value.render}}"
-      final_text = "{#{key} : #{new_value.render}}"
+      orig_text = "{#{key}: #{value.render}}"
+      final_text = "{#{key}: #{new_value.render}}"
 
       expect(complex_node.render).to eq(orig_text)
       expect(new_node.render).to eq(final_text)
@@ -64,7 +64,7 @@ describe Hocon::Parser::ConfigNode do
       key_val_pair_3 = TestUtils.node_key_value_pair(key, value3)
       complex_node = TestUtils.config_node_object([key_val_pair_1, key_val_pair_2, key_val_pair_3])
       orig_text = "#{key_val_pair_1.render}#{key_val_pair_2.render}#{key_val_pair_3.render}"
-      final_text = "#{key.render} : 15"
+      final_text = "#{key.render}: 15"
 
       expect(complex_node.render).to eq(orig_text)
       expect(complex_node.set_value_on_path("foo", TestUtils.node_int(15)).render).to eq(final_text)
@@ -74,9 +74,9 @@ describe Hocon::Parser::ConfigNode do
   shared_examples_for "non existent path test" do
     it "should properly add a key/value pair if the key does not exist in the object" do
       node = TestUtils.config_node_object([TestUtils.node_key_value_pair(TestUtils.config_node_key("bar"), TestUtils.node_int(15))])
-      expect(node.render).to eq('bar : 15')
+      expect(node.render).to eq('bar: 15')
       new_node = node.set_value_on_path('foo', value)
-      final_text = "bar : 15, foo : #{value.render}"
+      final_text = "bar: 15, foo: #{value.render}"
       expect(new_node.render).to eq(final_text)
     end
   end
@@ -508,8 +508,8 @@ describe Hocon::Parser::ConfigNode do
   # Replacement of nested nodes
   #################################
   context "replace nested nodes" do
-    orig_text = "foo : bar\nbaz : {\n\t\"abc.def\" : 123\n\t//This is a comment about the below setting\n\n\tabc : {\n\t\t" +
-        "def : \"this is a string\"\n\t\tghi : ${\"a.b\"}\n\t}\n}\nbaz.abc.ghi : 52\nbaz.abc.ghi : 53\n}"
+    orig_text = "foo: bar\nbaz: {\n\t\"abc.def\": 123\n\t//This is a comment about the below setting\n\n\tabc: {\n\t\t" +
+        "def: \"this is a string\"\n\t\tghi: ${\"a.b\"}\n\t}\n}\nbaz.abc.ghi: 52\nbaz.abc.ghi: 53\n}"
     lowest_level_map = TestUtils.config_node_object([TestUtils.node_open_brace, TestUtils.node_line(6), TestUtils.node_whitespace("\t\t"),
                                                      TestUtils.node_key_value_pair(TestUtils.config_node_key("def"), TestUtils.config_node_simple_value(TestUtils.token_string("this is a string"))),
                                                      TestUtils.node_line(7), TestUtils.node_whitespace("\t\t"),
@@ -531,8 +531,8 @@ describe Hocon::Parser::ConfigNode do
     end
 
     it "should properly replae values in the original node" do
-      final_text = "foo : bar\nbaz : {\n\t\"abc.def\" : true\n\t//This is a comment about the below setting\n\n\tabc : {\n\t\t" +
-          "def : false\n\t\t\n\t\t\"this.does.not.exist@@@+$#\" : {\n\t\t  end : doesnotexist\n\t\t}\n\t}\n}\n\nbaz.abc.ghi : randomunquotedString\n}"
+      final_text = "foo: bar\nbaz: {\n\t\"abc.def\": true\n\t//This is a comment about the below setting\n\n\tabc: {\n\t\t" +
+          "def: false\n\t\t\n\t\t\"this.does.not.exist@@@+$#\": {\n\t\t  end: doesnotexist\n\t\t}\n\t}\n}\n\nbaz.abc.ghi: randomunquotedString\n}"
 
       # Paths with quotes in the name are treated as a single Path, rather than multiple sub-paths
       new_node = orig_node.set_value_on_path('baz."abc.def"', TestUtils.config_node_simple_value(TestUtils.token_true))

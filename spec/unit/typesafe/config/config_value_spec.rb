@@ -932,4 +932,28 @@ describe "#render" do
 
     expect(rendered).to eq('{"0":"a","1":"b","2":"c","3":"d","10":"e","20":"f","30":"g"}')
   end
+
+  context "RenderOptions.key_value_separator" do
+    specify "should use colons when set to :colon" do
+      conf = Hocon::ConfigValueFactory.from_any_ref({foo: {bar: 'baz'}})
+      expected = "foo: {\n    bar: baz\n}\n"
+      render_options = ConfigRenderOptions.defaults
+      render_options.json = false
+      render_options.key_value_separator = :colon
+      render_options.origin_comments = false
+
+      expect(conf.render(render_options)).to eq(expected)
+    end
+
+    specify "should use equals signs when set to :equals" do
+      conf = Hocon::ConfigValueFactory.from_any_ref({foo: {bar: 'baz'}})
+      expected = "foo={\n    bar=baz\n}\n"
+      render_options = ConfigRenderOptions.defaults
+      render_options.json = false
+      render_options.origin_comments = false
+      render_options.key_value_separator = :equals
+
+      expect(conf.render(render_options)).to eq(expected)
+    end
+  end
 end

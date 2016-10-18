@@ -188,7 +188,7 @@ describe "ConfigDocument" do
     it "should add the setting if only a multi-element duplicate exists" do
       orig_text = "{a.b.c: d}"
       config_doc = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_doc.set_value("a", "2").render).to eq("{ a : 2}")
+      expect(config_doc.set_value("a", "2").render).to eq("{ a: 2}")
     end
   end
 
@@ -198,19 +198,19 @@ describe "ConfigDocument" do
     let (:replace_path) { "\"e\"" }
 
     context "set a new value in CONF" do
-      let (:final_text) { "{\n\t\"a\":\"b\",\n\t\"c\":\"d\"\n\t\"e\" : \"f\"\n}" }
+      let (:final_text) { "{\n\t\"a\":\"b\",\n\t\"c\":\"d\"\n\t\"e\": \"f\"\n}" }
       include_examples "config document replace CONF test"
     end
 
     context "set a new value in JSON" do
-      let (:final_text) { "{\n\t\"a\":\"b\",\n\t\"c\":\"d\",\n\t\"e\" : \"f\"\n}" }
+      let (:final_text) { "{\n\t\"a\":\"b\",\n\t\"c\":\"d\",\n\t\"e\": \"f\"\n}" }
       include_examples "config document replace JSON test"
     end
   end
 
   context "config document set new value no braces" do
     let (:orig_text) { "\"a\":\"b\",\n\"c\":\"d\"\n" }
-    let (:final_text) { "\"a\":\"b\",\n\"c\":\"d\"\n\"e\" : \"f\"\n" }
+    let (:final_text) { "\"a\":\"b\",\n\"c\":\"d\"\n\"e\": \"f\"\n" }
     let (:new_value) { "\"f\"" }
     let (:replace_path) { "\"e\"" }
 
@@ -219,7 +219,7 @@ describe "ConfigDocument" do
 
   context "config document set new value multi level CONF" do
     let (:orig_text) { "a:b\nc:d" }
-    let (:final_text) { "a:b\nc:d\ne : {\n  f : {\n    g : 12\n  }\n}" }
+    let (:final_text) { "a:b\nc:d\ne: {\n  f: {\n    g: 12\n  }\n}" }
     let (:new_value) { "12" }
     let (:replace_path) { "e.f.g" }
 
@@ -228,7 +228,7 @@ describe "ConfigDocument" do
 
   context "config document set new value multi level JSON" do
     let (:orig_text) { "{\"a\":\"b\",\n\"c\":\"d\"}" }
-    let (:final_text) { "{\"a\":\"b\",\n\"c\":\"d\",\n  \"e\" : {\n    \"f\" : {\n      \"g\" : 12\n    }\n  }}" }
+    let (:final_text) { "{\"a\":\"b\",\n\"c\":\"d\",\n  \"e\": {\n    \"f\": {\n      \"g\": 12\n    }\n  }}" }
     let (:new_value) { "12" }
     let (:replace_path) { "e.f.g" }
 
@@ -306,10 +306,10 @@ describe "ConfigDocument" do
 
   context "config document remove overridden" do
     it "should remove all instances of keys even if overridden by a top-level key/value pair" do
-      orig_text = "a { b: 42 }, a.b = 43, a { b: { c: 44 } }, a : 57 "
+      orig_text = "a { b: 42 }, a.b = 43, a { b: { c: 44 } }, a: 57 "
       config_doc = ConfigDocumentFactory.parse_string(orig_text)
       removed = config_doc.remove_value("a.b")
-      expect(removed.render).to eq("a { }, a { }, a : 57 ")
+      expect(removed.render).to eq("a { }, a { }, a: 57 ")
     end
   end
 
@@ -382,37 +382,37 @@ describe "ConfigDocument" do
     it "should properly indent a value in a single-line map" do
       orig_text = "a { b: c }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.d", "e").render).to eq("a { b: c, d : e }")
+      expect(config_document.set_value("a.d", "e").render).to eq("a { b: c, d: e }")
     end
 
     it "should properly indent a value in the top-level when it is on a single line" do
       orig_text = "a { b: c }, d: e"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("f", "g").render).to eq("a { b: c }, d: e, f : g")
+      expect(config_document.set_value("f", "g").render).to eq("a { b: c }, d: e, f: g")
     end
 
     it "should not preserve trailing commas" do
       orig_text = "a { b: c }, d: e,"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("f", "g").render).to eq("a { b: c }, d: e, f : g")
+      expect(config_document.set_value("f", "g").render).to eq("a { b: c }, d: e, f: g")
     end
 
     it "should add necessary keys along the path to the value and properly space them" do
       orig_text = "a { b: c }, d: e,"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("f.g.h", "i").render).to eq("a { b: c }, d: e, f : { g : { h : i } }")
+      expect(config_document.set_value("f.g.h", "i").render).to eq("a { b: c }, d: e, f: { g: { h: i } }")
     end
 
     it "should properly indent keys added to the top-level with curly braces" do
       orig_text = "{a { b: c }, d: e}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("f", "g").render).to eq("{a { b: c }, d: e, f : g}")
+      expect(config_document.set_value("f", "g").render).to eq("{a { b: c }, d: e, f: g}")
     end
 
     it "should add necessary keys along the path to the value and properly space them when the root has braces" do
       orig_text = "{a { b: c }, d: e}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("f.g.h", "i").render).to eq("{a { b: c }, d: e, f : { g : { h : i } }}")
+      expect(config_document.set_value("f.g.h", "i").render).to eq("{a { b: c }, d: e, f: { g: { h: i } }}")
     end
   end
 
@@ -422,11 +422,11 @@ describe "ConfigDocument" do
       let (:config_document) { ConfigDocumentFactory.parse_string(orig_text) }
 
       it "should properly indent a value in a multi-line map" do
-        expect(config_document.set_value("a.e", "f").render).to eq("a {\n  b: c\n  e : f\n}")
+        expect(config_document.set_value("a.e", "f").render).to eq("a {\n  b: c\n  e: f\n}")
       end
 
       it "should properly add/indent any necessary objects along the way to the value" do
-        expect(config_document.set_value("a.d.e.f", "g").render).to eq("a {\n  b: c\n  d : {\n    e : {\n      f : g\n    }\n  }\n}")
+        expect(config_document.set_value("a.d.e.f", "g").render).to eq("a {\n  b: c\n  d: {\n    e: {\n      f: g\n    }\n  }\n}")
       end
     end
 
@@ -435,11 +435,11 @@ describe "ConfigDocument" do
       let (:config_document) { ConfigDocumentFactory.parse_string(orig_text) }
 
       it "should properly indent a value at the root with multiple lines" do
-        expect(config_document.set_value("d", "e").render).to eq("a {\n b: c\n}\nd : e\n")
+        expect(config_document.set_value("d", "e").render).to eq("a {\n b: c\n}\nd: e\n")
       end
 
       it "should properly add/indent any necessary objects along the way to the value" do
-        expect(config_document.set_value("d.e.f", "g").render).to eq("a {\n b: c\n}\nd : {\n  e : {\n    f : g\n  }\n}\n")
+        expect(config_document.set_value("d.e.f", "g").render).to eq("a {\n b: c\n}\nd: {\n  e: {\n    f: g\n  }\n}\n")
       end
     end
   end
@@ -448,13 +448,13 @@ describe "ConfigDocument" do
     it "should properly space a new key/value pair in a nested map in a single-line document" do
       orig_text = "a { b { c { d: e } } }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c.f", "g").render).to eq("a { b { c { d: e, f : g } } }")
+      expect(config_document.set_value("a.b.c.f", "g").render).to eq("a { b { c { d: e, f: g } } }")
     end
 
     it "should properly space a new key/value pair in a nested map in a multi-line document" do
       orig_text = "a {\n  b {\n    c {\n      d: e\n    }\n  }\n}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c.f", "g").render).to eq("a {\n  b {\n    c {\n      d: e\n      f : g\n    }\n  }\n}")
+      expect(config_document.set_value("a.b.c.f", "g").render).to eq("a {\n  b {\n    c {\n      d: e\n      f: g\n    }\n  }\n}")
     end
   end
 
@@ -462,13 +462,13 @@ describe "ConfigDocument" do
     it "should properly space a new key/value pair in a single-line empty object" do
       orig_text = "a { }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b", "c").render).to eq("a { b : c }")
+      expect(config_document.set_value("a.b", "c").render).to eq("a { b: c }")
     end
 
     it "should properly indent a new key/value pair in a multi-line empty object" do
       orig_text = "a {\n  b {\n  }\n}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c", "d").render).to eq("a {\n  b {\n    c : d\n  }\n}")
+      expect(config_document.set_value("a.b.c", "d").render).to eq("a {\n  b {\n    c: d\n  }\n}")
     end
   end
 
@@ -478,12 +478,12 @@ describe "ConfigDocument" do
 
     it "should successfully insert and indent a multi-line object" do
       expect(config_document.set_value("a.b.c.f", "{\n  g: h\n  i: j\n  k: {\n    l: m\n  }\n}").render
-            ).to eq("a {\n  b {\n    c {\n      d: e\n      f : {\n        g: h\n        i: j\n        k: {\n          l: m\n        }\n      }\n    }\n  }\n}")
+            ).to eq("a {\n  b {\n    c {\n      d: e\n      f: {\n        g: h\n        i: j\n        k: {\n          l: m\n        }\n      }\n    }\n  }\n}")
     end
 
     it "should successfully insert a concatenation with a multi-line array" do
       expect(config_document.set_value("a.b.c.f", "12 13 [1,\n2,\n3,\n{\n  a:b\n}]").render
-            ).to eq("a {\n  b {\n    c {\n      d: e\n      f : 12 13 [1,\n      2,\n      3,\n      {\n        a:b\n      }]\n    }\n  }\n}")
+            ).to eq("a {\n  b {\n    c {\n      d: e\n      f: 12 13 [1,\n      2,\n      3,\n      {\n        a:b\n      }]\n    }\n  }\n}")
     end
   end
 
@@ -491,7 +491,7 @@ describe "ConfigDocument" do
     it "should get weird indentation when adding a multi-line value to a single-line object" do
       orig_text = "a { b { } }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c", "{\n  c:d\n}").render).to eq("a { b { c : {\n   c:d\n } } }")
+      expect(config_document.set_value("a.b.c", "{\n  c:d\n}").render).to eq("a { b { c: {\n   c:d\n } } }")
     end
   end
 
@@ -499,38 +499,38 @@ describe "ConfigDocument" do
     it "should treat an object with no new-lines outside of its values as a single-line object" do
       orig_text = "a { b {\n  c: d\n} }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.e", "f").render).to eq("a { b {\n  c: d\n}, e : f }")
+      expect(config_document.set_value("a.e", "f").render).to eq("a { b {\n  c: d\n}, e: f }")
     end
   end
 
   context "config document indentation replacing with multi line value" do
     it "should properly indent a multi-line value when replacing a single-line value" do
-      orig_text = "a {\n  b {\n    c : 22\n  }\n}"
+      orig_text = "a {\n  b {\n    c: 22\n  }\n}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c", "{\n  d:e\n}").render).to eq("a {\n  b {\n    c : {\n      d:e\n    }\n  }\n}")
+      expect(config_document.set_value("a.b.c", "{\n  d:e\n}").render).to eq("a {\n  b {\n    c: {\n      d:e\n    }\n  }\n}")
     end
 
     it "should properly indent a multi-line value when replacing a single-line value in an object with multiple keys" do
-      orig_text = "a {\n  b {\n                f : 10\n    c : 22\n  }\n}"
+      orig_text = "a {\n  b {\n                f: 10\n    c: 22\n  }\n}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b.c", "{\n  d:e\n}").render).to eq("a {\n  b {\n                f : 10\n    c : {\n      d:e\n    }\n  }\n}")
+      expect(config_document.set_value("a.b.c", "{\n  d:e\n}").render).to eq("a {\n  b {\n                f: 10\n    c: {\n      d:e\n    }\n  }\n}")
     end
   end
 
   context "config document indentation value with include" do
     it "should indent an include node" do
-      orig_text = "a {\n  b {\n    c : 22\n  }\n}"
+      orig_text = "a {\n  b {\n    c: 22\n  }\n}"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
       expect(config_document.set_value("a.b.d", "{\n  include \"foo\"\n  e:f\n}").render
-            ).to eq("a {\n  b {\n    c : 22\n    d : {\n      include \"foo\"\n      e:f\n    }\n  }\n}")
+            ).to eq("a {\n  b {\n    c: 22\n    d: {\n      include \"foo\"\n      e:f\n    }\n  }\n}")
     end
   end
 
   context "config document indentation based on include node" do
     it "should indent properly when only an include node is present in the object in which the value is inserted" do
-      orig_text = "a : b\n      include \"foo\"\n"
+      orig_text = "a: b\n      include \"foo\"\n"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("c", "d").render).to eq("a : b\n      include \"foo\"\n      c : d\n")
+      expect(config_document.set_value("c", "d").render).to eq("a: b\n      include \"foo\"\n      c: d\n")
     end
   end
 
@@ -538,13 +538,13 @@ describe "ConfigDocument" do
     it "should successfully insert a value into an empty document" do
       orig_text = ""
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a", "1").render).to eq("a : 1")
+      expect(config_document.set_value("a", "1").render).to eq("a: 1")
     end
 
     it "should successfully insert a multi-line object into an empty document" do
       orig_text = ""
       config_document = ConfigDocumentFactory.parse_string(orig_text)
-      expect(config_document.set_value("a.b", "1").render).to eq("a : {\n  b : 1\n}")
+      expect(config_document.set_value("a.b", "1").render).to eq("a: {\n  b: 1\n}")
     end
 
     it "should successfully insert a hash into an empty document" do
@@ -552,7 +552,7 @@ describe "ConfigDocument" do
       config_document = ConfigDocumentFactory.parse_string(orig_text)
       map_val = ConfigValueFactory.from_any_ref({"a" => 1, "b" => 2})
 
-      expect(config_document.set_config_value("a", map_val).render).to eq("a : {\n    \"a\" : 1,\n    \"b\" : 2\n}")
+      expect(config_document.set_config_value("a", map_val).render).to eq("a: {\n    \"a\": 1,\n    \"b\": 2\n}")
     end
 
     it "should successfully insert an array into an empty document" do
@@ -560,17 +560,17 @@ describe "ConfigDocument" do
       config_document = ConfigDocumentFactory.parse_string(orig_text)
       array_val = ConfigValueFactory.from_any_ref([1,2])
 
-      expect(config_document.set_config_value("a", array_val).render).to eq("a : [\n    1,\n    2\n]")
+      expect(config_document.set_config_value("a", array_val).render).to eq("a: [\n    1,\n    2\n]")
     end
   end
 
   context "can insert a map parsed with ConfigValueFactory" do
     it "should successfully insert a map into a document" do
-      orig_text = "{ a : b }"
+      orig_text = "{ a: b }"
       config_document = ConfigDocumentFactory.parse_string(orig_text)
 
       map = ConfigValueFactory.from_any_ref({"a" => 1, "b" => 2})
-      expect(config_document.set_config_value("a", map).render).to eq("{ a : {\n     \"a\" : 1,\n     \"b\" : 2\n } }")
+      expect(config_document.set_config_value("a", map).render).to eq("{ a: {\n     \"a\": 1,\n     \"b\": 2\n } }")
     end
   end
 end
