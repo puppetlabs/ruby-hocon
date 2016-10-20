@@ -1,6 +1,6 @@
 require 'optparse'
 require 'hocon'
-require 'hocon/version'
+require 'ruby-hocon/version'
 require 'hocon/config_render_options'
 require 'hocon/config_factory'
 require 'hocon/config_value_factory'
