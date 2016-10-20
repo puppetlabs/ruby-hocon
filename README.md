@@ -18,6 +18,12 @@ you may still run into some issues. If you find a problem, feel free to open a g
 The implementation is intended to be as close to a line-for-line port as the two languages allow,
 in hopes of making it fairly easy to port over new changesets from the Java code base over time.
 
+Support
+=======
+
+For best results, if you find an issue with this library, please open an issue on our [Jira issue tracker](https://tickets.puppetlabs.com/browse/HC).  Issues filed there tend to be more visible to the current maintainers than issues on the Github issue tracker.
+
+
 Basic Usage
 ===========
 
