@@ -1,3 +1,8 @@
+## 1.2.0
+This is a feature release.
+
+* Added a cli tool called `hocon` for reading and manipulating hocon files
+
 ## 1.1.3
 This is a bugfix release.
 
