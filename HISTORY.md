@@ -1,6 +1,7 @@
 # enterprise_ruby-hocon_bump_and_tag_master - History
 ## Tags
-* [LATEST - 27 Oct, 2016 (33a9edef)](#LATEST)
+* [LATEST - 27 Oct, 2016 (0e06af2f)](#LATEST)
+* [1.2.0 - 27 Oct, 2016 (1060d251)](#1.2.0)
 * [1.1.3 - 12 Oct, 2016 (bf4a7d4b)](#1.1.3)
 * [1.1.2 - 15 Jul, 2016 (6041a5c4)](#1.1.2)
 * [1.1.1 - 6 Jul, 2016 (5b2c8baa)](#1.1.1)
@@ -18,7 +19,23 @@
 * [0.0.1 - 16 Mar, 2014 (f7dbca52)](#0.0.1)
 
 ## Details
-### <a name = "LATEST">LATEST - 27 Oct, 2016 (33a9edef)
+### <a name = "LATEST">LATEST - 27 Oct, 2016 (0e06af2f)
+
+* (GEM) update hocon version to 1.2.1 (0e06af2f)
+
+* Merge pull request #96 from jpinsonault/maint-update-version-to-1.2.1.SNAPSHOT (418d5e24)
+
+
+```
+Merge pull request #96 from jpinsonault/maint-update-version-to-1.2.1.SNAPSHOT
+
+(MAINT) Update version to 1.2.1.SNAPSHOT
+```
+* (MAINT) Update version to 1.2.1.SNAPSHOT (20d34a33)
+
+### <a name = "1.2.0">1.2.0 - 27 Oct, 2016 (1060d251)
+
+* (HISTORY) update ruby-hocon history for gem release 1.2.0 (1060d251)
 
 * (GEM) update hocon version to 1.2.0 (33a9edef)
 
