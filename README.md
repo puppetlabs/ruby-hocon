@@ -116,7 +116,9 @@ $ cat settings.conf
 $ hocon -i settings.conf get foo
 bar
 
-$ hocon -i settings.conf set foo.baz
+$ hocon -i settings.conf set foo baz
+
+$ cat settings.conf
 {
   foo: baz
 }
