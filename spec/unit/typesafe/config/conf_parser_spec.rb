@@ -705,6 +705,11 @@ describe "Config Parser" do
     assert_comments_at_path([], conf8, "a")
   end
 
+  context "loading unicode file paths" do
+    it "should be able to parse files with unicode file paths" do
+      expect(Hocon.load("#{FIXTURE_DIR}/test_utils/resources/ᚠᛇᚻ.conf")).to eq({'ᚠᛇᚻ' => '᛫ᛒᛦᚦ᛫ᚠᚱᚩᚠᚢ'})
+    end
+  end
 
   it "includeFile" do
     conf = Hocon::ConfigFactory.parse_string("include file(" +
@@ -780,12 +785,6 @@ describe "Config Parser" do
   # Skipping 'includeResources' because we don't support classpath resources
   # Skipping 'includeURLHeuristically' because we don't support URLs
   # Skipping 'includeURLBasenameHeuristically' because we don't support URLs
-
-  it "shouldacceptUTF8FileNames" do
-    skip('UTF-8 filenames not currently supported') do
-      expect { Hocon::ConfigFactory.parse_file(TestUtils.resource_file("ᚠᛇᚻ.conf")) }.to raise_error
-    end
-  end
 
   it "acceptsUTF8FileContents" do
     # utf8.conf is UTF-8 with no BOM

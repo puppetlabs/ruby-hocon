@@ -5,6 +5,7 @@ require 'hocon/impl'
 require 'hocon/impl/url'
 require 'hocon/impl/origin_type'
 require 'hocon/config_error'
+require 'addressable'
 
 class Hocon::Impl::SimpleConfigOrigin
 
@@ -39,7 +40,7 @@ class Hocon::Impl::SimpleConfigOrigin
   end
 
   def self.new_file(file_path)
-    url = URI.join('file:///', file_path)
+    url = Addressable::URI.join('file:///', file_path)
     self.new(file_path, -1, -1,
              OriginType::FILE,
              url, nil, nil)
