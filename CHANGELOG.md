@@ -1,3 +1,8 @@
+## 1.2.5
+This is a bugfix release
+
+* Fixed loading files with UTF-8 characters in their file paths
+
 ## 1.2.4
 This is a feature release.
 

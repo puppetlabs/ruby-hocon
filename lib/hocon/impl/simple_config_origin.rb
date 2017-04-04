@@ -5,7 +5,6 @@ require 'hocon/impl'
 require 'hocon/impl/url'
 require 'hocon/impl/origin_type'
 require 'hocon/config_error'
-require 'addressable'
 
 class Hocon::Impl::SimpleConfigOrigin
 
@@ -24,6 +23,9 @@ class Hocon::Impl::SimpleConfigOrigin
     @line_number = line_number
     @end_line_number = end_line_number
     @origin_type = origin_type
+
+    # TODO: Currently ruby hocon does not support URLs, and so this variable
+    # is not actually a URL/URI, but a string
     @url_or_nil = url_or_nil
     @resource_or_nil = resource_or_nil
     @comments_or_nil = comments_or_nil
@@ -40,10 +42,9 @@ class Hocon::Impl::SimpleConfigOrigin
   end
 
   def self.new_file(file_path)
-    url = Addressable::URI.join('file:///', file_path)
     self.new(file_path, -1, -1,
              OriginType::FILE,
-             url, nil, nil)
+             file_path, nil, nil)
   end
 
   # NOTE: not porting `new_url` because we're not going to support URLs for now
@@ -154,6 +155,10 @@ class Hocon::Impl::SimpleConfigOrigin
   end
 
   def filename
+    # TODO because we don't support URLs, this function's URL handling
+    # is completely pointless. It will only return _description (a string that
+    # is the file path) or nil.
+    # It should be cleaned up
     if origin_type == OriginType::FILE
       _description
     elsif ! url_or_nil.nil?
