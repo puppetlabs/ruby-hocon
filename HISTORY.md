@@ -1,6 +1,7 @@
 # enterprise_ruby-hocon_bump_and_tag_master - History
 ## Tags
-* [LATEST - 3 Nov, 2016 (67ff0795)](#LATEST)
+* [LATEST - 4 Apr, 2017 (b42a72f0)](#LATEST)
+* [1.2.4 - 3 Nov, 2016 (5157cc60)](#1.2.4)
 * [1.2.3 - 3 Nov, 2016 (cd9a5c8d)](#1.2.3)
 * [1.2.2 - 1 Nov, 2016 (4a29c034)](#1.2.2)
 * [1.2.1 - 27 Oct, 2016 (b6edea48)](#1.2.1)
@@ -22,7 +23,130 @@
 * [0.0.1 - 16 Mar, 2014 (f7dbca52)](#0.0.1)
 
 ## Details
-### <a name = "LATEST">LATEST - 3 Nov, 2016 (67ff0795)
+### <a name = "LATEST">LATEST - 4 Apr, 2017 (b42a72f0)
+
+* (GEM) update hocon version to 1.2.5 (b42a72f0)
+
+* Merge pull request #108 from jpinsonault/maint-prepare-for-1.2.5 (50b0087b)
+
+
+```
+Merge pull request #108 from jpinsonault/maint-prepare-for-1.2.5
+
+(MAINT) Change version back 1.2.5.SNAPSHOT
+```
+* (MAINT) Change version back 1.2.5.SNAPSHOT (40d45c77)
+
+
+```
+(MAINT) Change version back 1.2.5.SNAPSHOT
+
+CI needs the current to be less than the next version to be released
+```
+* Merge pull request #107 from jpinsonault/PE-18165-support-for-utf8-file-paths (c65941f2)
+
+
+```
+Merge pull request #107 from jpinsonault/PE-18165-support-for-utf8-file-paths
+
+(PE-18165) Support for utf-8 file paths
+```
+* (MAINT) Prepare for 1.2.5 release (8edf0841)
+
+
+```
+(MAINT) Prepare for 1.2.5 release
+
+Update changelog and version
+```
+* (PE-18165) Support for utf-8 file paths (a54c93b5)
+
+
+```
+(PE-18165) Support for utf-8 file paths
+
+This commit removes the dependency on Addressable and adds some comments
+regarding some screwy areas in the code where we half heartedly tried to
+support loading of URIs
+
+It maintains utf-8 file support
+```
+* Merge pull request #105 from mwbutcher/maint/master/PE-18165_encode_file_URIs_in_order_to_handle_utf-8_chars (e2725955)
+
+
+```
+Merge pull request #105 from mwbutcher/maint/master/PE-18165_encode_file_URIs_in_order_to_handle_utf-8_chars
+
+(PE-18165) encode file URIs to handle utf8 chars
+```
+* (PE-18165) encode file URIs to handle utf8 chars (51525f43)
+
+
+```
+(PE-18165) encode file URIs to handle utf8 chars
+
+Prior to this change, the hocon parser would
+error when give file names like ᚠᛇᚻ.conf or
+/tmp/旗本/pe.conf.
+
+This commit URI encodes the filenames to
+avoid that issue.
+```
+* Merge pull request #104 from puppetlabs/rm_cprice404 (ddb4afb2)
+
+
+```
+Merge pull request #104 from puppetlabs/rm_cprice404
+
+remove cprice404
+```
+* remove cprice404 (f74fb2ca)
+
+* Merge pull request #98 from puppetlabs/theshanx-patch-1 (c532a69e)
+
+
+```
+Merge pull request #98 from puppetlabs/theshanx-patch-1
+
+(maint) Add internal_list key to MAINTAINERS
+```
+* Merge pull request #102 from jpinsonault/maint-fix-typo-in-readme (ecd2de47)
+
+
+```
+Merge pull request #102 from jpinsonault/maint-fix-typo-in-readme
+
+(MAINT) Fix typo in readme
+```
+* (MAINT) Fix typo in readme (10961a98)
+
+* Merge pull request #101 from jpinsonault/maint-update-changelog-after-1.2.4-release (c8d543ad)
+
+
+```
+Merge pull request #101 from jpinsonault/maint-update-changelog-after-1.2.4-release
+
+(MAINT) Update changelog for 1.2.4
+```
+* (MAINT) Update changelog for 1.2.4 (c7a5edf1)
+
+
+```
+(MAINT) Update changelog for 1.2.4
+
+And explain missing version numbers
+```
+* (maint) Add internal_list key to MAINTAINERS (e327d214)
+
+
+```
+(maint) Add internal_list key to MAINTAINERS
+
+This change adds a reference to the Google group the maintainers are associated with.
+```
+### <a name = "1.2.4">1.2.4 - 3 Nov, 2016 (5157cc60)
+
+* (HISTORY) update ruby-hocon history for gem release 1.2.4 (5157cc60)
 
 * (GEM) update hocon version to 1.2.4 (67ff0795)
 
