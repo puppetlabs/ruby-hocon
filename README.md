@@ -61,6 +61,7 @@ modifying settings in a config file, or if you want to retain access to
 things like comments and line numbers:
 
 ```rb
+require 'hocon'
 require 'hocon/parser/config_document_factory'
 require 'hocon/config_value_factory'
 
