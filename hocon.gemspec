@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.description = "== A port of the Java {Typesafe Config}[https://github.com/typesafehub/config] library to Ruby"
   s.authors     = ["Chris Price", "Wayne Warren", "Preben Ingvaldsen", "Joe Pinsonault", "Kevin Corcoran", "Jane Lu"]
   s.email       = 'chris@puppetlabs.com'
-  s.files       = Dir["{lib}/**/*.rb", "spec/**/*" , "bin/*", "LICENSE", "*.md"]
+  s.files       = Dir["{lib}/**/*.rb", "bin/*", "LICENSE", "*.md"]
   s.require_paths = ["lib"]
   s.executables   = ['hocon']
   s.homepage      = 'https://github.com/puppetlabs/ruby-hocon'
