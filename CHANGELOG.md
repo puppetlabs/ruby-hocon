@@ -1,3 +1,8 @@
+## 1.2.6
+This is a bugfix release
+
+* Do not ship spec folder with gem ([PA-2942](https://tickets.puppetlabs.com/browse/PA-2942))
+
 ## 1.2.5
 This is a bugfix release
 
@@ -27,7 +32,7 @@ This is a bugfix release.
 This is a bugfix release.
 
 * Fixed a bug where an undefined method `value_type_name` error was being thrown due to
-  improper calls to the class method. 
+  improper calls to the class method.
 
 ## 1.1.0
 This is a bugfix/feature release
