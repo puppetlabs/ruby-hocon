@@ -1,3 +1,8 @@
+## 1.3.0
+This is a feature release
+
+* Support environment variable lists ([HC-104](https://tickets.puppetlabs.com/browse/HC-104))
+
 ## 1.2.6
 This is a bugfix release
 
