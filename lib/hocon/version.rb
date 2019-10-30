@@ -1,5 +1,5 @@
 module Hocon
   module Version
-    STRING = '1.2.6'
+    STRING = '1.3.0'
   end
 end
