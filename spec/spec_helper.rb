@@ -41,3 +41,8 @@ EXAMPLE4 = { :hash =>
              :name => "example4",
 }
 
+# set values out of order to verify they return in-order
+# must be set prior to config_impl.rb loading
+ENV['ENVARRAY.1'] = 'bar'
+ENV['ENVARRAY.2'] = 'baz'
+ENV['ENVARRAY.0'] = 'foo'

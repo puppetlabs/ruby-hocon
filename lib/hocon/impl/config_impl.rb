@@ -237,9 +237,27 @@ class Hocon::Impl::ConfigImpl
   def self.load_env_variables
     env = ENV
     m = {}
+    lists = {}
     env.each do |key, value|
       m[key] = Hocon::Impl::ConfigString::Quoted.new(
           Hocon::Impl::SimpleConfigOrigin.new_simple("env var #{key}"), value)
+      # find env var arrays specified like FOO.0, FOO.1
+      if key =~ /^(.*)\.(\d+)$/
+        name, index = $1, Integer($2)
+        # values are added unordered
+        (lists[name] ||= {})[index] = value
+      end
+    end
+
+    lists.each do |key, values|
+      origin = Hocon::Impl::SimpleConfigOrigin.new_simple("env var list #{key}")
+      m[key] = Hocon::Impl::SimpleConfigList.new(
+        origin,
+        # out of order env vars FOO.1, FOO.0 are sorted here
+        values.sort.map do |v|
+          Hocon::Impl::ConfigString::Quoted.new(origin, v[1])
+        end
+      )
     end
 
     Hocon::Impl::SimpleConfigObject.new(
