@@ -35,10 +35,11 @@ class Hocon::Impl::Parseable
     end
   end
 
-  # Changed this to a class variable because the upstream library seems to use it
-  # as a global way of keeping track of how many files have been included, to
-  # avoid cycles
-  @@parse_stack= []
+  # The upstream library seems to use this as a global way of keeping track of
+  # how many files have been included, to avoid cycles
+  def self.parse_stack
+    Thread.current[:hocon_parse_stack] ||= []
+  end
 
   MAX_INCLUDE_DEPTH = 50
 
@@ -134,7 +135,7 @@ class Hocon::Impl::Parseable
     if (base_options.nil?)
       base_options = options
     end
-    stack = @@parse_stack
+    stack = self.class.parse_stack
     if stack.length >= MAX_INCLUDE_DEPTH
       raise Hocon::ConfigError::ConfigParseError.new(@initial_origin,
             "include statements nested more than #{MAX_INCLUDE_DEPTH} times, " +
