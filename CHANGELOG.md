@@ -1,3 +1,8 @@
+## 1.3.1
+This is a bugfix release
+
+* Fix a bug when using the library in multiple threads ([HC-105](https://tickets.puppetlabs.com/browse/HC-105))
+
 ## 1.3.0
 This is a feature release
 
