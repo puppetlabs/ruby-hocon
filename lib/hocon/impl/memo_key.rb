@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/impl'
+require_relative '../../hocon'
+require_relative '../../hocon/impl'
 
 class Hocon::Impl::MemoKey
 

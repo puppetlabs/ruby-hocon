@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/impl/config_impl'
+require_relative '../hocon'
+require_relative '../hocon/impl/config_impl'
 
 class Hocon::ConfigValueFactory
   ConfigImpl = Hocon::Impl::ConfigImpl

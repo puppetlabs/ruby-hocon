@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_value'
 
 class Hocon::Impl::ConfigBoolean
   include Hocon::Impl::AbstractConfigValue

@@ -1,16 +1,16 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_value'
+require_relative '../../hocon'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_value'
 
 class Hocon::Impl::ConfigReference
   include Hocon::Impl::Unmergeable
   include Hocon::Impl::AbstractConfigValue
 
   # Require these lazily, to avoid circular dependencies
-  require 'hocon/impl/resolve_source'
-  require 'hocon/impl/resolve_result'
+  require_relative '../../hocon/impl/resolve_source'
+  require_relative '../../hocon/impl/resolve_result'
 
 
   NotPossibleToResolve = Hocon::Impl::AbstractConfigValue::NotPossibleToResolve

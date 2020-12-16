@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon/parser'
-require 'hocon/impl/parseable'
-require 'hocon/config_parse_options'
+require_relative '../../hocon/parser'
+require_relative '../../hocon/impl/parseable'
+require_relative '../../hocon/config_parse_options'
 
 #
 # Factory for creating {@link

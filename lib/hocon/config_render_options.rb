@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon'
+require_relative '../hocon'
 
 class Hocon::ConfigRenderOptions
   def initialize(origin_comments, comments, formatted, json, key_value_separator=:equals)

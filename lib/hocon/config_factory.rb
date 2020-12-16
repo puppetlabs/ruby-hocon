@@ -1,10 +1,10 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/impl/parseable'
-require 'hocon/config_parse_options'
-require 'hocon/impl/config_impl'
-require 'hocon/config_factory'
+require_relative '../hocon'
+require_relative '../hocon/impl/parseable'
+require_relative '../hocon/config_parse_options'
+require_relative '../hocon/impl/config_impl'
+require_relative '../hocon/config_factory'
 
 ## Please note that the `parse` operations will simply create a ConfigValue
 ## and do nothing else, whereas the `load` operations will perform a higher-level

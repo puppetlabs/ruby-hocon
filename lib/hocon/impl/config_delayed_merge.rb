@@ -1,9 +1,9 @@
-require 'hocon/impl'
-require 'hocon/impl/replaceable_merge_stack'
-require 'hocon/impl/config_delayed_merge_object'
-require 'hocon/impl/config_impl'
-require 'hocon/impl/resolve_result'
-require 'hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/replaceable_merge_stack'
+require_relative '../../hocon/impl/config_delayed_merge_object'
+require_relative '../../hocon/impl/config_impl'
+require_relative '../../hocon/impl/resolve_result'
+require_relative '../../hocon/impl/abstract_config_value'
 
 #
 # The issue here is that we want to first merge our stack of config files, and

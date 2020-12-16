@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon'
+require_relative '../hocon'
 
 module Hocon::Impl
 

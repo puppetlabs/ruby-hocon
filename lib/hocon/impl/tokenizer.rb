@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/config_impl_util'
-require 'hocon/impl/tokens'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_impl_util'
+require_relative '../../hocon/impl/tokens'
+require_relative '../../hocon/config_error'
 require 'stringio'
 require 'forwardable'
 

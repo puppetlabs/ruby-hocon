@@ -1,12 +1,12 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/simple_config_origin'
-require 'hocon/impl/abstract_config_object'
-require 'hocon/impl/resolve_status'
-require 'hocon/impl/resolve_result'
-require 'hocon/impl/path'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/simple_config_origin'
+require_relative '../../hocon/impl/abstract_config_object'
+require_relative '../../hocon/impl/resolve_status'
+require_relative '../../hocon/impl/resolve_result'
+require_relative '../../hocon/impl/path'
+require_relative '../../hocon/config_error'
 require 'set'
 require 'forwardable'
 
