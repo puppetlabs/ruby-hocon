@@ -1,11 +1,11 @@
 require 'optparse'
-require 'hocon'
-require 'hocon/version'
-require 'hocon/config_render_options'
-require 'hocon/config_factory'
-require 'hocon/config_value_factory'
-require 'hocon/parser/config_document_factory'
-require 'hocon/config_error'
+require_relative '../hocon'
+require_relative '../hocon/version'
+require_relative '../hocon/config_render_options'
+require_relative '../hocon/config_factory'
+require_relative '../hocon/config_value_factory'
+require_relative '../hocon/parser/config_document_factory'
+require_relative '../hocon/config_error'
 
 module Hocon::CLI
   # Aliases

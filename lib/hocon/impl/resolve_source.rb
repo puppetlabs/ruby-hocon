@@ -1,10 +1,10 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_error'
-require 'hocon/impl'
-require 'hocon/impl/config_impl'
-require 'hocon/impl/container'
+require_relative '../../hocon'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_impl'
+require_relative '../../hocon/impl/container'
 
 class Hocon::Impl::ResolveSource
 

@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_node'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_node'
 
 class Hocon::Impl::ConfigNodeSingleToken
   include Hocon::Impl::AbstractConfigNode

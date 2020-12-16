@@ -1,11 +1,11 @@
 # encoding: utf-8
 
-require 'hocon/config_syntax'
-require 'hocon/impl'
-require 'hocon/impl/config_node_complex_value'
-require 'hocon/impl/config_node_field'
-require 'hocon/impl/config_node_single_token'
-require 'hocon/impl/tokens'
+require_relative '../../hocon/config_syntax'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_node_complex_value'
+require_relative '../../hocon/impl/config_node_field'
+require_relative '../../hocon/impl/config_node_single_token'
+require_relative '../../hocon/impl/tokens'
 
 class Hocon::Impl::ConfigNodeObject
   include Hocon::Impl::ConfigNodeComplexValue

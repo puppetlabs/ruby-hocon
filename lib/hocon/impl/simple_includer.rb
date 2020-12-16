@@ -1,17 +1,17 @@
 # encoding: utf-8
 
 require 'stringio'
-require 'hocon/impl'
-require 'hocon/impl/full_includer'
-require 'hocon/impl/url'
-require 'hocon/impl/config_impl'
-require 'hocon/config_error'
-require 'hocon/config_syntax'
-require 'hocon/impl/simple_config_object'
-require 'hocon/impl/simple_config_origin'
-require 'hocon/config_includer_file'
-require 'hocon/config_factory'
-require 'hocon/impl/parseable'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/full_includer'
+require_relative '../../hocon/impl/url'
+require_relative '../../hocon/impl/config_impl'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/config_syntax'
+require_relative '../../hocon/impl/simple_config_object'
+require_relative '../../hocon/impl/simple_config_origin'
+require_relative '../../hocon/config_includer_file'
+require_relative '../../hocon/config_factory'
+require_relative '../../hocon/impl/parseable'
 
 class Hocon::Impl::SimpleIncluder < Hocon::Impl::FullIncluder
 

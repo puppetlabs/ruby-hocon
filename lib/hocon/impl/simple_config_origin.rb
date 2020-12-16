@@ -1,10 +1,10 @@
 # encoding: utf-8
 
 require 'uri'
-require 'hocon/impl'
-require 'hocon/impl/url'
-require 'hocon/impl/origin_type'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/url'
+require_relative '../../hocon/impl/origin_type'
+require_relative '../../hocon/config_error'
 
 class Hocon::Impl::SimpleConfigOrigin
 

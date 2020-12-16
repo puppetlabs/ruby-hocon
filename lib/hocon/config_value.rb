@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_mergeable'
+require_relative '../hocon'
+require_relative '../hocon/config_mergeable'
 
 #
 # An immutable value, following the <a href="http://json.org">JSON</a> type

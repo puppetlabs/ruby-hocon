@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon'
+require_relative '../hocon'
 
 class Hocon::ConfigResolveOptions
   attr_reader :use_system_environment, :allow_unresolved

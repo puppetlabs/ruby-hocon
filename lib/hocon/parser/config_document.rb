@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/parser'
-require 'hocon/config_error'
+require_relative '../../hocon/parser'
+require_relative '../../hocon/config_error'
 
 #
 # Represents an individual HOCON or JSON file, preserving all

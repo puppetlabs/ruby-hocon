@@ -1,15 +1,15 @@
 # encoding: utf-8
 
-require 'hocon/impl'
+require_relative '../../hocon/impl'
 require 'stringio'
-require 'hocon/config_render_options'
-require 'hocon/config_object'
-require 'hocon/impl/resolve_status'
-require 'hocon/impl/resolve_result'
-require 'hocon/impl/unmergeable'
-require 'hocon/impl/config_impl_util'
-require 'hocon/config_error'
-require 'hocon/config_value'
+require_relative '../../hocon/config_render_options'
+require_relative '../../hocon/config_object'
+require_relative '../../hocon/impl/resolve_status'
+require_relative '../../hocon/impl/resolve_result'
+require_relative '../../hocon/impl/unmergeable'
+require_relative '../../hocon/impl/config_impl_util'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/config_value'
 
 ##
 ## Trying very hard to avoid a parent reference in config values; when you have
@@ -161,7 +161,7 @@ module Hocon::Impl::AbstractConfigValue
   def construct_delayed_merge(origin, stack)
     # TODO: this might not work because ConfigDelayedMerge inherits
     # from this class, so we can't `require` it from this file
-    require 'hocon/impl/config_delayed_merge'
+    require_relative '../../hocon/impl/config_delayed_merge'
     Hocon::Impl::ConfigDelayedMerge.new(origin, stack)
   end
 

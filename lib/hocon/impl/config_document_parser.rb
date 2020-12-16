@@ -1,17 +1,17 @@
 # encoding: utf-8
 
 require 'stringio'
-require 'hocon/impl'
-require 'hocon/config_error'
-require 'hocon/impl/tokens'
-require 'hocon/impl/config_node_single_token'
-require 'hocon/impl/config_node_comment'
-require 'hocon/impl/abstract_config_node_value'
-require 'hocon/impl/config_node_concatenation'
-require 'hocon/impl/config_include_kind'
-require 'hocon/impl/config_node_object'
-require 'hocon/impl/config_node_array'
-require 'hocon/impl/config_node_root'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/tokens'
+require_relative '../../hocon/impl/config_node_single_token'
+require_relative '../../hocon/impl/config_node_comment'
+require_relative '../../hocon/impl/abstract_config_node_value'
+require_relative '../../hocon/impl/config_node_concatenation'
+require_relative '../../hocon/impl/config_include_kind'
+require_relative '../../hocon/impl/config_node_object'
+require_relative '../../hocon/impl/config_node_array'
+require_relative '../../hocon/impl/config_node_root'
 
 class Hocon::Impl::ConfigDocumentParser
 

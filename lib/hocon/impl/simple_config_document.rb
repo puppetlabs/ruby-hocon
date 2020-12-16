@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/parser/config_document'
-require 'hocon/impl/config_document_parser'
-require 'hocon/config_render_options'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/parser/config_document'
+require_relative '../../hocon/impl/config_document_parser'
+require_relative '../../hocon/config_render_options'
 
 class Hocon::Impl::SimpleConfigDocument
   include Hocon::Parser::ConfigDocument

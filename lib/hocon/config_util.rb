@@ -1,4 +1,4 @@
-require 'hocon/impl/config_impl_util'
+require_relative '../hocon/impl/config_impl_util'
 
 
 # Contains static utility methods

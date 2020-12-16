@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_value'
+require_relative '../hocon'
+require_relative '../hocon/config_value'
 
 #
 # Subtype of {@link ConfigValue} representing an object (AKA dictionary or map)

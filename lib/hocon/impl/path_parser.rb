@@ -1,13 +1,13 @@
 # encoding: utf-8
 
 require 'stringio'
-require 'hocon/impl'
-require 'hocon/config_syntax'
-require 'hocon/impl/tokenizer'
-require 'hocon/impl/config_node_path'
-require 'hocon/impl/tokens'
-require 'hocon/config_value_type'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_syntax'
+require_relative '../../hocon/impl/tokenizer'
+require_relative '../../hocon/impl/config_node_path'
+require_relative '../../hocon/impl/tokens'
+require_relative '../../hocon/config_value_type'
+require_relative '../../hocon/config_error'
 
 class Hocon::Impl::PathParser
   ConfigSyntax = Hocon::ConfigSyntax
