@@ -17,6 +17,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>=1.9.0'
 
   # Testing dependencies
-  s.add_development_dependency 'bundler', '~> 1.5'
   s.add_development_dependency 'rspec', '~> 2.14'
 end
