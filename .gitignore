@@ -2,6 +2,7 @@
 *.rbc
 .bundle
 .config
+Gemfile.local
 Gemfile.lock
 coverage
 InstalledFiles
