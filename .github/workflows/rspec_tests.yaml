@@ -1,0 +1,32 @@
+name: RSpec tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rspec_tests:
+    name: RSpec (Ruby ${{ matrix.ruby }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [ '2.5', '2.7', '3.1' ]
+    steps:
+      - name: Checkout current PR
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Ruby version ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Update rubygems and install gems
+        run: |
+          gem update --system --silent --no-document
+          bundle install --jobs 4 --retry 3
+      - run: bundle exec rspec spec
