@@ -442,7 +442,7 @@ class Hocon::Impl::Parseable
       end
       if sibling.nil?
         nil
-      elsif File.exists?(sibling)
+      elsif File.exist?(sibling)
         self.class.trace("#{sibling} exists, so loading it as a file")
         Hocon::Impl::Parseable.new_file(sibling, options.set_origin_description(nil))
       else
