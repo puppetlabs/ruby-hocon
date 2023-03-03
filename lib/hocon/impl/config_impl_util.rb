@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon/impl'
+require_relative '../../hocon/impl'
 require 'stringio'
 
 class Hocon::Impl::ConfigImplUtil

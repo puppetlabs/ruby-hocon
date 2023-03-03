@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'hocon'
+require_relative '../hocon'
 
 class Hocon::ConfigParseOptions
   attr_accessor :syntax, :origin_description, :allow_missing, :includer

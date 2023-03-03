@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 require 'uri'
-require 'hocon/impl'
+require_relative '../../hocon/impl'
 
 # There are several places in the Java codebase that
 # use Java's URL constructor, and rely on it to throw

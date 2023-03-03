@@ -1,16 +1,16 @@
 # encoding: utf-8
 
 require 'stringio'
-require 'hocon/impl'
-require 'hocon/impl/token'
-require 'hocon/impl/token_type'
-require 'hocon/impl/config_number'
-require 'hocon/impl/config_string'
-require 'hocon/impl/config_null'
-require 'hocon/impl/config_boolean'
-require 'hocon/config_error'
-require 'hocon/impl/resolve_status'
-require 'hocon/config_value_type'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/token'
+require_relative '../../hocon/impl/token_type'
+require_relative '../../hocon/impl/config_number'
+require_relative '../../hocon/impl/config_string'
+require_relative '../../hocon/impl/config_null'
+require_relative '../../hocon/impl/config_boolean'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/resolve_status'
+require_relative '../../hocon/config_value_type'
 
 # FIXME the way the subclasses of Token are private with static isFoo and accessors is kind of ridiculous.
 class Hocon::Impl::Tokens

@@ -1,6 +1,6 @@
-require 'hocon/impl'
-require 'hocon/impl/unmergeable'
-require 'hocon/impl/replaceable_merge_stack'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/unmergeable'
+require_relative '../../hocon/impl/replaceable_merge_stack'
 
 # This is just like ConfigDelayedMerge except we know statically
 # that it will turn out to be an object.

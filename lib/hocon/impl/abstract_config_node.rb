@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/parser/config_node'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/parser/config_node'
+require_relative '../../hocon/config_error'
 
 module Hocon::Impl::AbstractConfigNode
   include Hocon::Parser::ConfigNode

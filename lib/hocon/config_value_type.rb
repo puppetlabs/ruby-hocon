@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_error'
+require_relative '../hocon'
+require_relative '../hocon/config_error'
 
 #
 # The type of a configuration value (following the <a

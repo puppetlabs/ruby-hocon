@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_value'
-require 'hocon/config_error'
+require_relative '../hocon'
+require_relative '../hocon/config_value'
+require_relative '../hocon/config_error'
 
 #
 # Subtype of {@link ConfigValue} representing a list value, as in JSON's

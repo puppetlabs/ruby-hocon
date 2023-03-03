@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/config_number'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_number'
 
 class Hocon::Impl::ConfigDouble < Hocon::Impl::ConfigNumber
   def initialize(origin, value, original_text)

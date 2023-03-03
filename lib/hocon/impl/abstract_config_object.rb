@@ -1,16 +1,16 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_value'
-require 'hocon/impl/simple_config'
-require 'hocon/config_object'
-require 'hocon/config_value_type'
-require 'hocon/impl/resolve_status'
-require 'hocon/impl/simple_config_origin'
-require 'hocon/config_error'
-require 'hocon/impl/config_impl'
-require 'hocon/impl/unsupported_operation_error'
-require 'hocon/impl/container'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl/simple_config'
+require_relative '../../hocon/config_object'
+require_relative '../../hocon/config_value_type'
+require_relative '../../hocon/impl/resolve_status'
+require_relative '../../hocon/impl/simple_config_origin'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/config_impl'
+require_relative '../../hocon/impl/unsupported_operation_error'
+require_relative '../../hocon/impl/container'
 
 module Hocon::Impl::AbstractConfigObject
   include Hocon::ConfigObject

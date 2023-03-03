@@ -1,13 +1,13 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/config_error'
-require 'hocon/impl/abstract_config_node'
-require 'hocon/impl/abstract_config_node_value'
-require 'hocon/impl/config_node_comment'
-require 'hocon/impl/config_node_path'
-require 'hocon/impl/config_node_single_token'
-require 'hocon/impl/tokens'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/abstract_config_node'
+require_relative '../../hocon/impl/abstract_config_node_value'
+require_relative '../../hocon/impl/config_node_comment'
+require_relative '../../hocon/impl/config_node_path'
+require_relative '../../hocon/impl/config_node_single_token'
+require_relative '../../hocon/impl/tokens'
 
 class Hocon::Impl::ConfigNodeField
   include Hocon::Impl::AbstractConfigNode

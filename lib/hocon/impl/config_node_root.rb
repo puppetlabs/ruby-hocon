@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/config_node_array'
-require 'hocon/impl/config_node_complex_value'
-require 'hocon/impl/config_node_object'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_node_array'
+require_relative '../../hocon/impl/config_node_complex_value'
+require_relative '../../hocon/impl/config_node_object'
 
 class Hocon::Impl::ConfigNodeRoot
   include Hocon::Impl::ConfigNodeComplexValue

@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_error'
+require_relative '../hocon'
+require_relative '../hocon/config_error'
 
 #
 # Implement this <em>in addition to</em> {@link ConfigIncluder} if you want to

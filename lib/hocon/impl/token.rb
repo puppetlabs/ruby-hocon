@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/token_type'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/token_type'
 
 class Hocon::Impl::Token
   attr_reader :token_type, :token_text

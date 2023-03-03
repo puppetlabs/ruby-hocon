@@ -1,15 +1,15 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/resolve_status'
-require 'hocon/config_value_type'
-require 'hocon/config_error'
-require 'hocon/impl/abstract_config_object'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/resolve_status'
+require_relative '../../hocon/config_value_type'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/abstract_config_object'
 require 'forwardable'
-require 'hocon/impl/unsupported_operation_error'
-require 'hocon/impl/resolve_result'
-require 'hocon/impl/container'
-require 'hocon/config_list'
+require_relative '../../hocon/impl/unsupported_operation_error'
+require_relative '../../hocon/impl/resolve_result'
+require_relative '../../hocon/impl/container'
+require_relative '../../hocon/config_list'
 
 class Hocon::Impl::SimpleConfigList
   include Hocon::Impl::Container

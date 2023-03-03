@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/config_node_complex_value'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/config_node_complex_value'
 
 class Hocon::Impl::ConfigNodeArray
   include Hocon::Impl::ConfigNodeComplexValue

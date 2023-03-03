@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/config_value'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_value'
+require_relative '../../hocon/config_error'
 
 # An AbstractConfigValue which contains other values. Java has no way to
 # express "this has to be an AbstractConfigValue also" other than making

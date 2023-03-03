@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/simple_includer'
-require 'hocon/config_include_context'
-require 'hocon/impl/config_impl'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/simple_includer'
+require_relative '../../hocon/config_include_context'
+require_relative '../../hocon/impl/config_impl'
 
 class Hocon::Impl::SimpleIncludeContext
   include Hocon::ConfigIncludeContext
