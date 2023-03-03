@@ -1,4 +1,4 @@
-require 'hocon/impl'
+require_relative '../../hocon/impl'
 
 
 class Hocon::Impl::SubstitutionExpression

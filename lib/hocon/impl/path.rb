@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/path_builder'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/path_builder'
+require_relative '../../hocon/config_error'
 require 'stringio'
 
 class Hocon::Impl::Path

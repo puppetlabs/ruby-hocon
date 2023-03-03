@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_value'
 
 class Hocon::Impl::ConfigNumber
   include Hocon::Impl::AbstractConfigValue
   ## sigh... requiring these subclasses before this class
   ## is declared would cause an error.  Thanks, ruby.
-  require 'hocon/impl/config_int'
-  require 'hocon/impl/config_double'
+  require_relative '../../hocon/impl/config_int'
+  require_relative '../../hocon/impl/config_double'
 
   def self.new_number(origin, number, original_text)
     as_int = number.to_i

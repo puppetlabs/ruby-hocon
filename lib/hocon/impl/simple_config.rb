@@ -1,13 +1,13 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/config_value_type'
-require 'hocon/config_resolve_options'
-require 'hocon/impl/path'
-require 'hocon/impl/default_transformer'
-require 'hocon/impl/config_impl'
-require 'hocon/impl/resolve_context'
-require 'hocon/config_mergeable'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_value_type'
+require_relative '../../hocon/config_resolve_options'
+require_relative '../../hocon/impl/path'
+require_relative '../../hocon/impl/default_transformer'
+require_relative '../../hocon/impl/config_impl'
+require_relative '../../hocon/impl/resolve_context'
+require_relative '../../hocon/config_mergeable'
 
 class Hocon::Impl::SimpleConfig
   include Hocon::ConfigMergeable

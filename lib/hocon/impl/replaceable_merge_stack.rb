@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/container'
-require 'hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/container'
+require_relative '../../hocon/config_error'
 
 #
 # Implemented by a merge stack (ConfigDelayedMerge, ConfigDelayedMergeObject)

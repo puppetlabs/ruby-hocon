@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-require 'hocon/config_error'
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_node_value'
-require 'hocon/impl/array_iterator'
-require 'hocon/impl/config_reference'
-require 'hocon/impl/config_string'
-require 'hocon/impl/path_parser'
-require 'hocon/impl/substitution_expression'
-require 'hocon/impl/tokens'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_node_value'
+require_relative '../../hocon/impl/array_iterator'
+require_relative '../../hocon/impl/config_reference'
+require_relative '../../hocon/impl/config_string'
+require_relative '../../hocon/impl/path_parser'
+require_relative '../../hocon/impl/substitution_expression'
+require_relative '../../hocon/impl/tokens'
 
 class Hocon::Impl::ConfigNodeSimpleValue
   include Hocon::Impl::AbstractConfigNodeValue

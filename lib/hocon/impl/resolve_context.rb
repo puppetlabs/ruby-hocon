@@ -1,12 +1,12 @@
 # encoding: utf-8
 
-require 'hocon'
-require 'hocon/config_error'
-require 'hocon/impl/resolve_source'
-require 'hocon/impl/resolve_memos'
-require 'hocon/impl/memo_key'
-require 'hocon/impl/abstract_config_value'
-require 'hocon/impl/config_impl'
+require_relative '../../hocon'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/resolve_source'
+require_relative '../../hocon/impl/resolve_memos'
+require_relative '../../hocon/impl/memo_key'
+require_relative '../../hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl/config_impl'
 
 class Hocon::Impl::ResolveContext
 

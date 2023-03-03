@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/abstract_config_value'
-require 'hocon/impl/abstract_config_object'
-require 'hocon/impl/simple_config_list'
-require 'hocon/config_object'
-require 'hocon/impl/unmergeable'
-require 'hocon/impl/simple_config_origin'
-require 'hocon/impl/config_string'
-require 'hocon/impl/container'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/abstract_config_value'
+require_relative '../../hocon/impl/abstract_config_object'
+require_relative '../../hocon/impl/simple_config_list'
+require_relative '../../hocon/config_object'
+require_relative '../../hocon/impl/unmergeable'
+require_relative '../../hocon/impl/simple_config_origin'
+require_relative '../../hocon/impl/config_string'
+require_relative '../../hocon/impl/container'
 
 class Hocon::Impl::ConfigConcatenation
   include Hocon::Impl::Unmergeable

@@ -1,14 +1,14 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/impl/simple_includer'
-require 'hocon/config_error'
-require 'hocon/impl/from_map_mode'
-require 'hocon/impl/simple_config_origin'
-require 'hocon/impl/simple_config_list'
-require 'hocon/impl/config_boolean'
-require 'hocon/impl/config_null'
-require 'hocon/impl/parseable'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/impl/simple_includer'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/from_map_mode'
+require_relative '../../hocon/impl/simple_config_origin'
+require_relative '../../hocon/impl/simple_config_list'
+require_relative '../../hocon/impl/config_boolean'
+require_relative '../../hocon/impl/config_null'
+require_relative '../../hocon/impl/parseable'
 
 class Hocon::Impl::ConfigImpl
   @default_includer = Hocon::Impl::SimpleIncluder.new(nil)

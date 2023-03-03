@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'hocon/impl'
-require 'hocon/config_error'
-require 'hocon/impl/abstract_config_node'
-require 'hocon/impl/config_node_simple_value'
+require_relative '../../hocon/impl'
+require_relative '../../hocon/config_error'
+require_relative '../../hocon/impl/abstract_config_node'
+require_relative '../../hocon/impl/config_node_simple_value'
 
 class Hocon::Impl::ConfigNodeInclude
   include Hocon::Impl::AbstractConfigNode
