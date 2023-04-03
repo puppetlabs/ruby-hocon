@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.executables   = ['hocon']
   s.homepage      = 'https://github.com/puppetlabs/ruby-hocon'
-  s.license       = 'Apache License, v2'
+  s.license       = 'Apache-2.0'
   s.required_ruby_version = '>=1.9.0'
 
   # Testing dependencies
