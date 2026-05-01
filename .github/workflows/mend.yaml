@@ -15,7 +15,8 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.3
+          bundler-cache: true
       - name: Create lock
         run: bundle lock
       - uses: actions/setup-java@v3
@@ -30,5 +31,5 @@ jobs:
           WS_APIKEY: ${{ secrets.MEND_API_KEY }}
           WS_WSS_URL: https://saas-eu.whitesourcesoftware.com/agent
           WS_USERKEY: ${{ secrets.MEND_TOKEN }}
-          WS_PRODUCTNAME: Puppet Agent
+          WS_PRODUCTNAME: Puppet Core
           WS_PROJECTNAME: ${{ github.event.repository.name }}
